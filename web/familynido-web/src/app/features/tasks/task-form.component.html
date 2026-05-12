@@ -1,0 +1,451 @@
+<div
+  class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl p-4 mb-5"
+>
+  <h2 class="font-serif text-xl font-semibold mb-3">
+    @if (initial()) {
+      <ng-container i18n="@@task-form.title.edit">Editar tarea</ng-container>
+    } @else {
+      <ng-container i18n="@@task-form.title.new">Nueva tarea</ng-container>
+    }
+  </h2>
+
+  <label i18n="@@task-form.label.title" class="block text-xs uppercase tracking-wide text-[color:var(--color-ink-3)] mb-1">
+    Título
+  </label>
+  <input
+    type="text"
+    class="w-full px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white mb-3"
+    [value]="title()"
+    (input)="title.set(readInput($event))"
+    maxlength="120"
+    i18n-placeholder="@@task-form.title.placeholder"
+    placeholder="Fregar el baño"
+    required
+  />
+
+  <label i18n="@@task-form.label.description" class="block text-xs uppercase tracking-wide text-[color:var(--color-ink-3)] mb-1">
+    Descripción
+  </label>
+  <textarea
+    class="w-full px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white mb-3"
+    rows="2"
+    [(ngModel)]="description"
+    maxlength="2000"
+  ></textarea>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+    <div>
+      <label i18n="@@task-form.label.category" class="block text-xs uppercase tracking-wide text-[color:var(--color-ink-3)] mb-1">
+        Categoría
+      </label>
+      <input
+        type="text"
+        class="w-full px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+        [(ngModel)]="category"
+        maxlength="40"
+      />
+    </div>
+    <div>
+      <label i18n="@@task-form.label.time" class="block text-xs uppercase tracking-wide text-[color:var(--color-ink-3)] mb-1">
+        Hora (opcional)
+      </label>
+      <input
+        type="time"
+        class="w-full px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+        [(ngModel)]="timeOfDay"
+      />
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <div class="flex items-baseline justify-between mb-1">
+      <label i18n="@@task-form.label.reward" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">
+        Recompensa
+      </label>
+      <span class="text-2xl font-serif font-semibold leading-none text-[color:var(--color-terra)]">
+        🏆 {{ points() }}
+      </span>
+    </div>
+    <div
+      role="slider"
+      tabindex="0"
+      [attr.aria-valuemin]="1"
+      [attr.aria-valuemax]="10"
+      [attr.aria-valuenow]="points()"
+      i18n-aria-label="@@task-form.reward-aria"
+      aria-label="Recompensa de la tarea"
+      class="flex gap-1 select-none touch-none"
+    >
+      @for (n of pointSegments; track n) {
+        <button
+          type="button"
+          (click)="setPoints(n)"
+          [attr.aria-label]="rewardSegmentAriaLabel(n)"
+          class="flex-1 h-7 rounded-md border transition-colors cursor-pointer"
+          [ngClass]="n <= points()
+            ? 'bg-[color:var(--color-terra)] border-[color:var(--color-terra)]'
+            : 'bg-white border-[color:var(--color-line)] hover:border-[color:var(--color-terra)]'"
+        ></button>
+      }
+    </div>
+    <p i18n="@@task-form.reward-hint" class="text-xs text-[color:var(--color-ink-3)] mt-1">
+      1 = trivial · 5 = normal · 10 = una paliza
+    </p>
+  </div>
+
+  <label class="flex items-start gap-2 mb-3 cursor-pointer">
+    <input type="checkbox" class="mt-1"
+      [checked]="isFloating()" (change)="setFloating($any($event.target).checked)" />
+    <span i18n="@@task-form.floating-explainer" class="text-sm">
+      <strong>Tarea sin fecha</strong> — aparece en "Hoy" todos los días hasta que se marque como hecha.
+      <span class="block text-xs text-[color:var(--color-ink-3)] mt-0.5">
+        Útil para "encargar el jarabe" y similares.
+      </span>
+    </span>
+  </label>
+
+  @if (!isFloating()) {
+  <label i18n="@@task-form.label.recurrence" class="block text-xs uppercase tracking-wide text-[color:var(--color-ink-3)] mb-1">
+    Recurrencia
+  </label>
+  <div class="flex gap-1 mb-3">
+    @for (opt of recurrenceOpts; track opt.value) {
+      <button
+        type="button"
+        class="flex-1 py-2 text-sm rounded-lg border transition-colors"
+        [ngClass]="
+          recurrence() === opt.value
+            ? 'bg-[color:var(--color-terra)] text-white border-[color:var(--color-terra)]'
+            : 'bg-white text-[color:var(--color-ink)] border-[color:var(--color-line)]'
+        "
+        (click)="recurrence.set(opt.value)"
+      >
+        {{ opt.label }}
+      </button>
+    }
+  </div>
+  }
+
+  @if (!isFloating() && recurrence() === 'Weekly') {
+    <label i18n="@@task-form.label.weekdays" class="block text-xs uppercase tracking-wide text-[color:var(--color-ink-3)] mb-1">
+      Días
+    </label>
+    <div class="flex gap-1 mb-3">
+      @for (day of weekdays; track day.flag) {
+        <button
+          type="button"
+          class="flex-1 py-2 text-sm rounded-lg border"
+          [ngClass]="
+            selectedDays().includes(day.flag)
+              ? 'bg-[color:var(--color-terra)] text-white border-[color:var(--color-terra)]'
+              : 'bg-white text-[color:var(--color-ink)] border-[color:var(--color-line)]'
+          "
+          (click)="toggleDay(day.flag)"
+        >
+          {{ day.label }}
+        </button>
+      }
+    </div>
+  }
+
+  @if (!isFloating() && recurrence() === 'Monthly') {
+    <label i18n="@@task-form.label.monthly-day" class="block text-xs uppercase tracking-wide text-[color:var(--color-ink-3)] mb-1">
+      Día del mes
+    </label>
+    <div class="flex items-center gap-2 mb-3">
+      <input
+        type="number"
+        min="1"
+        max="31"
+        class="flex-1 px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+        [disabled]="lastDayOfMonth"
+        [(ngModel)]="monthlyDay"
+      />
+      <label class="flex items-center gap-2 text-sm">
+        <input type="checkbox" [(ngModel)]="lastDayOfMonth" />
+        <ng-container i18n="@@task-form.last-day">último día</ng-container>
+      </label>
+    </div>
+  }
+
+  @if (!isFloating()) {
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+      <div>
+        <label i18n="@@task-form.label.start-date" class="block text-xs uppercase tracking-wide text-[color:var(--color-ink-3)] mb-1">
+          Desde
+        </label>
+        <input
+          type="date"
+          class="w-full px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+          [(ngModel)]="startDate"
+          required
+        />
+      </div>
+      @if (recurrence() === 'None') {
+        <div>
+          <label i18n="@@task-form.label.due-date" class="block text-xs uppercase tracking-wide text-[color:var(--color-ink-3)] mb-1">
+            Fecha límite
+          </label>
+          <input
+            type="date"
+            class="w-full px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+            [(ngModel)]="dueDate"
+          />
+        </div>
+      }
+    </div>
+  }
+
+  <label i18n="@@task-form.label.responsible" class="block text-xs uppercase tracking-wide text-[color:var(--color-ink-3)] mb-1">
+    Responsable
+  </label>
+  <select
+    class="w-full px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white mb-4"
+    (change)="onResponsibleChange($event)"
+  >
+    <option value="" [selected]="responsibleId() === ''" i18n="@@task-form.responsible.none">Sin responsable (lo puede hacer cualquiera)</option>
+    @for (m of members(); track m.id) {
+      <option [value]="m.id" [selected]="m.id === responsibleId()">{{ m.displayName }}</option>
+    }
+  </select>
+
+  <label class="block text-xs uppercase tracking-wide text-[color:var(--color-ink-3)] mb-1">
+    <ng-container i18n="@@task-form.label.related">Relacionados</ng-container>
+    <span i18n="@@task-form.label.related-hint" class="text-[color:var(--color-ink-3)] font-normal normal-case">
+      (a/con quién es la tarea)
+    </span>
+  </label>
+  <div class="flex flex-wrap gap-2 mb-4">
+    @if (members().length === 0) {
+      <span i18n="@@task-form.no-members" class="text-sm text-[color:var(--color-ink-3)]">Sin miembros todavía.</span>
+    }
+    @for (m of members(); track m.id) {
+      <button
+        type="button"
+        class="flex items-center gap-2 px-3 py-1.5 rounded-full border text-sm"
+        [class.opacity-40]="m.id === responsibleId()"
+        [disabled]="m.id === responsibleId()"
+        [ngClass]="
+          selectedRelated().includes(m.id)
+            ? 'bg-[color:var(--color-terra-bg)] border-[color:var(--color-terra)]'
+            : 'bg-white border-[color:var(--color-line)]'
+        "
+        (click)="toggleRelated(m.id)"
+      >
+        <span class="w-3 h-3 rounded-full" [style.background-color]="m.colorHex"></span>
+        {{ m.displayName }}
+      </button>
+    }
+  </div>
+
+  @if (isAdmin() && initial() !== null) {
+    <section class="mb-4 pt-3 border-t border-[color:var(--color-line)]">
+      <h3 i18n="@@task-form.completion.heading" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)] mb-2 font-bold">
+        Estado de la tarea
+      </h3>
+
+      <label class="flex items-center gap-2 mb-3 cursor-pointer">
+        <input
+          type="checkbox"
+          [checked]="completionEnabled()"
+          (change)="setCompletionEnabled($event)"
+        />
+        <span i18n="@@task-form.completion.toggle" class="text-sm">
+          Marcar como completada
+        </span>
+      </label>
+
+      @if (completionEnabled()) {
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <label class="block">
+            <span i18n="@@task-form.completion.date-label" class="block text-xs uppercase tracking-wide text-[color:var(--color-ink-3)] mb-1">
+              Fecha
+            </span>
+            <input
+              type="date"
+              class="w-full px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+              [value]="completionDate()"
+              (input)="onCompletionDateChange($event)"
+            />
+          </label>
+          <label class="block">
+            <span i18n="@@task-form.completion.member-label" class="block text-xs uppercase tracking-wide text-[color:var(--color-ink-3)] mb-1">
+              Quién la ha completado
+            </span>
+            <!--
+              [selected] per option, not [value] on the select. With `@for`
+              the options render *after* the select element, so [value] gets
+              applied against an empty options list and silently does
+              nothing — the canonical Angular pattern is to mark the right
+              option as selected once it renders.
+            -->
+            <select
+              class="w-full px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+              (change)="onCompletionMemberChange($event)"
+            >
+              <option value="" disabled [selected]="!completionMemberId()" i18n="@@task-form.completion.member-placeholder">
+                Elegir…
+              </option>
+              @for (m of members(); track m.id) {
+                <option [value]="m.id" [selected]="m.id === completionMemberId()">{{ m.displayName }}</option>
+              }
+            </select>
+          </label>
+        </div>
+      }
+    </section>
+  }
+
+  @if (isAdmin() && initial() !== null) {
+    <section class="mb-4 pt-3 border-t border-[color:var(--color-line)]">
+      <div class="flex items-center justify-between mb-2 gap-2 flex-wrap">
+        <h3 i18n="@@task-form.history.heading" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)] font-bold">
+          Historial de completados
+        </h3>
+        @if (!addingHistoryEntry()) {
+          <button
+            type="button"
+            class="text-xs underline cursor-pointer text-[color:var(--color-terra)] bg-transparent border-0 p-0"
+            (click)="openAddHistoryEntry()"
+            i18n="@@task-form.history.add"
+          >+ añadir completado</button>
+        }
+      </div>
+
+      @if (addingHistoryEntry()) {
+        <div class="mb-3 p-2 rounded-lg bg-[color:var(--color-bg-2)] flex flex-col gap-2">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <label class="block">
+              <span i18n="@@task-form.history.add-date-label" class="block text-[10px] uppercase tracking-wide text-[color:var(--color-ink-3)] mb-0.5">
+                Fecha
+              </span>
+              <input
+                type="date"
+                class="w-full px-2 py-1 rounded border border-[color:var(--color-line)] bg-white text-sm"
+                [value]="newEntryDate()"
+                (input)="onNewEntryDateChange($event)"
+              />
+            </label>
+            <label class="block">
+              <span i18n="@@task-form.history.add-member-label" class="block text-[10px] uppercase tracking-wide text-[color:var(--color-ink-3)] mb-0.5">
+                Quién la ha completado
+              </span>
+              <select
+                class="w-full px-2 py-1 rounded border border-[color:var(--color-line)] bg-white text-sm"
+                (change)="onNewEntryMemberChange($event)"
+              >
+                <option value="" disabled [selected]="!newEntryMemberId()" i18n="@@task-form.history.add-member-placeholder">
+                  Elegir…
+                </option>
+                @for (m of members(); track m.id) {
+                  <option [value]="m.id" [selected]="m.id === newEntryMemberId()">{{ m.displayName }}</option>
+                }
+              </select>
+            </label>
+          </div>
+          @if (addEntryError(); as err) {
+            <p class="text-xs text-[color:var(--color-error)]">{{ err }}</p>
+          }
+          <div class="flex justify-end gap-2">
+            <button
+              type="button"
+              class="text-xs px-3 py-1 rounded-full border border-[color:var(--color-line)] bg-white cursor-pointer"
+              (click)="closeAddHistoryEntry()"
+              [disabled]="savingHistoryRow()"
+              i18n="@@task-form.history.add-cancel"
+            >Cancelar</button>
+            <button
+              type="button"
+              class="text-xs px-3 py-1 rounded-full border-0 bg-[color:var(--color-terra)] text-white cursor-pointer disabled:opacity-50"
+              (click)="saveNewHistoryEntry()"
+              [disabled]="savingHistoryRow() || !canSaveNewEntry()"
+              i18n="@@task-form.history.add-save"
+            >Añadir</button>
+          </div>
+        </div>
+      }
+
+      @if (loadingHistory()) {
+        <p i18n="@@task-form.history.loading" class="text-xs text-[color:var(--color-ink-3)]">Cargando…</p>
+      } @else if (completions().length === 0) {
+        <p i18n="@@task-form.history.empty" class="text-xs text-[color:var(--color-ink-3)] italic">
+          Sin completados todavía.
+        </p>
+      } @else {
+        <ul class="flex flex-col gap-1.5">
+          @for (entry of completions(); track entry.occurrenceDate) {
+            <li class="flex items-center gap-2 text-sm py-1 px-2 rounded-md bg-[color:var(--color-bg-2)]">
+              <span class="font-medium shrink-0 w-24 capitalize">
+                {{ historyRowLabel(entry.occurrenceDate) }}
+              </span>
+              @if (isEditingHistoryRow(entry.occurrenceDate)) {
+                <select
+                  class="flex-1 text-xs px-2 py-1 rounded border border-[color:var(--color-line)] bg-white"
+                  [disabled]="savingHistoryRow()"
+                  (change)="onHistoryAttributionChange(entry.occurrenceDate, entry.completedByMemberId, $event)"
+                >
+                  <option value="" disabled [selected]="!entry.completedByMemberId" i18n="@@task-form.history.member-placeholder">
+                    Elegir…
+                  </option>
+                  @for (m of members(); track m.id) {
+                    <option [value]="m.id" [selected]="m.id === entry.completedByMemberId">
+                      {{ m.displayName }}
+                    </option>
+                  }
+                </select>
+                <button
+                  type="button"
+                  class="text-xs px-2 cursor-pointer text-[color:var(--color-ink-3)] hover:text-[color:var(--color-terra)] bg-transparent border-0"
+                  (click)="closeHistoryRow()"
+                  [disabled]="savingHistoryRow()"
+                  i18n-aria-label="@@task-form.history.cancel-aria"
+                  aria-label="Cancelar"
+                >×</button>
+              } @else {
+                <button
+                  type="button"
+                  class="flex-1 text-left text-xs underline cursor-pointer text-[color:var(--color-ink-2)] hover:text-[color:var(--color-terra)] bg-transparent border-0 p-0"
+                  (click)="openHistoryRow(entry.occurrenceDate)"
+                  [disabled]="savingHistoryRow()"
+                  i18n-aria-label="@@task-form.history.edit-aria"
+                  aria-label="Editar quién la completó"
+                >
+                  {{ memberDisplayName(entry.completedByMemberId) }}
+                </button>
+                <button
+                  type="button"
+                  class="text-xs px-2 cursor-pointer text-[color:var(--color-error)] hover:opacity-70 bg-transparent border-0"
+                  (click)="onUndoHistoryRow(entry.occurrenceDate)"
+                  [disabled]="savingHistoryRow()"
+                  i18n-aria-label="@@task-form.history.undo-aria"
+                  aria-label="Quitar el completado de este día"
+                  i18n="@@task-form.history.undo"
+                >Quitar</button>
+              }
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  }
+
+  <div class="flex justify-end gap-2">
+    <button
+      type="button"
+      class="px-4 py-2 rounded-lg border border-[color:var(--color-line)] bg-[color:var(--color-bg-2)] cursor-pointer"
+      (click)="cancel.emit()"
+      i18n="@@task-form.cancel"
+    >
+      Cancelar
+    </button>
+    <button
+      type="button"
+      class="px-4 py-2 rounded-lg border-0 bg-[color:var(--color-terra)] text-white cursor-pointer disabled:opacity-50"
+      [disabled]="!canSave()"
+      (click)="submit()"
+      i18n="@@task-form.save"
+    >
+      Guardar
+    </button>
+  </div>
+</div>

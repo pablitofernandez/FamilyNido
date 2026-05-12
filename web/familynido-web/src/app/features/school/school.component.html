@@ -1,0 +1,708 @@
+<section class="max-w-3xl mx-auto px-5 pt-6 lg:pt-8 pb-6">
+  <header class="mb-6">
+    <h1 class="font-serif text-3xl lg:text-5xl font-medium tracking-tight">
+      <ng-container i18n="@@school.title-prefix">El</ng-container>
+      <em class="text-[color:var(--color-terra)] italic font-normal" i18n="@@school.title-emph">cole</em>
+    </h1>
+    <p i18n="@@school.subtitle" class="text-sm text-[color:var(--color-ink-3)] mt-1">
+      Logística diaria, extraescolares y festivos. Quién lleva, quién recoge.
+    </p>
+  </header>
+
+  @if (error()) {
+    <p class="text-sm text-[color:var(--color-error)] mb-3">{{ error() }}</p>
+  }
+
+  @if (loading()) {
+    <p i18n="@@school.loading" class="text-sm text-[color:var(--color-ink-3)]">Cargando…</p>
+  } @else {
+    <article class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl p-4 mb-5">
+      <header class="flex items-center justify-between mb-3 gap-2">
+        <h2 i18n="@@school.this-week.heading" class="text-xs font-bold uppercase tracking-wider text-[color:var(--color-ink-3)]">
+          Esta semana
+        </h2>
+        <div class="flex items-center gap-1">
+          <button type="button" (click)="previousWeek()"
+            class="w-8 h-8 flex items-center justify-center rounded-md border border-[color:var(--color-line)] bg-white cursor-pointer"
+            i18n-aria-label="@@school.previous-week-aria"
+            aria-label="Semana anterior"><fn-icon name="chevronL" [size]="16" /></button>
+          <button type="button" (click)="thisWeek()"
+            class="text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-md border border-[color:var(--color-line)] bg-white cursor-pointer"
+            i18n="@@school.today">
+            Hoy
+          </button>
+          <button type="button" (click)="nextWeek()"
+            class="w-8 h-8 flex items-center justify-center rounded-md border border-[color:var(--color-line)] bg-white cursor-pointer"
+            i18n-aria-label="@@school.next-week-aria"
+            aria-label="Semana siguiente"><fn-icon name="chevron" [size]="16" /></button>
+        </div>
+      </header>
+
+      <ul class="flex flex-col gap-2">
+        @for (date of weekDays(); track date) {
+          <li class="border border-[color:var(--color-line)] rounded-xl p-3"
+              [ngClass]="{ 'bg-[color:var(--color-bg-2)]': holidayFor(date) }">
+            <header class="flex items-center justify-between mb-2">
+              <p class="text-xs font-bold uppercase tracking-wider">{{ dayLabel(date) }}</p>
+              @if (holidayFor(date); as hol) {
+                <span class="text-[10px] font-bold tracking-wide uppercase text-[color:var(--color-terra)] bg-[color:var(--color-terra-bg)] px-2 py-0.5 rounded-md">
+                  {{ hol.label }}
+                </span>
+              }
+            </header>
+
+            @if (daysFor(date).length === 0 && extrasFor(date).length === 0 && !holidayFor(date)) {
+              <p i18n="@@school.day.empty" class="text-xs text-[color:var(--color-ink-3)] italic">Sin cosas del cole.</p>
+            }
+
+            @for (b of daysFor(date); track b.memberId) {
+              <button type="button"
+                (click)="openDayExceptionEditor(b.memberId, date)"
+                class="w-full flex items-start gap-2 py-1.5 text-left cursor-pointer rounded-md hover:bg-[color:var(--color-bg-2)] -mx-1 px-1">
+                <span class="text-base shrink-0" aria-hidden="true">{{ transportIcon(b.memberId) }}</span>
+                <span [title]="memberName(b.memberId)" class="inline-flex shrink-0">
+                  <fn-avatar [name]="memberName(b.memberId)" [colorHex]="memberColor(b.memberId)"
+                    [photoUrl]="memberPhotoUrl(b.memberId)" [size]="22" />
+                </span>
+                <div class="flex-1 min-w-0">
+                  @if (b.isCancelled) {
+                    <p class="text-sm line-through text-[color:var(--color-ink-3)]">
+                      {{ memberName(b.memberId) }}
+                      <ng-container i18n="@@school.day.no-school">· sin cole</ng-container>
+                    </p>
+                  } @else {
+                    <p class="text-sm" [innerHTML]="schoolDayRowHtml(b)"></p>
+                  }
+                  @if (b.notes) {
+                    <p class="text-[11px] text-[color:var(--color-ink-3)] mt-0.5">{{ b.notes }}</p>
+                  }
+                </div>
+              </button>
+            }
+
+            @for (e of extrasFor(date); track e.extracurricularId) {
+              <button type="button"
+                (click)="openExtraExceptionEditor(e.extracurricularId, date)"
+                class="w-full flex items-start gap-2 py-1.5 text-left cursor-pointer rounded-md hover:bg-[color:var(--color-bg-2)] -mx-1 px-1">
+                <span class="text-base" aria-hidden="true">🎒</span>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm" [class.line-through]="e.isCancelled" [class.text-[color:var(--color-ink-3)]]="e.isCancelled">
+                    <strong>{{ e.name }}</strong>
+                    · {{ memberName(e.memberId) }}
+                    · {{ formatTime(e.startTime) }}–{{ formatTime(e.endTime) }}
+                    @if (e.location) { · {{ e.location }} }
+                  </p>
+                  @if (!e.isCancelled) {
+                    <p class="text-[11px] text-[color:var(--color-ink-3)]" [innerHTML]="extraTransportLine(e)"></p>
+                  } @else if (e.holidayLabel) {
+                    <p class="text-[11px] text-[color:var(--color-ink-3)]">{{ e.holidayLabel }}</p>
+                  }
+                </div>
+              </button>
+            }
+          </li>
+        }
+      </ul>
+    </article>
+
+    <article class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl p-4 mb-5">
+      <header class="flex items-center justify-between mb-3">
+        <h2 i18n="@@school.kids.heading" class="text-xs font-bold uppercase tracking-wider text-[color:var(--color-ink-3)]">
+          Niños — ficha y patrón semanal
+        </h2>
+      </header>
+
+      @if (kids().length === 0) {
+        <p i18n="@@school.kids.empty" class="text-sm text-[color:var(--color-ink-3)]">Añade un miembro tipo "Niño" en /nido para empezar.</p>
+      } @else {
+        <ul class="flex flex-col gap-2">
+          @for (k of kids(); track k.id) {
+            <li class="flex items-center gap-3 py-2 border-b last:border-b-0 border-[color:var(--color-line)]">
+              <fn-avatar [name]="k.displayName" [colorHex]="k.colorHex"
+                [photoUrl]="memberPhotoUrl(k.id)" [size]="32" />
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium leading-tight">{{ k.displayName }}</p>
+                <p class="text-[11px] text-[color:var(--color-ink-3)]">
+                  {{ transportIcon(k.id) }} {{ transportLabel(k.id) }}
+                </p>
+              </div>
+              <button type="button" (click)="openProfileEditor(k.id)"
+                class="text-xs underline text-[color:var(--color-ink-3)] cursor-pointer"
+                i18n="@@school.kids.profile-button"
+              >Ficha</button>
+              <button type="button" (click)="openDayPatternEditor(k.id)"
+                class="text-xs px-3 py-1.5 rounded-full bg-[color:var(--color-terra)] text-white font-bold cursor-pointer border-0"
+                i18n="@@school.kids.pattern-button"
+              >
+                Día a día
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    </article>
+
+    <article class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl p-4 mb-5">
+      <header class="flex items-center justify-between mb-3">
+        <h2 i18n="@@school.extras.heading" class="text-xs font-bold uppercase tracking-wider text-[color:var(--color-ink-3)]">
+          Extraescolares
+        </h2>
+        <button type="button" (click)="openExtraEditor({ mode: 'create' })"
+          class="px-3 py-1.5 rounded-full bg-[color:var(--color-terra)] text-white font-bold text-xs cursor-pointer border-0 flex items-center gap-1">
+          <fn-icon name="plus" [size]="14" />
+          <ng-container i18n="@@school.extras.new">Nueva</ng-container>
+        </button>
+      </header>
+
+      @if (kids().length === 0) {
+        <p i18n="@@school.extras.no-kids" class="text-sm text-[color:var(--color-ink-3)]">No hay niños activos en la familia.</p>
+      } @else {
+        @for (k of kids(); track k.id) {
+          <section class="mb-4 last:mb-0">
+            <header class="flex items-center gap-2 mb-2">
+              <fn-avatar [name]="k.displayName" [colorHex]="k.colorHex"
+                [photoUrl]="memberPhotoUrl(k.id)" [size]="24" />
+              <span class="text-sm font-semibold">{{ k.displayName }}</span>
+            </header>
+            <ul class="flex flex-col gap-2">
+              @for (a of extrasByKid(k.id); track a.id) {
+                <li class="border border-[color:var(--color-line)] rounded-xl p-3 flex items-start gap-3">
+                  <div class="flex-1 min-w-0">
+                    <p class="font-serif text-base font-semibold leading-tight">{{ a.name }}</p>
+                    <p class="text-xs text-[color:var(--color-ink-3)] mt-0.5">
+                      {{ describeExtra(a) }}
+                      @if (a.location) { · {{ a.location }} }
+                    </p>
+                    <p class="text-[11px] text-[color:var(--color-ink-3)] mt-1" [innerHTML]="extraDefaultsLine(a)"></p>
+                  </div>
+                  <div class="flex gap-1 shrink-0">
+                    <button type="button" (click)="openExtraEditor({ mode: 'edit', activity: a })"
+                      class="w-8 h-8 flex items-center justify-center rounded-md hover:bg-[color:var(--color-bg-2)] cursor-pointer"
+                      i18n-aria-label="@@school.edit-aria"
+                      aria-label="Editar"><fn-icon name="settings" [size]="16" /></button>
+                    <button type="button" (click)="archiveExtra(a)"
+                      class="w-8 h-8 flex items-center justify-center rounded-md hover:bg-[color:var(--color-bg-2)] cursor-pointer"
+                      i18n-aria-label="@@school.archive-aria"
+                      aria-label="Archivar"><fn-icon name="trash-2" [size]="16" /></button>
+                  </div>
+                </li>
+              } @empty {
+                <li i18n="@@school.extras.empty" class="text-xs text-[color:var(--color-ink-3)] italic">Sin extraescolares.</li>
+              }
+            </ul>
+          </section>
+        }
+      }
+    </article>
+
+    <article class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl p-4">
+      <header class="flex items-center justify-between mb-3">
+        <h2 i18n="@@school.holidays.heading" class="text-xs font-bold uppercase tracking-wider text-[color:var(--color-ink-3)]">
+          Festivos del curso
+        </h2>
+        <button type="button" (click)="openHolidayEditor(null)"
+          class="px-3 py-1.5 rounded-full bg-[color:var(--color-terra)] text-white font-bold text-xs cursor-pointer border-0 flex items-center gap-1">
+          <fn-icon name="plus" [size]="14" />
+          <ng-container i18n="@@school.holidays.new">Festivo</ng-container>
+        </button>
+      </header>
+
+      @if (overview()?.holidays?.length) {
+        <ul class="flex flex-col gap-2">
+          @for (h of overview()!.holidays; track h.id) {
+            <li class="flex items-start gap-3 border border-[color:var(--color-line)] rounded-xl p-3">
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold">{{ h.label }}</p>
+                <p class="text-xs text-[color:var(--color-ink-3)]">
+                  {{ h.startDate | date: 'longDate' }}
+                  @if (h.startDate !== h.endDate) {
+                    – {{ h.endDate | date: 'longDate' }}
+                  }
+                </p>
+              </div>
+              <div class="flex gap-1 shrink-0">
+                <button type="button" (click)="openHolidayEditor(h)"
+                  class="w-8 h-8 flex items-center justify-center rounded-md hover:bg-[color:var(--color-bg-2)] cursor-pointer"
+                  i18n-aria-label="@@school.edit-aria"
+                  aria-label="Editar"><fn-icon name="settings" [size]="16" /></button>
+                <button type="button" (click)="deleteHoliday(h)"
+                  class="w-8 h-8 flex items-center justify-center rounded-md hover:bg-[color:var(--color-bg-2)] cursor-pointer"
+                  i18n-aria-label="@@school.delete-aria"
+                  aria-label="Borrar"><fn-icon name="trash-2" [size]="16" /></button>
+              </div>
+            </li>
+          }
+        </ul>
+      } @else {
+        <p i18n="@@school.holidays.empty" class="text-xs text-[color:var(--color-ink-3)] italic">Sin festivos del curso. Añade rangos para no tener que cancelar día a día.</p>
+      }
+    </article>
+  }
+</section>
+
+@if (dayPatternEditor(); as ed) {
+  <div class="fixed inset-0 bg-black/40 flex items-end sm:items-center justify-center z-30 p-3" (click)="closeDayPatternEditor()">
+    <div class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl p-5 w-full max-w-lg max-h-[90vh] overflow-y-auto" (click)="$event.stopPropagation()">
+      <h3 class="font-serif text-xl font-semibold mb-1">{{ dayPatternHeading(ed.kidId) }}</h3>
+      <p class="text-xs text-[color:var(--color-ink-3)] mb-3">
+        @if (showDropoffColumn(ed.kidId)) {
+          <ng-container i18n="@@school.day-pattern.help-default">Quién lleva por la mañana y quién recoge por la tarde. Deja "—" si ese día no hay cole o no aplica.</ng-container>
+        } @else {
+          <ng-container i18n="@@school.day-pattern.help-bus">Bus escolar: solo se rellena quién recoge por la tarde.</ng-container>
+        }
+      </p>
+
+      <div class="grid grid-cols-[28px_1fr_1fr] gap-2 mb-4 items-center text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">
+        <span></span>
+        @if (showDropoffColumn(ed.kidId)) {
+          <span i18n="@@school.day-pattern.dropoff-col">Lleva</span>
+        } @else {
+          <span class="text-[color:var(--color-ink-3)] italic normal-case">—</span>
+        }
+        <span i18n="@@school.day-pattern.pickup-col">Recoge</span>
+      </div>
+
+      <div class="flex flex-col gap-2 mb-4">
+        @for (day of [1, 2, 3, 4, 5, 6, 0]; track day) {
+          <div class="grid grid-cols-[28px_1fr_1fr] gap-2 items-center">
+            <span class="text-xs font-bold uppercase">{{ weekdayShort(day) }}</span>
+            @if (showDropoffColumn(ed.kidId)) {
+              <select class="px-2 py-2 rounded-lg border border-[color:var(--color-line)] bg-white text-sm"
+                [value]="dayPatternValueFor(day, 'dropoff')"
+                (change)="onDayPatternChange(day, 'dropoff', $any($event.target).value)">
+                <option value="">—</option>
+                @for (c of caretakers(); track c.id) {
+                  <option [value]="c.id">{{ c.displayName }}</option>
+                }
+              </select>
+            } @else {
+              <span i18n="@@school.day-pattern.not-applicable" class="text-xs text-[color:var(--color-ink-3)] italic">no aplica</span>
+            }
+            <select class="px-2 py-2 rounded-lg border border-[color:var(--color-line)] bg-white text-sm"
+              [value]="dayPatternValueFor(day, 'pickup')"
+              (change)="onDayPatternChange(day, 'pickup', $any($event.target).value)">
+              <option value="">—</option>
+              @for (c of caretakers(); track c.id) {
+                <option [value]="c.id">{{ c.displayName }}</option>
+              }
+            </select>
+          </div>
+        }
+      </div>
+      <div class="flex justify-end gap-2">
+        <button type="button" (click)="closeDayPatternEditor()"
+          class="px-4 py-2 rounded-lg border border-[color:var(--color-line)] bg-white cursor-pointer"
+          i18n="@@school.cancel"
+        >Cancelar</button>
+        <button type="button" (click)="saveDayPattern()" [disabled]="savingPattern()"
+          class="px-5 py-2 rounded-full bg-[color:var(--color-terra)] text-white font-bold cursor-pointer border-0 disabled:opacity-50">
+          @if (savingPattern()) {
+            <ng-container i18n="@@school.saving">Guardando…</ng-container>
+          } @else {
+            <ng-container i18n="@@school.save">Guardar</ng-container>
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (dayExceptionEditor(); as ed) {
+  <div class="fixed inset-0 bg-black/40 flex items-end sm:items-center justify-center z-30 p-3" (click)="closeDayExceptionEditor()">
+    <div class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl p-5 w-full max-w-md" (click)="$event.stopPropagation()">
+      <h3 class="font-serif text-xl font-semibold mb-1">{{ memberName(ed.kidId) }}</h3>
+      <p class="text-xs text-[color:var(--color-ink-3)] mb-3">{{ dayLabel(ed.date) }}</p>
+
+      <label class="flex items-center gap-2 mb-3">
+        <input type="checkbox" [checked]="dayExceptionCancel()"
+          (change)="dayExceptionCancel.set($any($event.target).checked)" />
+        <span i18n="@@school.day-exception.cancel" class="text-sm">Sin cole ese día</span>
+      </label>
+
+      @if (!dayExceptionCancel()) {
+        @if (showDropoffColumn(ed.kidId)) {
+          <label class="flex flex-col gap-1 mb-3">
+            <span i18n="@@school.day-exception.dropoff" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Lleva ese día</span>
+            <select class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+              (change)="dayExceptionDropoff.set($any($event.target).value)">
+              <option value="" [selected]="dayExceptionDropoff() === ''" i18n="@@school.day-exception.no-change">— sin cambio —</option>
+              @for (c of caretakers(); track c.id) {
+                <option [value]="c.id" [selected]="c.id === dayExceptionDropoff()">{{ c.displayName }}</option>
+              }
+            </select>
+          </label>
+        }
+        <label class="flex flex-col gap-1 mb-3">
+          <span i18n="@@school.day-exception.pickup" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Recoge ese día</span>
+          <select class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+            (change)="dayExceptionPickup.set($any($event.target).value)">
+            <option value="" [selected]="dayExceptionPickup() === ''" i18n="@@school.day-exception.no-change">— sin cambio —</option>
+            @for (c of caretakers(); track c.id) {
+              <option [value]="c.id" [selected]="c.id === dayExceptionPickup()">{{ c.displayName }}</option>
+            }
+          </select>
+        </label>
+
+        <div class="grid grid-cols-2 gap-3 mb-3">
+          @if (showDropoffColumn(ed.kidId)) {
+            <label class="flex flex-col gap-1">
+              <span i18n="@@school.day-exception.morning-time" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Hora entrada (este día)</span>
+              <input type="time" class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+                [value]="dayExceptionMorning()"
+                (input)="onText(dayExceptionMorning.set.bind(dayExceptionMorning))($event)" />
+            </label>
+          }
+          <label class="flex flex-col gap-1" [class.col-span-2]="!showDropoffColumn(ed.kidId)">
+            <span i18n="@@school.day-exception.afternoon-time" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Hora salida (este día)</span>
+            <input type="time" class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+              [value]="dayExceptionAfternoon()"
+              (input)="onText(dayExceptionAfternoon.set.bind(dayExceptionAfternoon))($event)" />
+          </label>
+        </div>
+        <p i18n="@@school.day-exception.times-help" class="text-[11px] text-[color:var(--color-ink-3)] -mt-1 mb-3">
+          Deja en blanco si la hora habitual no cambia ese día.
+        </p>
+      }
+
+      <label class="flex flex-col gap-1 mb-4">
+        <span i18n="@@school.day-exception.note" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Nota (opcional)</span>
+        <input type="text" maxlength="500"
+          class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+          [value]="dayExceptionNotes()"
+          (input)="onText(dayExceptionNotes.set.bind(dayExceptionNotes))($event)" />
+      </label>
+
+      <div class="flex justify-between gap-2">
+        <button type="button" (click)="clearDayException()" [disabled]="savingDayException()"
+          class="text-xs underline text-[color:var(--color-ink-3)] cursor-pointer"
+          i18n="@@school.day-exception.clear"
+        >Quitar excepción</button>
+        <div class="flex gap-2">
+          <button type="button" (click)="closeDayExceptionEditor()"
+            class="px-4 py-2 rounded-lg border border-[color:var(--color-line)] bg-white cursor-pointer"
+            i18n="@@school.cancel"
+          >Cancelar</button>
+          <button type="button" (click)="saveDayException()" [disabled]="savingDayException()"
+            class="px-5 py-2 rounded-full bg-[color:var(--color-terra)] text-white font-bold cursor-pointer border-0 disabled:opacity-50">
+            @if (savingDayException()) {
+              <ng-container i18n="@@school.saving">Guardando…</ng-container>
+            } @else {
+              <ng-container i18n="@@school.save">Guardar</ng-container>
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+@if (extraEditor(); as ed) {
+  <div class="fixed inset-0 bg-black/40 flex items-end sm:items-center justify-center z-30 p-3" (click)="closeExtraEditor()">
+    <div class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl p-5 w-full max-w-lg max-h-[90vh] overflow-y-auto" (click)="$event.stopPropagation()">
+      <h3 class="font-serif text-xl font-semibold mb-3">
+        @if (ed.mode === 'edit') {
+          <ng-container i18n="@@school.extra-form.edit-title">Editar extraescolar</ng-container>
+        } @else {
+          <ng-container i18n="@@school.extra-form.new-title">Nueva extraescolar</ng-container>
+        }
+      </h3>
+      <form (submit)="$event.preventDefault(); saveExtra()" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <label class="flex flex-col gap-1 sm:col-span-2">
+          <span i18n="@@school.extra-form.name" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Nombre</span>
+          <input type="text" maxlength="120" class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+            [value]="extraName()" (input)="onText(extraName.set.bind(extraName))($event)" />
+        </label>
+
+        <label class="flex flex-col gap-1">
+          <span i18n="@@school.extra-form.kid" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Niño</span>
+          <select class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+            (change)="extraMemberId.set($any($event.target).value)">
+            @for (k of kids(); track k.id) {
+              <option [value]="k.id" [selected]="k.id === extraMemberId()">{{ k.displayName }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="flex flex-col gap-1">
+          <span i18n="@@school.extra-form.location" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Lugar</span>
+          <input type="text" maxlength="160" class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+            [value]="extraLocation()" (input)="onText(extraLocation.set.bind(extraLocation))($event)" />
+        </label>
+
+        <label class="flex flex-col gap-1 sm:col-span-2">
+          <span i18n="@@school.extra-form.weekdays" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Días de la semana</span>
+          <div class="flex gap-1">
+            @for (day of [1, 2, 3, 4, 5, 6, 0]; track day) {
+              <button type="button" (click)="toggleExtraDay(day)"
+                class="w-9 h-9 rounded-md border text-xs font-bold cursor-pointer transition-colors"
+                [class.bg-[color:var(--color-terra)]]="isExtraDaySelected(day)"
+                [class.text-white]="isExtraDaySelected(day)"
+                [class.border-[color:var(--color-terra)]]="isExtraDaySelected(day)"
+                [class.bg-white]="!isExtraDaySelected(day)"
+                [class.border-[color:var(--color-line)]]="!isExtraDaySelected(day)">
+                {{ weekdayShort(day) }}
+              </button>
+            }
+          </div>
+        </label>
+
+        <label class="flex flex-col gap-1">
+          <span i18n="@@school.extra-form.start-time" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Hora inicio</span>
+          <input type="time" class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+            [value]="extraStartTime()" (input)="onText(extraStartTime.set.bind(extraStartTime))($event)" />
+        </label>
+
+        <label class="flex flex-col gap-1">
+          <span i18n="@@school.extra-form.end-time" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Hora fin</span>
+          <input type="time" class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+            [value]="extraEndTime()" (input)="onText(extraEndTime.set.bind(extraEndTime))($event)" />
+        </label>
+
+        <label class="flex flex-col gap-1">
+          <span i18n="@@school.extra-form.start-date" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Inicio del curso</span>
+          <input type="date" class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+            [value]="extraStartDate()" (input)="onText(extraStartDate.set.bind(extraStartDate))($event)" />
+        </label>
+
+        <label class="flex flex-col gap-1">
+          <span i18n="@@school.extra-form.end-date" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Fin del curso (opcional)</span>
+          <input type="date" class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+            [value]="extraEndDate()" (input)="onText(extraEndDate.set.bind(extraEndDate))($event)" />
+        </label>
+
+        <label class="flex flex-col gap-1">
+          <span i18n="@@school.extra-form.default-dropoff" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Lleva por defecto</span>
+          <select class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+            (change)="extraDropoff.set($any($event.target).value)">
+            <option value="" [selected]="extraDropoff() === ''">—</option>
+            @for (c of caretakers(); track c.id) {
+              <option [value]="c.id" [selected]="c.id === extraDropoff()">{{ c.displayName }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="flex flex-col gap-1">
+          <span i18n="@@school.extra-form.default-pickup" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Recoge por defecto</span>
+          <select class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+            (change)="extraPickup.set($any($event.target).value)">
+            <option value="" [selected]="extraPickup() === ''">—</option>
+            @for (c of caretakers(); track c.id) {
+              <option [value]="c.id" [selected]="c.id === extraPickup()">{{ c.displayName }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="flex flex-col gap-1 sm:col-span-2">
+          <span i18n="@@school.extra-form.phone" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Teléfono de contacto</span>
+          <input type="tel" maxlength="40" class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+            [value]="extraPhone()" (input)="onText(extraPhone.set.bind(extraPhone))($event)" />
+        </label>
+
+        <label class="flex flex-col gap-1 sm:col-span-2">
+          <span i18n="@@school.extra-form.notes" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Notas</span>
+          <textarea rows="2" maxlength="2000" class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+            [value]="extraNotes()" (input)="onText(extraNotes.set.bind(extraNotes))($event)"></textarea>
+        </label>
+
+        <div class="sm:col-span-2 flex justify-end gap-2 mt-2">
+          <button type="button" (click)="closeExtraEditor()"
+            class="px-4 py-2 rounded-lg border border-[color:var(--color-line)] bg-white cursor-pointer"
+            i18n="@@school.cancel"
+          >Cancelar</button>
+          <button type="submit" [disabled]="savingExtra()"
+            class="px-5 py-2 rounded-full bg-[color:var(--color-terra)] text-white font-bold cursor-pointer border-0 disabled:opacity-50">
+            @if (savingExtra()) {
+              <ng-container i18n="@@school.saving">Guardando…</ng-container>
+            } @else {
+              <ng-container i18n="@@school.save">Guardar</ng-container>
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+@if (extraExceptionEditor(); as ed) {
+  <div class="fixed inset-0 bg-black/40 flex items-end sm:items-center justify-center z-30 p-3" (click)="closeExtraExceptionEditor()">
+    <div class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl p-5 w-full max-w-md" (click)="$event.stopPropagation()">
+      <h3 i18n="@@school.extra-exception.title" class="font-serif text-xl font-semibold mb-1">Excepción</h3>
+      <p class="text-xs text-[color:var(--color-ink-3)] mb-3">{{ dayLabel(ed.date) }}</p>
+
+      <label class="flex items-center gap-2 mb-3">
+        <input type="checkbox" [checked]="extraExceptionCancel()"
+          (change)="extraExceptionCancel.set($any($event.target).checked)" />
+        <span i18n="@@school.extra-exception.cancel" class="text-sm">Cancelar ese día</span>
+      </label>
+
+      @if (!extraExceptionCancel()) {
+        <label class="flex flex-col gap-1 mb-3">
+          <span i18n="@@school.extra-exception.dropoff" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Lleva ese día</span>
+          <select class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+            (change)="extraExceptionDropoff.set($any($event.target).value)">
+            <option value="" [selected]="extraExceptionDropoff() === ''">—</option>
+            @for (c of caretakers(); track c.id) {
+              <option [value]="c.id" [selected]="c.id === extraExceptionDropoff()">{{ c.displayName }}</option>
+            }
+          </select>
+        </label>
+        <label class="flex flex-col gap-1 mb-3">
+          <span i18n="@@school.extra-exception.pickup" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Recoge ese día</span>
+          <select class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+            (change)="extraExceptionPickup.set($any($event.target).value)">
+            <option value="" [selected]="extraExceptionPickup() === ''">—</option>
+            @for (c of caretakers(); track c.id) {
+              <option [value]="c.id" [selected]="c.id === extraExceptionPickup()">{{ c.displayName }}</option>
+            }
+          </select>
+        </label>
+      }
+
+      <label class="flex flex-col gap-1 mb-4">
+        <span i18n="@@school.extra-exception.note" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Nota</span>
+        <input type="text" maxlength="500" class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+          [value]="extraExceptionNotes()" (input)="onText(extraExceptionNotes.set.bind(extraExceptionNotes))($event)" />
+      </label>
+
+      <div class="flex justify-between gap-2">
+        <button type="button" (click)="clearExtraException()" [disabled]="savingExtraException()"
+          class="text-xs underline text-[color:var(--color-ink-3)] cursor-pointer"
+          i18n="@@school.extra-exception.clear"
+        >Quitar excepción</button>
+        <div class="flex gap-2">
+          <button type="button" (click)="closeExtraExceptionEditor()"
+            class="px-4 py-2 rounded-lg border border-[color:var(--color-line)] bg-white cursor-pointer"
+            i18n="@@school.cancel"
+          >Cancelar</button>
+          <button type="button" (click)="saveExtraException()" [disabled]="savingExtraException()"
+            class="px-5 py-2 rounded-full bg-[color:var(--color-terra)] text-white font-bold cursor-pointer border-0 disabled:opacity-50">
+            @if (savingExtraException()) {
+              <ng-container i18n="@@school.saving">Guardando…</ng-container>
+            } @else {
+              <ng-container i18n="@@school.save">Guardar</ng-container>
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+@if (holidayEditor(); as ed) {
+  <div class="fixed inset-0 bg-black/40 flex items-end sm:items-center justify-center z-30 p-3" (click)="closeHolidayEditor()">
+    <div class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl p-5 w-full max-w-md" (click)="$event.stopPropagation()">
+      <h3 class="font-serif text-xl font-semibold mb-3">
+        @if (ed.id) {
+          <ng-container i18n="@@school.holiday-form.edit-title">Editar festivo</ng-container>
+        } @else {
+          <ng-container i18n="@@school.holiday-form.new-title">Nuevo festivo</ng-container>
+        }
+      </h3>
+      <form (submit)="$event.preventDefault(); saveHoliday()" class="flex flex-col gap-3">
+        <label class="flex flex-col gap-1">
+          <span i18n="@@school.holiday-form.label" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Etiqueta</span>
+          <input type="text" maxlength="120" class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+            [value]="holidayLabel()" (input)="onText(holidayLabel.set.bind(holidayLabel))($event)" />
+        </label>
+        <div class="grid grid-cols-2 gap-3">
+          <label class="flex flex-col gap-1">
+            <span i18n="@@school.holiday-form.start" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Inicio</span>
+            <input type="date" class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+              [value]="holidayStart()" (input)="onText(holidayStart.set.bind(holidayStart))($event)" />
+          </label>
+          <label class="flex flex-col gap-1">
+            <span i18n="@@school.holiday-form.end" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Fin</span>
+            <input type="date" class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+              [value]="holidayEnd()" (input)="onText(holidayEnd.set.bind(holidayEnd))($event)" />
+          </label>
+        </div>
+        <div class="flex justify-end gap-2 mt-1">
+          <button type="button" (click)="closeHolidayEditor()"
+            class="px-4 py-2 rounded-lg border border-[color:var(--color-line)] bg-white cursor-pointer"
+            i18n="@@school.cancel"
+          >Cancelar</button>
+          <button type="submit" [disabled]="savingHoliday()"
+            class="px-5 py-2 rounded-full bg-[color:var(--color-terra)] text-white font-bold cursor-pointer border-0 disabled:opacity-50">
+            @if (savingHoliday()) {
+              <ng-container i18n="@@school.saving">Guardando…</ng-container>
+            } @else {
+              <ng-container i18n="@@school.save">Guardar</ng-container>
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+@if (profileEditor(); as ed) {
+  <div class="fixed inset-0 bg-black/40 flex items-end sm:items-center justify-center z-30 p-3" (click)="closeProfileEditor()">
+    <div class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl p-5 w-full max-w-md max-h-[90vh] overflow-y-auto" (click)="$event.stopPropagation()">
+      <h3 class="font-serif text-xl font-semibold mb-3">{{ profileHeading(ed.memberId) }}</h3>
+      <form (submit)="$event.preventDefault(); saveProfile()" class="flex flex-col gap-3">
+        <label class="flex flex-col gap-1">
+          <span i18n="@@school.profile-form.school" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Centro</span>
+          <input type="text" maxlength="120" class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+            [value]="profileSchool()" (input)="onText(profileSchool.set.bind(profileSchool))($event)" />
+        </label>
+        <label class="flex flex-col gap-1">
+          <span i18n="@@school.profile-form.grade" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Curso</span>
+          <input type="text" maxlength="60" class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+            [value]="profileGrade()" (input)="onText(profileGrade.set.bind(profileGrade))($event)" />
+        </label>
+        <label class="flex flex-col gap-1">
+          <span i18n="@@school.profile-form.tutor" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Tutor</span>
+          <input type="text" maxlength="120" class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+            [value]="profileTutor()" (input)="onText(profileTutor.set.bind(profileTutor))($event)" />
+        </label>
+
+        <label class="flex flex-col gap-1">
+          <span i18n="@@school.profile-form.transport" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Tipo de transporte</span>
+          <select class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+            (change)="profileTransport.set($any($event.target).value)">
+            @for (opt of transportOptions; track opt.value) {
+              <option [value]="opt.value" [selected]="opt.value === profileTransport()">{{ opt.icon }} {{ opt.label }}</option>
+            }
+          </select>
+        </label>
+
+        <div class="grid grid-cols-2 gap-3">
+          @if (profileTransport() !== 'Bus' && profileTransport() !== 'None') {
+            <label class="flex flex-col gap-1">
+              <span i18n="@@school.profile-form.morning-time" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Hora de entrada</span>
+              <input type="time" class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+                [value]="profileMorningTime()" (input)="onText(profileMorningTime.set.bind(profileMorningTime))($event)" />
+            </label>
+          }
+          @if (profileTransport() !== 'None') {
+            <label class="flex flex-col gap-1" [class.col-span-2]="profileTransport() === 'Bus'">
+              <span i18n="@@school.profile-form.afternoon-time" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Hora de salida</span>
+              <input type="time" class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+                [value]="profileAfternoonTime()" (input)="onText(profileAfternoonTime.set.bind(profileAfternoonTime))($event)" />
+            </label>
+          }
+        </div>
+
+        <label class="flex flex-col gap-1">
+          <span i18n="@@school.profile-form.notes" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Notas</span>
+          <textarea rows="3" maxlength="2000" class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+            [value]="profileNotes()" (input)="onText(profileNotes.set.bind(profileNotes))($event)"></textarea>
+        </label>
+        <div class="flex justify-end gap-2">
+          <button type="button" (click)="closeProfileEditor()"
+            class="px-4 py-2 rounded-lg border border-[color:var(--color-line)] bg-white cursor-pointer"
+            i18n="@@school.cancel"
+          >Cancelar</button>
+          <button type="submit" [disabled]="savingProfile()"
+            class="px-5 py-2 rounded-full bg-[color:var(--color-terra)] text-white font-bold cursor-pointer border-0 disabled:opacity-50">
+            @if (savingProfile()) {
+              <ng-container i18n="@@school.saving">Guardando…</ng-container>
+            } @else {
+              <ng-container i18n="@@school.save">Guardar</ng-container>
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

@@ -1,0 +1,73 @@
+# ─── .NET ─────────────────────────────────────────────
+bin/
+obj/
+*.user
+*.suo
+*.userprefs
+.vs/
+.vscode/
+.idea/
+*.lock.json
+project.lock.json
+artifacts/
+coverage/
+*.coverage
+*.trx
+TestResults/
+
+# ─── Angular / Node ───────────────────────────────────
+node_modules/
+dist/
+.angular/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.cache/
+.parcel-cache/
+.turbo/
+
+# ─── Environment & secrets ────────────────────────────
+.env
+.env.local
+.env.*.local
+*.pfx
+*.snk
+
+# ─── Local tool state ─────────────────────────────────
+# Claude Code per-repo permissions and preferences.
+.claude/
+
+# ─── OS ───────────────────────────────────────────────
+Thumbs.db
+Desktop.ini
+.DS_Store
+ehthumbs.db
+$RECYCLE.BIN/
+
+# ─── Editor ───────────────────────────────────────────
+*.swp
+*~
+
+# ─── Docker ───────────────────────────────────────────
+.docker-data/
+
+# ─── EF Core artifacts ────────────────────────────────
+*.db
+*.db-shm
+*.db-wal
+
+# ─── Temporary / local scratch ────────────────────────
+scratch/
+tmp/
+
+# ─── Local uploads (wall images, future attachments) ──
+# Created by the Api when running in dev; production uses the
+# `familynido-files` Docker volume and never hits this path.
+src/FamilyNido.Api/data/
+
+# ─── Personal design / spec notes kept out of the public repo ─────
+FamilyNido.md
+design/
+

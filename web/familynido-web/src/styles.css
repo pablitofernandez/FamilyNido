@@ -1,0 +1,200 @@
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Nunito:wght@400;500;600;700;800&display=swap");
+@import "tailwindcss";
+
+/*
+ * ─── FamilyNido design tokens ──────────────────────────────────────────────
+ * "Editorial Cálido": warm family aesthetic, cream background, terracotta
+ * accent, Fraunces serif for headings, Nunito sans for UI.
+ * Palette lifted verbatim from design/familynido/project/styles.css.
+ */
+@theme {
+  --color-bg: #F5EDE2;
+  --color-bg-2: #EFE4D3;
+  --color-card: #FFFBF4;
+
+  --color-ink: #2A1F16;
+  --color-ink-2: #5B4A3A;
+  --color-ink-3: #8A7862;
+
+  --color-line: rgb(42 31 22 / 9%);
+  --color-line-2: rgb(42 31 22 / 14%);
+
+  --color-terra: #C96442;
+  --color-terra-soft: #E8B9A3;
+  --color-terra-bg: #F7E2D4;
+  --color-moss: #7A8F5C;
+  --color-moss-bg: #E3E9D2;
+  --color-ochre: #D4A24C;
+  --color-ochre-bg: #F4E2BD;
+  --color-plum: #8B6A86;
+  --color-plum-bg: #E8DCE6;
+  --color-sage: #9AAE94;
+  --color-sage-bg: #DFE7DB;
+
+  --font-serif: "Fraunces", ui-serif, Georgia, serif;
+  --font-sans: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --radius-card: 22px;
+  --radius-pill: 999px;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+  background-color: var(--color-bg);
+  background-image:
+    radial-gradient(ellipse 800px 600px at 20% 10%, rgb(201 100 66 / 6%), transparent 70%),
+    radial-gradient(ellipse 600px 500px at 90% 100%, rgb(122 143 92 / 5%), transparent 70%);
+  background-attachment: fixed;
+}
+
+/* Utility: apply the editorial serif stack with opsz tuned for headings. */
+.font-serif {
+  font-family: var(--font-serif);
+  font-variation-settings: "opsz" 80, "SOFT" 100;
+}
+
+/* Warm paper surface reused across pages (from the prototype). */
+.paper {
+  background-color: var(--color-bg);
+  background-image:
+    radial-gradient(ellipse 800px 600px at 20% 10%, rgb(201 100 66 / 6%), transparent 70%),
+    radial-gradient(ellipse 600px 500px at 90% 100%, rgb(122 143 92 / 5%), transparent 70%);
+}
+
+/*
+ * Restores typographic styling for the HTML emitted by Markdig inside wall
+ * message/comment bodies. Tailwind's preflight strips font-weight from <strong>,
+ * font-style from <em>, and margins/padding from block elements, so without
+ * this block the markdown source renders but visually looks plain.
+ * Shared globally because `[innerHTML]` injects un-encapsulated children that
+ * component-scoped CSS cannot target.
+ */
+.wall-markdown strong,
+.wall-markdown b {
+  font-weight: 700;
+}
+
+.wall-markdown em,
+.wall-markdown i {
+  font-style: italic;
+}
+
+.wall-markdown a {
+  color: var(--color-terra);
+  text-decoration: underline;
+}
+
+.wall-markdown code {
+  background: var(--color-bg-2);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-size: 0.9em;
+}
+
+.wall-markdown p {
+  margin: 0.5em 0;
+}
+
+.wall-markdown p:first-child {
+  margin-top: 0;
+}
+
+.wall-markdown p:last-child {
+  margin-bottom: 0;
+}
+
+.wall-markdown ul,
+.wall-markdown ol {
+  padding-left: 1.25em;
+  margin: 0.5em 0;
+}
+
+.wall-markdown ul {
+  list-style: disc;
+}
+
+.wall-markdown ol {
+  list-style: decimal;
+}
+
+.wall-markdown li {
+  margin: 0.2em 0;
+}
+
+.wall-markdown blockquote {
+  border-left: 3px solid var(--color-line-2);
+  padding-left: 0.75em;
+  margin: 0.5em 0;
+  color: var(--color-ink-3);
+  font-style: italic;
+}
+
+.wall-markdown h1,
+.wall-markdown h2,
+.wall-markdown h3 {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  margin: 0.75em 0 0.25em;
+  line-height: 1.2;
+}
+
+.wall-markdown h1 {
+  font-size: 1.5em;
+}
+
+.wall-markdown h2 {
+  font-size: 1.25em;
+}
+
+.wall-markdown h3 {
+  font-size: 1.1em;
+}
+
+.wall-markdown hr {
+  border: 0;
+  border-top: 1px solid var(--color-line);
+  margin: 0.75em 0;
+}
+
+.wall-markdown .fn-mention,
+.fn-mention {
+  display: inline-block;
+  padding: 0 6px;
+  border-radius: 6px;
+  background: var(--color-terra-bg);
+  color: var(--color-terra);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* iOS Safari renders <input type="date"> and <input type="time"> with an
+   intrinsic minimum width that ignores w-full and overflows narrow modals.
+   Strip the native widget chrome so they shrink to their container — the
+   tap-to-open picker still works because the input keeps its semantics. */
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"] {
+  -webkit-appearance: none;
+  appearance: none;
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* View Transitions API — used by the dashboard "Tareas de hoy" widget so a
+   task slides smoothly to the bottom of the list when marked as done.
+   Scoped via inline `view-transition-name` in the template so we only animate
+   the rows that opted in. */
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-group(*) {
+    animation-duration: 450ms;
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}

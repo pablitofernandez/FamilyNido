@@ -1,0 +1,26 @@
+{
+  "name": "FamilyNido",
+  "short_name": "FamilyNido",
+  "description": "Self-hosted PWA for the family — calendar, chores, meals, school and more.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#C96442",
+  "background_color": "#F5EDE2",
+  "lang": "es-ES",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "favicon.ico",
+      "sizes": "32x32",
+      "type": "image/x-icon",
+      "purpose": "any"
+    }
+  ]
+}

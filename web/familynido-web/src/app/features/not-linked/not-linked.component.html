@@ -1,0 +1,22 @@
+<section
+  class="min-h-screen paper flex items-center justify-center px-6 py-12 text-center"
+>
+  <div class="max-w-md">
+    <div class="text-5xl mb-6" aria-hidden="true">🪺</div>
+    <h1 i18n="@@not-linked.title" class="font-serif text-3xl lg:text-4xl font-medium tracking-tight">
+      Aún no estás en el nido
+    </h1>
+    <p i18n="@@not-linked.body" class="text-[color:var(--color-ink-2)] mt-4 font-serif">
+      Pídele al administrador de tu familia que te envíe una invitación a
+      tu correo. Una vez la aceptes, ya podrás usar FamilyNido.
+    </p>
+    <button
+      type="button"
+      (click)="logout()"
+      i18n="@@not-linked.logout"
+      class="mt-8 px-6 py-3 rounded-full bg-[color:var(--color-terra)] text-white font-bold tracking-wide cursor-pointer border-0"
+    >
+      Cerrar sesión
+    </button>
+  </div>
+</section>

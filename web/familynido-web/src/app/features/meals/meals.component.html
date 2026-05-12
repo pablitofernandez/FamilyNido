@@ -1,0 +1,193 @@
+<section class="max-w-3xl mx-auto px-5 pt-6 lg:pt-8 pb-6">
+  <header class="flex items-end justify-between mb-6 gap-3">
+    <div class="min-w-0">
+      <h1 class="font-serif text-3xl lg:text-5xl font-medium tracking-tight">
+        <ng-container i18n="@@meals.title-prefix">La</ng-container>
+        <em class="text-[color:var(--color-terra)] italic font-normal" i18n="@@meals.title-emph">mesa</em>
+      </h1>
+      <p class="text-sm text-[color:var(--color-ink-3)] mt-1 truncate">
+        {{ weekLabel() }}
+        @if (isThisWeek()) {
+          <ng-container i18n="@@meals.this-week">· esta semana</ng-container>
+        }
+      </p>
+    </div>
+    <div class="flex gap-1 shrink-0">
+      <button
+        type="button"
+        class="w-10 h-10 rounded-full border border-[color:var(--color-line)] bg-white flex items-center justify-center cursor-pointer"
+        i18n-aria-label="@@meals.previous-week-aria"
+        aria-label="Semana anterior"
+        (click)="previousWeek()"
+      >
+        <fn-icon name="chevronL" [size]="18" />
+      </button>
+      <button
+        type="button"
+        class="px-3 h-10 rounded-full border border-[color:var(--color-line)] bg-white text-xs cursor-pointer disabled:opacity-50"
+        [disabled]="isThisWeek()"
+        (click)="jumpToToday()"
+        i18n="@@meals.today-button"
+      >
+        Hoy
+      </button>
+      <button
+        type="button"
+        class="w-10 h-10 rounded-full border border-[color:var(--color-line)] bg-white flex items-center justify-center cursor-pointer"
+        i18n-aria-label="@@meals.next-week-aria"
+        aria-label="Semana siguiente"
+        (click)="nextWeek()"
+      >
+        <fn-icon name="chevron" [size]="18" />
+      </button>
+    </div>
+  </header>
+
+  <div class="flex justify-end mb-3">
+    <button
+      type="button"
+      class="text-xs text-[color:var(--color-terra)] underline cursor-pointer"
+      (click)="duplicatePrevious()"
+      i18n="@@meals.duplicate-previous"
+    >
+      Duplicar semana anterior
+    </button>
+  </div>
+
+  @if (loading() && !week()) {
+    <p i18n="@@meals.loading" class="text-sm text-[color:var(--color-ink-3)] text-center py-12">Cargando…</p>
+  } @else if (error() === 'load') {
+    <p i18n="@@meals.load-error" class="text-sm text-[color:var(--color-error)] text-center py-12">
+      No se pudo cargar la planificación. Reintenta en un momento.
+    </p>
+  } @else {
+    <ul class="flex flex-col gap-3">
+      @for (day of grid(); track day.date) {
+        <li
+          class="rounded-2xl border bg-[color:var(--color-card)] p-3 transition-shadow"
+          [ngClass]="day.isToday
+            ? 'border-[color:var(--color-terra)] shadow-sm'
+            : 'border-[color:var(--color-line)]'"
+        >
+          <p
+            class="text-xs font-bold uppercase tracking-wider mb-2 capitalize"
+            [ngClass]="day.isToday
+              ? 'text-[color:var(--color-terra)]'
+              : 'text-[color:var(--color-ink-3)]'"
+          >
+            {{ day.label }}
+            @if (day.isToday) {
+              <ng-container i18n="@@meals.today-suffix">· hoy</ng-container>
+            }
+          </p>
+
+          <div class="grid grid-cols-2 gap-3">
+            <ng-container
+              *ngTemplateOutlet="
+                slotBlock;
+                context: { date: day.date, slot: 'Lunch', label: lunchLabel, entry: day.lunch }
+              "
+            />
+            <ng-container
+              *ngTemplateOutlet="
+                slotBlock;
+                context: { date: day.date, slot: 'Dinner', label: dinnerLabel, entry: day.dinner }
+              "
+            />
+          </div>
+        </li>
+      }
+    </ul>
+  }
+
+  <!-- ─── Slot block: header + two course rows (primero/segundo) ───────── -->
+  <ng-template #slotBlock let-date="date" let-slot="slot" let-label="label" let-entry="entry">
+    <div class="flex flex-col gap-1">
+      <p class="text-[10px] uppercase tracking-wider text-[color:var(--color-ink-3)]">
+        {{ label }}
+      </p>
+      <ng-container
+        *ngTemplateOutlet="
+          courseRow;
+          context: {
+            date: date,
+            slot: slot,
+            course: 'First',
+            placeholder: firstCoursePlaceholder,
+            value: courseValue(entry, 'First'),
+          }
+        "
+      />
+      <ng-container
+        *ngTemplateOutlet="
+          courseRow;
+          context: {
+            date: date,
+            slot: slot,
+            course: 'Second',
+            placeholder: secondCoursePlaceholder,
+            value: courseValue(entry, 'Second'),
+          }
+        "
+      />
+    </div>
+  </ng-template>
+
+  <!-- ─── Single course row: button display or inline editor ──────────── -->
+  <ng-template
+    #courseRow
+    let-date="date"
+    let-slot="slot"
+    let-course="course"
+    let-placeholder="placeholder"
+    let-value="value"
+  >
+    @if (isEditing(date, slot, course)) {
+      <div class="relative">
+        <input
+          #draftInput
+          type="text"
+          class="w-full px-3 py-2 rounded-lg border border-[color:var(--color-terra)] bg-white text-sm outline-none"
+          [value]="draft()"
+          i18n-placeholder="@@meals.input-placeholder"
+          placeholder="¿Qué toca?"
+          (input)="onDraftInput($event)"
+          (keydown)="onKeydown($event)"
+          (blur)="onBlur(date, slot, course)"
+        />
+        @if (suggestionsOpen() && suggestions().length > 0) {
+          <ul
+            class="absolute left-0 right-0 top-full mt-1 z-10 bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-lg shadow-md max-h-48 overflow-y-auto"
+          >
+            @for (suggestion of suggestions(); track suggestion; let i = $index) {
+              <li>
+                <button
+                  type="button"
+                  class="w-full text-left px-3 py-1.5 text-sm cursor-pointer transition-colors hover:bg-[color:var(--color-bg-2)]"
+                  [style.backgroundColor]="isHighlighted(i) ? 'var(--color-terra-bg)' : null"
+                  [style.color]="isHighlighted(i) ? 'var(--color-terra)' : null"
+                  (mouseenter)="highlightIndex.set(i)"
+                  (mousedown)="pickSuggestion(suggestion)"
+                >
+                  {{ suggestion }}
+                </button>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+    } @else {
+      <button
+        type="button"
+        class="w-full text-left px-3 py-1.5 rounded-lg bg-[color:var(--color-bg-2)] hover:bg-[color:var(--color-bg-3)] cursor-pointer text-sm min-h-[34px]"
+        (click)="startEdit(date, slot, course, value)"
+      >
+        @if (value) {
+          {{ value }}
+        } @else {
+          <span class="text-[color:var(--color-ink-3)]">{{ placeholder }}</span>
+        }
+      </button>
+    }
+  </ng-template>
+</section>

@@ -1,0 +1,394 @@
+<section class="max-w-2xl mx-auto px-5 pt-6 lg:pt-8 pb-6">
+  <header class="flex items-end justify-between mb-6">
+    <div>
+      <h1 class="font-serif text-3xl lg:text-5xl font-medium tracking-tight">
+        <ng-container i18n="@@wall.title-prefix">El</ng-container>
+        <em class="text-[color:var(--color-terra)] italic font-normal" i18n="@@wall.title-emph">muro</em>
+      </h1>
+      <p i18n="@@wall.subtitle" class="text-sm text-[color:var(--color-ink-3)] mt-1">
+        Pizarra de la cocina digital.
+      </p>
+    </div>
+    <button
+      type="button"
+      class="w-11 h-11 rounded-full border-0 bg-[color:var(--color-terra)] text-white flex items-center justify-center cursor-pointer"
+      [attr.aria-label]="composerOpen() ? closeAriaLabel : newMessageAriaLabel"
+      (click)="toggleComposer()"
+    >
+      <fn-icon [name]="composerOpen() ? 'x' : 'plus'" [size]="20" [strokeWidth]="2.2" />
+    </button>
+  </header>
+
+  @if (composerOpen()) {
+    <div
+      class="border rounded-2xl p-4 mb-5 transition-colors"
+      [ngClass]="composerDragOver()
+        ? 'bg-[color:var(--color-terra-bg)] border-[color:var(--color-terra)] border-dashed'
+        : 'bg-[color:var(--color-card)] border-[color:var(--color-line)]'"
+      (dragover)="onComposerDragOver($event)"
+      (dragleave)="onComposerDragLeave($event)"
+      (drop)="onComposerDrop($event)"
+    >
+      <h2 class="font-serif text-xl font-semibold mb-3">
+        @if (editingMessageId()) {
+          <ng-container i18n="@@wall.composer.title.edit">Editar mensaje</ng-container>
+        } @else {
+          <ng-container i18n="@@wall.composer.title.new">Nuevo mensaje</ng-container>
+        }
+      </h2>
+
+      <label i18n="@@wall.composer.text-label" class="block text-xs uppercase tracking-wide text-[color:var(--color-ink-3)] mb-1">
+        Texto (markdown)
+      </label>
+      <fn-mention-textarea
+        class="block mb-3"
+        textareaClass="w-full px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+        [rows]="4"
+        [maxLength]="4000"
+        [placeholder]="composerPlaceholder"
+        [members]="mentionCandidates()"
+        [value]="composerText()"
+        (valueChange)="onComposerInput($event)"
+        (pasteImage)="onComposerPasteImage($event)"
+      />
+      <p i18n="@@wall.composer.text-hint" class="text-[11px] text-[color:var(--color-ink-3)] -mt-2 mb-3">
+        Escribe <code>@</code> para mencionar · pega o arrastra una imagen para adjuntarla.
+      </p>
+
+      @if (composerText().trim().length > 0) {
+        <div class="mb-3 bg-[color:var(--color-bg-2)] border border-[color:var(--color-line)] rounded-lg px-3 py-2">
+          <p class="text-[11px] uppercase tracking-wide text-[color:var(--color-ink-3)] mb-1 flex items-center justify-between">
+            <span i18n="@@wall.composer.preview">Vista previa</span>
+            @if (previewLoading()) {
+              <span i18n="@@wall.composer.preview-loading" class="text-[10px] italic">renderizando…</span>
+            }
+          </p>
+          <div class="text-sm wall-markdown" [innerHTML]="previewHtml()"></div>
+        </div>
+      }
+
+      <div class="mb-3">
+        <label i18n="@@wall.composer.image-label" class="block text-xs uppercase tracking-wide text-[color:var(--color-ink-3)] mb-1">
+          Imagen (opcional)
+        </label>
+        <div class="flex items-center gap-2">
+          <label
+            class="flex items-center gap-2 px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white cursor-pointer text-sm"
+          >
+            <!-- accept="image/*" abre el selector a todas las fotos en iOS,
+                 incluyendo HEIC; el backend acepta image/heic/heif. -->
+            <input
+              type="file"
+              accept="image/*"
+              class="hidden"
+              (change)="onImagePicked($event)"
+            />
+            @if (composerUploading()) {
+              <ng-container i18n="@@wall.composer.uploading">Subiendo…</ng-container>
+            } @else if (composerImageId()) {
+              <ng-container i18n="@@wall.composer.change-image">Cambiar</ng-container>
+            } @else {
+              <ng-container i18n="@@wall.composer.attach-image">Adjuntar</ng-container>
+            }
+          </label>
+          @if (composerImageId()) {
+            <button
+              type="button"
+              class="text-xs text-[color:var(--color-ink-3)] underline cursor-pointer"
+              (click)="clearImage()"
+              i18n="@@wall.composer.remove-image"
+            >
+              Quitar
+            </button>
+          }
+        </div>
+      </div>
+
+      @if (composerImagePreview()) {
+        <img
+          [src]="composerImagePreview()"
+          alt=""
+          class="max-h-48 rounded-lg border border-[color:var(--color-line)] mb-3"
+        />
+      }
+
+      <div class="flex justify-end gap-2">
+        <button
+          type="button"
+          class="px-4 py-2 rounded-lg border border-[color:var(--color-line)] bg-[color:var(--color-bg-2)] cursor-pointer"
+          (click)="toggleComposer()"
+          i18n="@@wall.composer.cancel"
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="px-4 py-2 rounded-lg border-0 bg-[color:var(--color-terra)] text-white cursor-pointer disabled:opacity-50"
+          [disabled]="!canPublish() || composerUploading()"
+          (click)="publish()"
+        >
+          @if (editingMessageId()) {
+            <ng-container i18n="@@wall.composer.save">Guardar</ng-container>
+          } @else {
+            <ng-container i18n="@@wall.composer.publish">Publicar</ng-container>
+          }
+        </button>
+      </div>
+    </div>
+  }
+
+  @if (loading()) {
+    <p i18n="@@wall.loading" class="text-center text-[color:var(--color-ink-3)] py-12">Cargando…</p>
+  } @else if (error() && messages().length === 0 && pinned().length === 0) {
+    <p i18n="@@wall.load-error" class="text-center text-[color:var(--color-terra)] py-12">
+      No hemos podido cargar el muro. Reintenta en un momento.
+    </p>
+  } @else {
+    @if (pinned().length > 0) {
+      <h2 class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)] mb-2 flex items-center gap-1">
+        <fn-icon name="pin" [size]="14" />
+        <ng-container i18n="@@wall.pinned-section">Fijados</ng-container>
+      </h2>
+      <ul class="flex flex-col gap-3 mb-6">
+        @for (message of pinned(); track message.id) {
+          <ng-container *ngTemplateOutlet="card; context: { message }" />
+        }
+      </ul>
+    }
+
+    <ul class="flex flex-col gap-3">
+      @for (message of messages(); track message.id) {
+        <ng-container *ngTemplateOutlet="card; context: { message }" />
+      } @empty {
+        <li i18n="@@wall.empty" class="text-center text-[color:var(--color-ink-3)] py-12">
+          Todavía nada en el muro. Publica el primer mensaje con el botón <b>+</b>.
+        </li>
+      }
+    </ul>
+
+    @if (hasMore()) {
+      <div class="text-center mt-4">
+        <button
+          type="button"
+          class="px-4 py-2 rounded-full border border-[color:var(--color-line)] bg-white cursor-pointer text-sm"
+          (click)="loadMore()"
+          i18n="@@wall.load-more"
+        >
+          Cargar más
+        </button>
+      </div>
+    }
+  }
+
+  <ng-template #card let-message="message">
+    <li class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl p-4">
+      <div class="flex items-start gap-3">
+        <fn-avatar
+          [name]="memberName(message.authorMemberId)"
+          [colorHex]="memberColor(message.authorMemberId)"
+          [size]="40"
+          [photoUrl]="memberPhotoUrl(message.authorMemberId)"
+        />
+        <div class="flex-1 min-w-0">
+          <p class="font-serif font-semibold text-sm leading-tight">
+            {{ memberName(message.authorMemberId) }}
+            @if (message.isPinned) {
+              <span class="text-[10px] font-bold tracking-wide uppercase text-[color:var(--color-terra)] bg-[color:var(--color-terra-bg)] px-2 py-0.5 rounded-md ml-2" i18n="@@wall.pinned-badge">
+                Fijado
+              </span>
+            }
+          </p>
+          <p class="text-xs text-[color:var(--color-ink-3)]">
+            {{ message.createdAt | date: 'short' }}
+          </p>
+        </div>
+        <div class="flex gap-1 shrink-0">
+          <button
+            type="button"
+            class="w-8 h-8 flex items-center justify-center rounded-md hover:bg-[color:var(--color-bg-2)] cursor-pointer"
+            [attr.aria-label]="message.isPinned ? unpinAriaLabel : pinAriaLabel"
+            (click)="togglePin(message)"
+          >
+            <fn-icon name="pin" [size]="16" />
+          </button>
+          @if (canEdit(message)) {
+            <button
+              type="button"
+              class="w-8 h-8 flex items-center justify-center rounded-md hover:bg-[color:var(--color-bg-2)] cursor-pointer"
+              i18n-aria-label="@@wall.edit-aria"
+              aria-label="Editar"
+              (click)="editMessage(message)"
+            >
+              <fn-icon name="pencil" [size]="16" />
+            </button>
+          }
+          @if (canDelete(message)) {
+            <button
+              type="button"
+              class="w-8 h-8 flex items-center justify-center rounded-md hover:bg-[color:var(--color-bg-2)] cursor-pointer"
+              i18n-aria-label="@@wall.delete-aria"
+              aria-label="Borrar"
+              (click)="deleteMessage(message)"
+            >
+              <fn-icon name="trash-2" [size]="16" />
+            </button>
+          }
+        </div>
+      </div>
+
+      <div class="wall-markdown mt-3 font-serif text-base leading-relaxed" [innerHTML]="message.textHtml"></div>
+
+      @if (message.image) {
+        <button
+          type="button"
+          (click)="openLightbox(message.image.url)"
+          class="block mt-3 w-full p-0 border-0 bg-transparent cursor-pointer touch-manipulation"
+          i18n-aria-label="@@wall.open-image-aria"
+          aria-label="Ver imagen completa"
+        >
+          <img
+            [src]="message.image.url"
+            alt=""
+            class="max-h-96 w-full object-contain bg-[color:var(--color-bg-2)] rounded-lg border border-[color:var(--color-line)] pointer-events-none"
+          />
+        </button>
+      }
+
+      <div class="flex flex-wrap items-center gap-2 mt-4">
+        @for (reaction of message.reactions; track reaction.emoji) {
+          <button
+            type="button"
+            class="flex items-center gap-1 px-2 py-1 rounded-full border text-sm cursor-pointer"
+            [ngClass]="
+              haveReacted(reaction)
+                ? 'bg-[color:var(--color-terra-bg)] border-[color:var(--color-terra)]'
+                : 'bg-white border-[color:var(--color-line)]'
+            "
+            (click)="react(message.id, reaction.emoji)"
+          >
+            <span>{{ reaction.emoji }}</span>
+            <span class="text-xs text-[color:var(--color-ink-3)]">{{ reaction.count }}</span>
+          </button>
+        }
+        <button
+          type="button"
+          class="w-8 h-8 flex items-center justify-center rounded-full border border-[color:var(--color-line)] bg-white cursor-pointer"
+          i18n-aria-label="@@wall.react-aria"
+          aria-label="Reaccionar"
+          (click)="togglePicker(message.id)"
+        >
+          <fn-icon name="heart" [size]="14" />
+        </button>
+        <button
+          type="button"
+          class="ml-auto text-xs text-[color:var(--color-ink-3)] underline cursor-pointer"
+          (click)="toggleComments(message.id)"
+        >
+          {{ commentCountLabel(message.comments.length) }}
+        </button>
+      </div>
+
+      @if (pickerOpenFor() === message.id) {
+        <div class="flex gap-1 mt-2 p-2 bg-[color:var(--color-bg-2)] rounded-lg">
+          @for (emoji of reactionPalette; track emoji) {
+            <button
+              type="button"
+              class="w-8 h-8 rounded-md hover:bg-white cursor-pointer text-lg"
+              (click)="react(message.id, emoji)"
+            >
+              {{ emoji }}
+            </button>
+          }
+        </div>
+      }
+
+      @if (commentsOpenFor(message.id)) {
+        <ul class="flex flex-col gap-2 mt-3 pt-3 border-t border-[color:var(--color-line)]">
+          @for (comment of message.comments; track comment.id) {
+            <li class="flex gap-2">
+              <fn-avatar
+                [name]="memberName(comment.authorMemberId)"
+                [colorHex]="memberColor(comment.authorMemberId)"
+                [size]="28"
+                [photoUrl]="memberPhotoUrl(comment.authorMemberId)"
+              />
+              <div class="flex-1 min-w-0">
+                <p class="text-xs font-semibold">{{ memberName(comment.authorMemberId) }}</p>
+                <div class="wall-markdown text-sm" [innerHTML]="comment.textHtml"></div>
+                <p class="text-[10px] text-[color:var(--color-ink-3)] mt-0.5">
+                  {{ comment.createdAt | date: 'short' }}
+                </p>
+              </div>
+              @if (canDeleteComment(comment)) {
+                <button
+                  type="button"
+                  class="w-6 h-6 flex items-center justify-center rounded-md hover:bg-[color:var(--color-bg-2)] cursor-pointer"
+                  i18n-aria-label="@@wall.delete-comment-aria"
+                  aria-label="Borrar comentario"
+                  (click)="deleteComment(comment)"
+                >
+                  <fn-icon name="trash-2" [size]="14" />
+                </button>
+              }
+            </li>
+          } @empty {
+            <li i18n="@@wall.no-comments" class="text-xs text-[color:var(--color-ink-3)] text-center py-2">
+              Sin comentarios todavía.
+            </li>
+          }
+        </ul>
+
+        <div class="mt-3 flex gap-2">
+          <fn-mention-textarea
+            class="flex-1"
+            textareaClass="w-full px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white text-sm"
+            [rows]="2"
+            [maxLength]="2000"
+            [placeholder]="commentPlaceholder"
+            [members]="mentionCandidates()"
+            [value]="commentDraft(message.id)"
+            (valueChange)="onCommentDraftInput(message.id, $event)"
+          />
+          <button
+            type="button"
+            class="px-3 py-2 rounded-lg border-0 bg-[color:var(--color-terra)] text-white cursor-pointer disabled:opacity-50 self-end"
+            [disabled]="commentDraft(message.id).trim().length === 0"
+            (click)="submitComment(message.id)"
+            i18n="@@wall.send-comment"
+          >
+            Enviar
+          </button>
+        </div>
+      }
+    </li>
+  </ng-template>
+
+  @if (lightboxUrl(); as url) {
+    <div
+      class="fixed inset-0 z-50 bg-black/85 flex items-center justify-center p-4 cursor-zoom-out"
+      role="dialog"
+      aria-modal="true"
+      i18n-aria-label="@@wall.lightbox-aria"
+      aria-label="Imagen ampliada"
+      tabindex="0"
+      (click)="closeLightbox()"
+      (keydown.escape)="closeLightbox()"
+    >
+      <button
+        type="button"
+        (click)="$event.stopPropagation(); closeLightbox()"
+        class="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/90 text-[color:var(--color-ink)] flex items-center justify-center cursor-pointer border-0"
+        i18n-aria-label="@@wall.close-lightbox-aria"
+        aria-label="Cerrar"
+      >
+        <fn-icon name="x" [size]="20" [strokeWidth]="2.4" />
+      </button>
+      <img
+        [src]="url"
+        alt=""
+        class="max-w-full max-h-full object-contain rounded-md shadow-2xl"
+        (click)="$event.stopPropagation()"
+      />
+    </div>
+  }
+</section>

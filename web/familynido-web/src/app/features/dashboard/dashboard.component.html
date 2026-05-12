@@ -1,0 +1,559 @@
+<section class="max-w-4xl mx-auto px-5 pt-6 lg:pt-8 pb-6">
+  <header class="flex items-start justify-between mb-6">
+    <div>
+      <p
+        class="uppercase tracking-widest text-xs font-bold text-[color:var(--color-ink-3)]"
+      >
+        {{ todayLabel() }}
+      </p>
+      <h1
+        class="font-serif text-3xl lg:text-5xl font-medium leading-tight mt-2 tracking-tight"
+      >
+        {{ greeting() }},<br />
+        <em class="italic font-normal" [style.color]="colorHex()">{{ displayName() }}</em>
+      </h1>
+      <p class="text-sm text-[color:var(--color-ink-3)] mt-2">
+        {{ summaryLine() }}
+      </p>
+    </div>
+    <div class="flex items-center gap-3">
+      <a
+        routerLink="/tablet"
+        class="hidden lg:inline-flex items-center gap-2 text-xs uppercase tracking-widest font-bold text-[color:var(--color-ink-3)] border border-[color:var(--color-line)] bg-[color:var(--color-card)] rounded-full px-4 py-2 cursor-pointer hover:text-[color:var(--color-terra)] no-underline"
+        i18n-title="@@dashboard.tablet-mode-title"
+        title="Modo tablet (pantalla completa)"
+      >
+        <span aria-hidden="true">📺</span>
+        <ng-container i18n="@@dashboard.tablet-mode">Modo tablet</ng-container>
+      </a>
+      <fn-avatar
+        [name]="displayName()"
+        [colorHex]="colorHex()"
+        [size]="56"
+        [ring]="true"
+        [photoUrl]="photoUrl()"
+      />
+    </div>
+  </header>
+
+  @if (brokenAccounts().length > 0) {
+    <a
+      routerLink="/calendar/accounts"
+      class="block bg-[color:var(--color-terra-bg)] border border-[color:var(--color-terra)] rounded-2xl p-4 mb-4 no-underline text-inherit"
+    >
+      <p class="text-sm font-medium text-[color:var(--color-terra)] flex items-center gap-2">
+        ⚠️
+        <span>{{ brokenAccountsLabel() }}</span>
+      </p>
+      <p i18n="@@dashboard.broken-accounts.help" class="text-xs text-[color:var(--color-ink-3)] mt-1">
+        Toca aquí para revisar y vincular de nuevo.
+      </p>
+    </a>
+  }
+
+  <div class="grid grid-cols-1 md:grid-cols-2 md:grid-flow-dense gap-4">
+    @for (widgetId of visibleWidgets(); track widgetId) {
+      @switch (widgetId) {
+        @case ('weather') {
+          <ng-container *ngTemplateOutlet="widgetWeather" />
+        }
+        @case ('school') {
+          <ng-container *ngTemplateOutlet="widgetSchool" />
+        }
+        @case ('agenda') {
+          <ng-container *ngTemplateOutlet="widgetAgenda" />
+        }
+        @case ('tasks') {
+          <ng-container *ngTemplateOutlet="widgetTasks" />
+        }
+        @case ('calendar') {
+          <ng-container *ngTemplateOutlet="widgetCalendar" />
+        }
+        @case ('meals') {
+          <ng-container *ngTemplateOutlet="widgetMeals" />
+        }
+        @case ('wall') {
+          <ng-container *ngTemplateOutlet="widgetWall" />
+        }
+        @case ('scores') {
+          <ng-container *ngTemplateOutlet="widgetScores" />
+        }
+        @case ('birthdays') {
+          <ng-container *ngTemplateOutlet="widgetBirthdays" />
+        }
+      }
+    }
+  </div>
+
+  <!-- ─── Widget templates ─────────────────────────────────────────────── -->
+
+  <ng-template #widgetWeather>
+    @if (weather(); as w) {
+      <article
+        class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl px-5 py-4 flex items-center gap-4 md:col-span-2"
+      >
+        <span class="text-4xl leading-none" aria-hidden="true">{{ w.weatherIcon }}</span>
+        <div class="flex-1 min-w-0">
+          <p class="font-serif text-2xl font-semibold leading-none">
+            {{ w.currentTemperature | number: '1.0-0' }}°
+            <span class="text-sm font-normal text-[color:var(--color-ink-3)]">
+              · {{ w.weatherLabel }}
+            </span>
+          </p>
+          <p class="text-xs text-[color:var(--color-ink-3)] mt-1">
+            @if (w.locationLabel) {
+              {{ w.locationLabel }} ·
+            }
+            Mín {{ w.minTemperature | number: '1.0-0' }}° · Máx {{ w.maxTemperature | number: '1.0-0' }}°
+            @if (w.precipitationProbability !== null) {
+              · 💧 {{ w.precipitationProbability }}%
+            }
+          </p>
+        </div>
+        @if (w.sunrise && w.sunset) {
+          <div class="hidden sm:flex flex-col text-[10px] text-[color:var(--color-ink-3)] uppercase tracking-wider text-right">
+            <span>🌅 {{ w.sunrise }}</span>
+            <span>🌇 {{ w.sunset }}</span>
+          </div>
+        }
+      </article>
+    }
+  </ng-template>
+
+  <ng-template #widgetSchool>
+    @if (hasSchoolToday()) {
+      <article class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl p-4 md:col-span-2">
+        <header class="flex items-center justify-between mb-3">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-[color:var(--color-ink-3)] flex items-center gap-2">
+            <fn-icon name="school" [size]="14" />
+            <ng-container i18n="@@dashboard.school-heading">Hoy en el cole</ng-container>
+          </h2>
+          <a routerLink="/school" class="text-xs text-[color:var(--color-terra)] font-medium" i18n="@@dashboard.school.see-more">Ver más</a>
+        </header>
+
+        @if (todayHoliday(); as hol) {
+          <p class="text-sm">
+            <span class="text-[10px] font-bold tracking-wide uppercase text-[color:var(--color-terra)] bg-[color:var(--color-terra-bg)] px-2 py-0.5 rounded-md mr-2" i18n="@@dashboard.school.holiday-badge">
+              Festivo
+            </span>
+            {{ schoolHolidayLabel(hol.label) }}
+          </p>
+        } @else {
+          <ul class="flex flex-col gap-1.5">
+            @for (b of todaySchoolDays(); track b.memberId) {
+              <li class="flex items-center gap-2 text-sm">
+                <span aria-hidden="true">{{ schoolModeIcon(b.transportMode) }}</span>
+                @if (b.isCancelled) {
+                  <span class="line-through text-[color:var(--color-ink-3)]">{{ memberName(b.memberId) }}</span>
+                  <span i18n="@@dashboard.school.no-school" class="text-[11px] text-[color:var(--color-ink-3)]">Sin cole</span>
+                } @else {
+                  <span [innerHTML]="schoolDayRowHtml(b)"></span>
+                }
+              </li>
+            }
+            @for (e of todayExtras(); track e.extracurricularId) {
+              <li class="flex items-start gap-2 text-sm" [class.opacity-60]="e.isCancelled">
+                <span aria-hidden="true">🎒</span>
+                <span [class.line-through]="e.isCancelled" [innerHTML]="extracurricularRowHtml(e)"></span>
+              </li>
+            }
+          </ul>
+        }
+      </article>
+    }
+  </ng-template>
+
+  <ng-template #widgetAgenda>
+    @if (awayToday().length > 0) {
+      <article class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl p-4">
+        <header class="flex items-center justify-between mb-3">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-[color:var(--color-ink-3)] flex items-center gap-2">
+            <fn-icon name="contacts" [size]="14" />
+            <ng-container i18n="@@dashboard.agenda-heading">Hoy fuera de casa</ng-container>
+          </h2>
+        </header>
+        <ul class="flex flex-col gap-1.5">
+          @for (entry of awayToday(); track entry.exceptionId ?? entry.patternId) {
+            <li class="flex items-center gap-3 text-sm">
+              <a
+                [routerLink]="['/nido', entry.memberId]"
+                class="shrink-0 no-underline"
+                [attr.title]="memberName(entry.memberId)"
+              >
+                <fn-avatar
+                  [name]="memberName(entry.memberId)"
+                  [colorHex]="memberColor(entry.memberId)"
+                  [size]="32"
+                  [photoUrl]="memberPhotoUrl(entry.memberId)"
+                />
+              </a>
+              <span class="flex-1 min-w-0">
+                @if (agendaTransportIcon(entry.transportMode); as ic) {
+                  @if (ic) { <span aria-hidden="true">{{ ic }}</span> }
+                }
+                <strong>{{ memberName(entry.memberId) }}</strong>
+                · {{ entry.label }}
+                @if (entry.location) { · {{ entry.location }} }
+                <span class="text-xs text-[color:var(--color-ink-3)]">
+                  · {{ agendaTimeLabel(entry) }}
+                </span>
+              </span>
+            </li>
+          }
+        </ul>
+      </article>
+    }
+  </ng-template>
+
+  <ng-template #widgetTasks>
+    <article
+      class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl p-5"
+    >
+      <header class="flex items-center justify-between mb-3">
+        <h2
+          class="text-xs font-bold uppercase tracking-wider text-[color:var(--color-ink-3)] flex items-center gap-2"
+        >
+          <fn-icon name="tasks" [size]="14" />
+          <ng-container i18n="@@dashboard.tasks-heading">Tareas de hoy</ng-container>
+        </h2>
+        <a
+          routerLink="/tasks"
+          class="text-xs text-[color:var(--color-terra)] font-medium"
+          i18n="@@dashboard.tasks.see-all"
+        >Ver todas</a>
+      </header>
+
+      @if (todayTasks().length === 0) {
+        <p class="text-sm text-[color:var(--color-ink-3)]">
+          @if (loading()) {
+            <ng-container i18n="@@dashboard.loading">Cargando…</ng-container>
+          } @else {
+            <ng-container i18n="@@dashboard.tasks.empty">Nada urgente hoy.</ng-container>
+          }
+        </p>
+      } @else {
+        <ul class="flex flex-col gap-2">
+          @for (row of todayTasks(); track row.task.id) {
+            <li
+              class="flex items-center gap-3"
+              [style.view-transition-name]="viewTransitionName(row.task.id)"
+            >
+              <button
+                type="button"
+                class="w-5 h-5 rounded border-2 flex items-center justify-center cursor-pointer shrink-0"
+                [ngClass]="row.occurrence.isCompleted
+                  ? 'border-[color:var(--color-terra)] bg-[color:var(--color-terra)]'
+                  : 'border-[color:var(--color-line)] hover:border-[color:var(--color-terra)]'"
+                [attr.aria-label]="row.occurrence.isCompleted ? undoAriaLabel : markDoneAriaLabel"
+                (click)="toggleTask(row)"
+              >
+                @if (row.occurrence.isCompleted) {
+                  <fn-icon name="check" [size]="12" [strokeWidth]="2.6" class="text-white" />
+                }
+              </button>
+              <div class="flex-1 min-w-0">
+                <p
+                  class="text-sm font-medium truncate"
+                  [ngClass]="row.occurrence.isCompleted ? 'line-through text-[color:var(--color-ink-3)]' : ''"
+                >{{ row.task.title }}</p>
+                <p class="text-xs text-[color:var(--color-ink-3)] truncate">
+                  {{ rowSubtitle(row) }}
+                </p>
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    </article>
+  </ng-template>
+
+  <ng-template #widgetCalendar>
+    <article
+      class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl p-5"
+    >
+      <header class="flex items-center justify-between mb-3">
+        <h2
+          class="text-xs font-bold uppercase tracking-wider text-[color:var(--color-ink-3)] flex items-center gap-2"
+        >
+          <fn-icon name="calendar" [size]="14" />
+          <ng-container i18n="@@dashboard.calendar-heading">Próximos eventos</ng-container>
+        </h2>
+        <a
+          routerLink="/calendar"
+          class="text-xs text-[color:var(--color-terra)] font-medium"
+          i18n="@@dashboard.calendar.see-all"
+        >Calendario</a>
+      </header>
+
+      @if (upcomingEvents().length === 0) {
+        <p class="text-sm text-[color:var(--color-ink-3)]">
+          @if (loading()) {
+            <ng-container i18n="@@dashboard.loading">Cargando…</ng-container>
+          } @else {
+            <ng-container i18n="@@dashboard.calendar.empty">Sin eventos en los próximos días.</ng-container>
+          }
+        </p>
+      } @else {
+        <ul class="flex flex-col gap-2">
+          @for (event of upcomingEvents(); track event.id) {
+            <li class="flex items-start gap-3">
+              <span
+                class="w-1 self-stretch rounded-full shrink-0"
+                [style.background-color]="eventColorFor(event)"
+                aria-hidden="true"
+              ></span>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium truncate">{{ event.title }}</p>
+                <p class="text-xs text-[color:var(--color-ink-3)]">
+                  {{ eventDayLabel(event) }} · {{ eventTimeLabel(event) }}
+                </p>
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    </article>
+  </ng-template>
+
+  <ng-template #widgetMeals>
+    <article
+      class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl p-5 md:col-span-2"
+    >
+      <header class="flex items-center justify-between mb-3">
+        <h2
+          class="text-xs font-bold uppercase tracking-wider text-[color:var(--color-ink-3)] flex items-center gap-2"
+        >
+          <fn-icon name="meal" [size]="14" />
+          <ng-container i18n="@@dashboard.meals-heading">A la mesa</ng-container>
+        </h2>
+        <a
+          routerLink="/meals"
+          class="text-xs text-[color:var(--color-terra)] font-medium"
+          i18n="@@dashboard.meals.plan"
+        >Planificar</a>
+      </header>
+
+      @if (!hasAnyMeals()) {
+        <p class="text-sm text-[color:var(--color-ink-3)]">
+          @if (loading()) {
+            <ng-container i18n="@@dashboard.loading">Cargando…</ng-container>
+          } @else {
+            <ng-container i18n="@@dashboard.meals.empty">Sin planificación para hoy ni mañana.</ng-container>
+            <a routerLink="/meals" class="underline text-[color:var(--color-terra)]" i18n="@@dashboard.meals.plan-week">Planifica la semana</a>.
+          }
+        </p>
+      } @else {
+        <div class="flex flex-col gap-4">
+          <ng-container
+            *ngTemplateOutlet="
+              dayBlock;
+              context: { label: todayLabelStr, lunch: todayLunch(), dinner: todayDinner(), hasContent: hasTodayMeals() }
+            "
+          />
+          <ng-container
+            *ngTemplateOutlet="
+              dayBlock;
+              context: { label: tomorrowLabelStr, lunch: tomorrowLunch(), dinner: tomorrowDinner(), hasContent: hasTomorrowMeals() }
+            "
+          />
+        </div>
+      }
+    </article>
+  </ng-template>
+
+  <!-- Block reused for "Hoy" and "Mañana" inside the meals widget. -->
+  <ng-template #dayBlock let-label="label" let-lunch="lunch" let-dinner="dinner" let-hasContent="hasContent">
+    <div>
+      <p class="text-[11px] font-bold uppercase tracking-wider text-[color:var(--color-ink-2)] mb-2">
+        {{ label }}
+      </p>
+      @if (!hasContent) {
+        <p i18n="@@dashboard.meals.unplanned" class="text-sm text-[color:var(--color-ink-3)] italic">sin planificar</p>
+      } @else {
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <ng-container
+            *ngTemplateOutlet="slotLines; context: { label: lunchLabelStr, icon: '☀️', slot: lunch }"
+          />
+          <ng-container
+            *ngTemplateOutlet="slotLines; context: { label: dinnerLabelStr, icon: '🌙', slot: dinner }"
+          />
+        </div>
+      }
+    </div>
+  </ng-template>
+
+  <!-- One slot's two course lines (or "sin planificar" when both empty). -->
+  <!-- Leading-element column is fixed at w-4 so the icon and the bullets share
+       the same x position; the courses align vertically with the label. -->
+  <ng-template #slotLines let-label="label" let-icon="icon" let-slot="slot">
+    <div class="rounded-xl bg-[color:var(--color-bg-2)] px-3 py-2">
+      <p class="text-[11px] font-bold uppercase tracking-wider text-[color:var(--color-ink-2)] mb-1 flex items-center gap-1.5">
+        <span class="w-4 inline-flex justify-center text-base leading-none" aria-hidden="true">{{ icon }}</span>
+        {{ label }}
+      </p>
+      @if (slot?.firstCourse || slot?.secondCourse) {
+        <ul class="flex flex-col gap-0.5">
+          @if (slot?.firstCourse) {
+            <li class="text-sm flex items-center gap-1.5">
+              <span class="w-4 inline-flex justify-center shrink-0">
+                <span class="w-1.5 h-1.5 rounded-full bg-[color:var(--color-terra)]"></span>
+              </span>
+              <span class="font-serif">{{ slot?.firstCourse }}</span>
+            </li>
+          }
+          @if (slot?.secondCourse) {
+            <li class="text-sm flex items-center gap-1.5">
+              <span class="w-4 inline-flex justify-center shrink-0">
+                <span class="w-1.5 h-1.5 rounded-full bg-[color:var(--color-ochre)]"></span>
+              </span>
+              <span class="font-serif">{{ slot?.secondCourse }}</span>
+            </li>
+          }
+        </ul>
+      } @else {
+        <p i18n="@@dashboard.meals.unplanned" class="text-sm text-[color:var(--color-ink-3)] italic">sin planificar</p>
+      }
+    </div>
+  </ng-template>
+
+  <ng-template #widgetWall>
+    <article
+      class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl p-5 md:col-span-2"
+    >
+      <header class="flex items-center justify-between mb-3">
+        <h2
+          class="text-xs font-bold uppercase tracking-wider text-[color:var(--color-ink-3)] flex items-center gap-2"
+        >
+          <fn-icon name="pin" [size]="14" />
+          <ng-container i18n="@@dashboard.wall-heading">Fijados en el muro</ng-container>
+        </h2>
+        <a
+          routerLink="/wall"
+          class="text-xs text-[color:var(--color-terra)] font-medium"
+          i18n="@@dashboard.wall.go"
+        >Ir al muro</a>
+      </header>
+
+      @if (pinned().length === 0) {
+        <p class="text-sm text-[color:var(--color-ink-3)]">
+          @if (loading()) {
+            <ng-container i18n="@@dashboard.loading">Cargando…</ng-container>
+          } @else {
+            <ng-container i18n="@@dashboard.wall.empty">Sin notas fijadas. Fija un mensaje desde el muro para que aparezca aquí.</ng-container>
+          }
+        </p>
+      } @else {
+        <ul class="flex flex-col gap-3">
+          @for (message of pinned(); track message.id) {
+            <li class="flex gap-3">
+              <fn-avatar
+                [name]="memberName(message.authorMemberId)"
+                [colorHex]="memberColor(message.authorMemberId)"
+                [size]="32"
+                [photoUrl]="memberPhotoUrl(message.authorMemberId)"
+              />
+              <div class="flex-1 min-w-0">
+                <p class="text-xs font-semibold">
+                  {{ memberName(message.authorMemberId) }}
+                </p>
+                <div class="text-sm wall-markdown" [innerHTML]="message.textHtml"></div>
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    </article>
+  </ng-template>
+
+  <ng-template #widgetScores>
+    @if (topScores().length > 0) {
+      <article class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl p-5">
+        <header class="flex items-center justify-between mb-3">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-[color:var(--color-ink-3)] flex items-center gap-2">
+            🏆
+            <ng-container i18n="@@dashboard.scores-heading">Marcador de la semana</ng-container>
+          </h2>
+        </header>
+        <ul class="flex flex-col gap-2">
+          @for (row of topScores(); track row.memberId; let i = $index) {
+            <li>
+              <a
+                [routerLink]="['/nido', row.memberId]"
+                class="flex items-center gap-3 bg-[color:var(--color-bg-2)] rounded-xl px-3 py-2 no-underline text-inherit hover:bg-[color:var(--color-line)]"
+              >
+                <span class="text-2xl leading-none w-7 text-center" aria-hidden="true">
+                  {{ i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉' }}
+                </span>
+                <fn-avatar
+                  [name]="memberName(row.memberId)"
+                  [colorHex]="memberColor(row.memberId)"
+                  [photoUrl]="memberPhotoUrl(row.memberId)"
+                  [size]="32"
+                />
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium truncate">{{ memberName(row.memberId) }}</p>
+                  <p class="text-xs text-[color:var(--color-ink-3)]">
+                    {{ scoreCountLabel(row.completionCount) }}
+                  </p>
+                </div>
+                <span class="font-serif text-2xl font-semibold text-[color:var(--color-terra)] leading-none">
+                  {{ row.points }}
+                </span>
+              </a>
+            </li>
+          }
+        </ul>
+      </article>
+    }
+  </ng-template>
+
+  <ng-template #widgetBirthdays>
+    @if (upcomingBirthdays().length > 0) {
+      <article
+        class="bg-gradient-to-br from-[color:var(--color-ochre-bg)] to-[color:var(--color-terra-bg)] border border-[color:var(--color-line)] rounded-2xl p-5 md:col-span-2"
+      >
+        <header class="flex items-center justify-between mb-3">
+          <h2
+            class="text-xs font-bold uppercase tracking-wider text-[color:var(--color-ink-2)] flex items-center gap-2"
+          >
+            <fn-icon name="heart" [size]="14" />
+            <ng-container i18n="@@dashboard.birthdays-heading">Cumpleaños próximos</ng-container>
+          </h2>
+          <a
+            routerLink="/nido"
+            class="text-xs text-[color:var(--color-terra)] font-medium"
+            i18n="@@dashboard.birthdays.see-all"
+          >Nido</a>
+        </header>
+
+        <ul class="flex flex-wrap gap-3">
+          @for (row of upcomingBirthdays(); track row.member.id) {
+            <li>
+              <a
+                [routerLink]="['/nido', row.member.id]"
+                class="flex items-center gap-2 bg-white/60 rounded-full pl-1 pr-3 py-1 no-underline text-inherit hover:bg-white"
+              >
+                <fn-avatar
+                  [name]="row.member.displayName"
+                  [colorHex]="row.member.colorHex"
+                  [size]="28"
+                  [photoUrl]="row.member.photoPath ? '/api/family-members/' + row.member.id + '/photo' : null"
+                />
+                <div class="leading-tight">
+                  <p class="text-sm font-medium">
+                    {{ row.member.displayName }}
+                    <span class="text-[color:var(--color-ink-3)] font-normal">·</span>
+                    <span class="text-[color:var(--color-ink-3)] font-normal">{{ ageLabel(row.age) }}</span>
+                  </p>
+                  <p class="text-xs text-[color:var(--color-ink-3)]">
+                    {{ birthdayHint(row) }} · {{ row.label }}
+                  </p>
+                </div>
+              </a>
+            </li>
+          }
+        </ul>
+      </article>
+    }
+  </ng-template>
+</section>

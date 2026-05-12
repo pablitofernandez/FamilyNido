@@ -1,0 +1,47 @@
+.fn-mention-wrap {
+  position: relative;
+}
+
+.fn-mention-popover {
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 50;
+  max-height: 220px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid var(--color-line);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  padding: 4px;
+  list-style: none;
+  margin: 0;
+}
+
+.fn-mention-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.fn-mention-item.is-active {
+  background: var(--color-bg-2);
+}
+
+.fn-mention-color {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.fn-mention-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-ink);
+}

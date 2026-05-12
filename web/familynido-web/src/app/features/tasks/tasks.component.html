@@ -1,0 +1,327 @@
+<section class="max-w-3xl mx-auto px-5 pt-6 lg:pt-8 pb-6">
+  <header class="flex items-end justify-between mb-6">
+    <div>
+      <h1 class="font-serif text-3xl lg:text-5xl font-medium tracking-tight">
+        <ng-container i18n="@@tasks.title-prefix">Las</ng-container>
+        <em class="text-[color:var(--color-terra)] italic font-normal" i18n="@@tasks.title-emph">tareas</em>
+      </h1>
+      <p class="text-sm text-[color:var(--color-ink-3)] mt-1">
+        {{ subtitle() }}
+      </p>
+    </div>
+    <button
+      type="button"
+      class="w-11 h-11 rounded-full border-0 bg-[color:var(--color-terra)] text-white flex items-center justify-center cursor-pointer"
+      [attr.aria-label]="editing() ? closeEditorAriaLabel : newTaskAriaLabel"
+      (click)="toggleEditor()"
+    >
+      <fn-icon [name]="editing() ? 'x' : 'plus'" [size]="20" [strokeWidth]="2.2" />
+    </button>
+  </header>
+
+  @if (editing()) {
+    <div id="task-form-anchor" class="scroll-mt-4">
+      <fn-task-form
+        [members]="members()"
+        [initial]="editTarget()"
+        [isAdmin]="isAdmin()"
+        (save)="onSave($event)"
+        (cancel)="closeEditor()"
+      />
+    </div>
+  }
+
+  <nav class="flex gap-1 bg-[color:var(--color-bg-2)] rounded-xl p-1 mb-5" role="tablist">
+    @for (tab of tabs; track tab.id) {
+      <button
+        type="button"
+        role="tab"
+        [attr.aria-selected]="view() === tab.id"
+        class="flex-1 py-2 text-sm font-medium rounded-lg cursor-pointer transition-colors"
+        [ngClass]="
+          view() === tab.id
+            ? 'bg-white shadow-sm text-[color:var(--color-ink)]'
+            : 'bg-transparent text-[color:var(--color-ink-3)]'
+        "
+        (click)="view.set(tab.id)"
+      >
+        {{ tab.label }}
+      </button>
+    }
+  </nav>
+
+  @if (loading()) {
+    <p i18n="@@tasks.loading" class="text-center text-[color:var(--color-ink-3)] py-12">Cargando…</p>
+  } @else if (error()) {
+    <p i18n="@@tasks.load-error" class="text-center text-[color:var(--color-terra)] py-12">
+      No hemos podido cargar las tareas. Reintenta en un momento.
+    </p>
+  } @else {
+    @switch (view()) {
+      @case ('today') {
+        <ng-container *ngTemplateOutlet="dayList; context: { rows: todayRows() }" />
+      }
+      @case ('week') {
+        @for (day of weekTasks(); track day.date) {
+          <h3 class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)] mt-5 mb-2">
+            {{ dayLabel(day.date) }}
+          </h3>
+          <ng-container *ngTemplateOutlet="dayList; context: { rows: toRows(day) }" />
+        } @empty {
+          <p i18n="@@tasks.week-empty" class="text-center text-[color:var(--color-ink-3)] py-12">Semana tranquila 🌿</p>
+        }
+      }
+      @case ('all') {
+        @if (allTasks().length > 0) {
+          <div class="flex items-center justify-between mb-3 px-1">
+            <p class="text-xs text-[color:var(--color-ink-3)]">
+              {{ visibleCountLabel() }}
+              @if (hideCompleted() && hiddenCompletedCount() > 0) {
+                · {{ hiddenLabel() }}
+              }
+            </p>
+            @if (hiddenCompletedCount() > 0 || hideCompleted()) {
+              <button
+                type="button"
+                class="text-xs font-medium underline cursor-pointer text-[color:var(--color-terra)]"
+                (click)="hideCompleted.set(!hideCompleted())"
+              >
+                @if (hideCompleted()) {
+                  <ng-container i18n="@@tasks.show-completed">Mostrar completadas</ng-container>
+                } @else {
+                  <ng-container i18n="@@tasks.hide-completed">Ocultar completadas</ng-container>
+                }
+              </button>
+            }
+          </div>
+        }
+        <ul class="flex flex-col gap-2">
+          @for (task of visibleAllTasks(); track task.id) {
+            <li
+              class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl p-4"
+            >
+              <div class="flex items-start gap-3">
+                <div class="flex-1 min-w-0">
+                  <p
+                    class="font-serif text-lg font-semibold leading-tight flex items-center gap-2 flex-wrap"
+                    [ngClass]="task.latestCompletion ? 'text-[color:var(--color-ink-3)]' : ''"
+                  >
+                    {{ task.title }}
+                    @if (task.isFloating) {
+                      <span class="text-[10px] font-bold tracking-wide uppercase text-[color:var(--color-terra)] bg-[color:var(--color-terra-bg)] px-2 py-0.5 rounded-md" i18n="@@tasks.no-date-badge">
+                        Sin fecha
+                      </span>
+                    }
+                    <span
+                      class="text-[11px] font-bold tracking-wide text-[color:var(--color-terra)] bg-[color:var(--color-terra-bg)] px-2 py-0.5 rounded-md"
+                      [attr.title]="rewardTitle(task.points)"
+                    >🏆 {{ task.points }}</span>
+                  </p>
+                  <p class="text-xs text-[color:var(--color-ink-3)] mt-0.5">
+                    @if (task.isFloating) {
+                      <ng-container i18n="@@tasks.floating-detail">Pendiente todos los días hasta marcarse</ng-container>
+                      · {{ task.category }}
+                    } @else {
+                      {{ recurrenceLabel(task) }} · {{ task.category }}
+                    }
+                  </p>
+                  @if (task.latestCompletion; as last) {
+                    <p class="text-xs text-[color:var(--color-terra)] mt-0.5 flex items-center gap-1.5">
+                      <fn-icon name="check" [size]="12" [strokeWidth]="2.4" />
+                      <ng-container i18n="@@tasks.done-on-prefix">Hecha el</ng-container>
+                      {{ shortDateLabel(last.occurrenceDate) }}
+                      @if (last.completedByMemberId) {
+                        · {{ completedByLabel(last.completedByMemberId) }}
+                      }
+                    </p>
+                  }
+                  <div class="flex items-center gap-2 mt-2 flex-wrap">
+                    @if (task.responsibleMemberId) {
+                      <span class="flex items-center gap-1.5 text-xs pl-0.5 pr-2 py-0.5 rounded-md bg-[color:var(--color-terra-bg)] text-[color:var(--color-terra)] font-medium">
+                        <fn-avatar
+                          [name]="memberName(task.responsibleMemberId)"
+                          [colorHex]="memberColor(task.responsibleMemberId)"
+                          [photoUrl]="memberPhotoUrl(task.responsibleMemberId)"
+                          [size]="20"
+                        />
+                        {{ memberName(task.responsibleMemberId) }}
+                      </span>
+                    } @else {
+                      <span i18n="@@tasks.no-responsible" class="text-xs text-[color:var(--color-ink-3)] italic">
+                        sin responsable
+                      </span>
+                    }
+                    @if (task.relatedMemberIds.length > 0) {
+                      <span class="text-xs text-[color:var(--color-ink-3)]">·</span>
+                      <span i18n="@@tasks.related-prefix" class="text-xs text-[color:var(--color-ink-3)]">para</span>
+                      <div class="flex gap-1">
+                        @for (memberId of task.relatedMemberIds; track memberId) {
+                          <span [title]="memberName(memberId)" class="inline-flex">
+                            <fn-avatar
+                              [name]="memberName(memberId)"
+                              [colorHex]="memberColor(memberId)"
+                              [photoUrl]="memberPhotoUrl(memberId)"
+                              [size]="22"
+                            />
+                          </span>
+                        }
+                      </div>
+                    }
+                  </div>
+                </div>
+                <div class="flex gap-1">
+                  <button
+                    type="button"
+                    class="text-xs px-2 py-1 rounded-md border border-[color:var(--color-line)] bg-[color:var(--color-bg-2)] cursor-pointer"
+                    (click)="edit(task)"
+                    i18n="@@tasks.edit"
+                  >
+                    Editar
+                  </button>
+                  @if (task.isArchived) {
+                    <button
+                      type="button"
+                      class="text-xs px-2 py-1 rounded-md border border-[color:var(--color-line)] bg-[color:var(--color-bg-2)] cursor-pointer"
+                      (click)="restore(task)"
+                      i18n="@@tasks.restore"
+                    >
+                      Recuperar
+                    </button>
+                  } @else {
+                    <button
+                      type="button"
+                      class="text-xs px-2 py-1 rounded-md border border-[color:var(--color-line)] bg-[color:var(--color-bg-2)] cursor-pointer"
+                      (click)="archive(task)"
+                      i18n="@@tasks.archive"
+                    >
+                      Archivar
+                    </button>
+                  }
+                  <button
+                    type="button"
+                    class="text-xs px-2 py-1 rounded-md border border-[color:var(--color-error)] text-[color:var(--color-error)] bg-white cursor-pointer"
+                    (click)="delete(task)"
+                    i18n="@@tasks.delete"
+                  >
+                    Eliminar
+                  </button>
+                </div>
+              </div>
+            </li>
+          } @empty {
+            <li i18n="@@tasks.all-empty" class="text-center text-[color:var(--color-ink-3)] py-12">
+              Aún no hay tareas. Crea la primera con el botón <b>+</b>.
+            </li>
+          }
+        </ul>
+      }
+    }
+  }
+
+  <ng-template #dayList let-rows="rows">
+    <ul class="flex flex-col gap-2">
+      @for (row of rows; track row.task.id + '|' + row.date) {
+        <li
+          class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl p-4 flex items-center gap-3"
+        >
+          <div class="relative shrink-0">
+            <button
+              type="button"
+              class="w-10 h-10 rounded-full border-2 flex items-center justify-center cursor-pointer"
+              [ngClass]="
+                row.occurrence.isCompleted
+                  ? 'border-[color:var(--color-terra)] bg-[color:var(--color-terra)]'
+                  : 'border-[color:var(--color-line)] bg-white'
+              "
+              [attr.aria-label]="row.occurrence.isCompleted ? undoAriaLabel : completeAriaLabel"
+              (click)="toggle(row)"
+            >
+              @if (row.occurrence.isCompleted) {
+                <fn-icon name="check" [size]="18" [strokeWidth]="2.4" class="text-white" />
+              }
+            </button>
+            @if (earned(); as e) {
+              @if (e.key === earnedKey(row.task.id, row.date)) {
+                <span
+                  class="points-pop absolute left-1/2 -top-2 text-sm font-bold text-[color:var(--color-terra)] pointer-events-none whitespace-nowrap"
+                  aria-hidden="true"
+                >+{{ e.points }} 🏆</span>
+              }
+            }
+          </div>
+          <div
+            class="flex-1 min-w-0 cursor-pointer"
+            role="button"
+            tabindex="0"
+            [attr.aria-label]="editAriaLabel(row.task.title)"
+            (click)="edit(row.task, row.occurrence)"
+            (keydown.enter)="edit(row.task, row.occurrence)"
+            (keydown.space)="edit(row.task, row.occurrence); $event.preventDefault()"
+          >
+            <p
+              class="font-serif text-lg font-semibold leading-tight flex items-center gap-2 flex-wrap"
+              [ngClass]="
+                row.occurrence.isCompleted
+                  ? 'line-through text-[color:var(--color-ink-3)]'
+                  : ''
+              "
+            >
+              {{ row.task.title }}
+              @if (row.task.isFloating) {
+                <span class="text-[10px] font-bold tracking-wide uppercase text-[color:var(--color-terra)] bg-[color:var(--color-terra-bg)] px-2 py-0.5 rounded-md" i18n="@@tasks.no-date-badge">
+                  Sin fecha
+                </span>
+              }
+              <span
+                class="text-[11px] font-bold tracking-wide text-[color:var(--color-terra)] bg-[color:var(--color-terra-bg)] px-2 py-0.5 rounded-md"
+                [attr.title]="rewardTitle(row.task.points)"
+              >🏆 {{ row.task.points }}</span>
+            </p>
+            <p class="text-xs text-[color:var(--color-ink-3)] mt-0.5">
+              @if (row.task.isFloating) {
+                <ng-container i18n="@@tasks.floating-short">Pendiente todos los días</ng-container>
+              } @else {
+                {{ recurrenceLabel(row.task) }}
+              }
+              @if (row.task.timeOfDay) {
+                · {{ row.task.timeOfDay.slice(0, 5) }}
+              }
+              @if (row.occurrence.isCompleted && row.occurrence.completedByMemberId) {
+                · {{ completedByLabel(row.occurrence.completedByMemberId) }}
+              }
+            </p>
+          </div>
+          @if (row.task.responsibleMemberId || row.task.relatedMemberIds.length > 0) {
+            <div class="flex gap-1 shrink-0 items-center">
+              @if (row.task.responsibleMemberId) {
+                <span [title]="responsibleTitle(row.task.responsibleMemberId)" class="inline-flex">
+                  <fn-avatar
+                    [name]="memberName(row.task.responsibleMemberId)"
+                    [colorHex]="memberColor(row.task.responsibleMemberId)"
+                    [photoUrl]="memberPhotoUrl(row.task.responsibleMemberId)"
+                    [size]="22"
+                    [ring]="true"
+                  />
+                </span>
+              }
+              @for (memberId of row.task.relatedMemberIds; track memberId) {
+                <span [title]="memberName(memberId)" class="inline-flex">
+                  <fn-avatar
+                    [name]="memberName(memberId)"
+                    [colorHex]="memberColor(memberId)"
+                    [photoUrl]="memberPhotoUrl(memberId)"
+                    [size]="20"
+                  />
+                </span>
+              }
+            </div>
+          }
+        </li>
+      } @empty {
+        <li i18n="@@tasks.day-empty" class="text-center text-[color:var(--color-ink-3)] py-12">
+          Nada por hacer aquí ✨
+        </li>
+      }
+    </ul>
+  </ng-template>
+</section>

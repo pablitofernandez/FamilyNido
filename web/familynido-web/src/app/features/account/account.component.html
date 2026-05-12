@@ -1,0 +1,588 @@
+<section class="max-w-2xl mx-auto px-5 pt-6 lg:pt-8 pb-6">
+  <header class="mb-6">
+    <h1 class="font-serif text-3xl lg:text-5xl font-medium tracking-tight">
+      <ng-container i18n="@@account.title-prefix">Mi</ng-container>
+      <em class="text-[color:var(--color-terra)] italic font-normal" i18n="@@account.title-emph">cuenta</em>
+    </h1>
+    @if (auth.me()) {
+      <p class="text-sm text-[color:var(--color-ink-3)] mt-2">
+        {{ auth.me()!.email }} · {{ auth.me()!.role }}
+      </p>
+    }
+  </header>
+
+  @if (successFlash()) {
+    <p class="text-sm bg-[color:var(--color-ochre-bg)] border border-[color:var(--color-line)] rounded-lg px-3 py-2 mb-4">
+      {{ successFlash() }}
+    </p>
+  }
+
+  @if (error()) {
+    <p class="text-sm text-[color:var(--color-error)] mb-4">{{ error() }}</p>
+  }
+
+  <article class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl p-5 mb-4">
+    <header class="flex items-center justify-between mb-3">
+      <h2 i18n="@@account.credentials.heading" class="text-xs font-bold uppercase tracking-wider text-[color:var(--color-ink-3)]">
+        Métodos de inicio de sesión
+      </h2>
+      @if (!hasLocal()) {
+        <button
+          type="button"
+          (click)="openForm()"
+          class="text-xs text-[color:var(--color-terra)] font-medium underline cursor-pointer"
+          i18n="@@account.credentials.set-password"
+        >Establecer contraseña local</button>
+      } @else {
+        <button
+          type="button"
+          (click)="openForm()"
+          class="text-xs text-[color:var(--color-terra)] font-medium underline cursor-pointer"
+          i18n="@@account.credentials.change-password"
+        >Cambiar contraseña</button>
+      }
+    </header>
+
+    @if (loading()) {
+      <p i18n="@@account.loading" class="text-sm text-[color:var(--color-ink-3)]">Cargando…</p>
+    } @else if (credentials().length === 0) {
+      <p i18n="@@account.credentials.none" class="text-sm text-[color:var(--color-ink-3)]">No hay credenciales registradas.</p>
+    } @else {
+      <ul class="flex flex-col gap-3">
+        @for (cred of credentials(); track cred.id) {
+          <li class="flex items-center justify-between gap-3">
+            <div>
+              <p class="text-sm font-medium">{{ providerLabel(cred.provider) }}</p>
+              <p class="text-xs text-[color:var(--color-ink-3)]">
+                <ng-container i18n="@@account.credentials.added-on">Añadida el</ng-container> {{ cred.createdAt | date:'longDate' }}
+                @if (cred.lastUsedAt) {
+                  <ng-container i18n="@@account.credentials.last-used">· última vez</ng-container> {{ cred.lastUsedAt | date:'shortDate' }}
+                }
+                @if (cred.providerKeyHint) {
+                  · {{ cred.providerKeyHint }}
+                }
+              </p>
+            </div>
+            <button
+              type="button"
+              (click)="remove(cred)"
+              [disabled]="!canRemove(cred.id)"
+              class="text-xs font-medium underline cursor-pointer disabled:opacity-40 disabled:no-underline disabled:cursor-not-allowed text-[color:var(--color-error)]"
+              [attr.title]="canRemove(cred.id) ? null : cannotRemoveTooltip"
+              i18n="@@account.credentials.remove"
+            >Eliminar</button>
+          </li>
+        }
+      </ul>
+    }
+  </article>
+
+  @if (formOpen()) {
+    <article class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl p-5 mb-4">
+      <h2 class="font-serif text-xl font-semibold mb-3">
+        @if (hasLocal()) {
+          <ng-container i18n="@@account.credentials.change-password">Cambiar contraseña</ng-container>
+        } @else {
+          <ng-container i18n="@@account.credentials.set-password">Establecer contraseña local</ng-container>
+        }
+      </h2>
+      <form (submit)="$event.preventDefault(); submitForm()" class="flex flex-col gap-3">
+        @if (hasLocal()) {
+          <label i18n="@@account.password-form.current" class="block text-xs uppercase tracking-wide text-[color:var(--color-ink-3)] mb-1">
+            Contraseña actual
+          </label>
+          <input
+            type="password"
+            class="w-full px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white -mt-2"
+            autocomplete="current-password"
+            [value]="currentPassword()"
+            (input)="readCurrent($event)"
+            required
+          />
+        }
+
+        <label i18n="@@account.password-form.new" class="block text-xs uppercase tracking-wide text-[color:var(--color-ink-3)] mb-1 mt-2">
+          Contraseña nueva
+        </label>
+        <input
+          type="password"
+          class="w-full px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white -mt-2"
+          autocomplete="new-password"
+          minlength="8"
+          [value]="newPassword()"
+          (input)="readNew($event)"
+          required
+        />
+
+        <label i18n="@@account.password-form.repeat" class="block text-xs uppercase tracking-wide text-[color:var(--color-ink-3)] mb-1 mt-2">
+          Repítela
+        </label>
+        <input
+          type="password"
+          class="w-full px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white -mt-2"
+          autocomplete="new-password"
+          minlength="8"
+          [value]="confirmPassword()"
+          (input)="readConfirm($event)"
+          required
+        />
+
+        @if (formError()) {
+          <p class="text-sm text-[color:var(--color-error)] mt-1">{{ formError() }}</p>
+        }
+
+        <p i18n="@@account.password-form.help" class="text-xs text-[color:var(--color-ink-3)]">
+          Mínimo 8 caracteres con al menos una letra y un número.
+        </p>
+
+        <div class="flex gap-2 mt-3">
+          <button
+            type="submit"
+            [disabled]="submitting()"
+            class="px-5 py-2 rounded-full bg-[color:var(--color-terra)] text-white font-bold tracking-wide cursor-pointer border-0 disabled:opacity-50"
+          >
+            @if (submitting()) {
+              <ng-container i18n="@@account.password-form.saving">Guardando…</ng-container>
+            } @else {
+              <ng-container i18n="@@account.password-form.save">Guardar</ng-container>
+            }
+          </button>
+          <button
+            type="button"
+            (click)="closeForm()"
+            class="px-5 py-2 rounded-full bg-white border border-[color:var(--color-line)] text-[color:var(--color-ink-2)] cursor-pointer"
+            i18n="@@account.password-form.cancel"
+          >Cancelar</button>
+        </div>
+      </form>
+    </article>
+  }
+
+  <article class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl p-5 mb-4">
+    <header class="mb-3">
+      <h2 i18n="@@account.notifications.heading" class="text-xs font-bold uppercase tracking-wider text-[color:var(--color-ink-3)]">
+        Notificaciones por email
+      </h2>
+      <p i18n="@@account.notifications.intro" class="text-xs text-[color:var(--color-ink-3)] mt-1">
+        Activa cada tipo de aviso de forma independiente. Si desactivas el primero, no recibirás ningún email.
+      </p>
+    </header>
+
+    @if (preferencesError()) {
+      <p class="text-xs text-[color:var(--color-error)] mb-2">{{ preferencesError() }}</p>
+    }
+
+    @if (preferences(); as prefs) {
+      <ul class="flex flex-col gap-3">
+        <li class="flex items-start justify-between gap-3">
+          <div>
+            <p i18n="@@account.notifications.master-name" class="text-sm font-medium">Recibir cualquier email</p>
+            <p i18n="@@account.notifications.master-desc" class="text-xs text-[color:var(--color-ink-3)]">Interruptor general — apaga todos los avisos por email.</p>
+          </div>
+          <label class="inline-flex items-center cursor-pointer shrink-0 mt-1">
+            <input
+              type="checkbox"
+              class="sr-only peer"
+              i18n-aria-label="@@account.notifications.master-aria"
+              aria-label="Recibir cualquier email"
+              [checked]="prefs.emailEnabled"
+              [disabled]="savingPreferences()"
+              (change)="togglePreference('emailEnabled')"
+            />
+            <span class="w-10 h-6 rounded-full bg-[color:var(--color-line)] peer-checked:bg-[color:var(--color-terra)] relative transition-colors">
+              <span class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4"></span>
+            </span>
+          </label>
+        </li>
+
+        <li class="flex items-start justify-between gap-3" [class.opacity-50]="!prefs.emailEnabled">
+          <div>
+            <p i18n="@@account.notifications.digest-name" class="text-sm font-medium">Resumen diario por la mañana</p>
+            <p i18n="@@account.notifications.digest-desc" class="text-xs text-[color:var(--color-ink-3)]">Tareas, eventos y cumpleaños del día.</p>
+          </div>
+          <label class="inline-flex items-center cursor-pointer shrink-0 mt-1">
+            <input
+              type="checkbox"
+              class="sr-only peer"
+              i18n-aria-label="@@account.notifications.digest-aria"
+              aria-label="Resumen diario por la mañana"
+              [checked]="prefs.digestEnabled"
+              [disabled]="savingPreferences() || !prefs.emailEnabled"
+              (change)="togglePreference('digestEnabled')"
+            />
+            <span class="w-10 h-6 rounded-full bg-[color:var(--color-line)] peer-checked:bg-[color:var(--color-terra)] relative transition-colors">
+              <span class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4"></span>
+            </span>
+          </label>
+        </li>
+
+        <li class="flex items-start justify-between gap-3" [class.opacity-50]="!prefs.emailEnabled">
+          <div>
+            <p i18n="@@account.notifications.task-name" class="text-sm font-medium">Tareas asignadas</p>
+            <p i18n="@@account.notifications.task-desc" class="text-xs text-[color:var(--color-ink-3)]">Cuando alguien te marca como responsable de una tarea.</p>
+          </div>
+          <label class="inline-flex items-center cursor-pointer shrink-0 mt-1">
+            <input
+              type="checkbox"
+              class="sr-only peer"
+              i18n-aria-label="@@account.notifications.task-aria"
+              aria-label="Tareas asignadas"
+              [checked]="prefs.taskAssignedEnabled"
+              [disabled]="savingPreferences() || !prefs.emailEnabled"
+              (change)="togglePreference('taskAssignedEnabled')"
+            />
+            <span class="w-10 h-6 rounded-full bg-[color:var(--color-line)] peer-checked:bg-[color:var(--color-terra)] relative transition-colors">
+              <span class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4"></span>
+            </span>
+          </label>
+        </li>
+
+        <li class="flex items-start justify-between gap-3" [class.opacity-50]="!prefs.emailEnabled">
+          <div>
+            <p i18n="@@account.notifications.mention-name" class="text-sm font-medium">Menciones en el muro</p>
+            <p i18n="@@account.notifications.mention-desc" class="text-xs text-[color:var(--color-ink-3)]">Cuando alguien te menciona con <code>&#64;</code> en un mensaje o comentario.</p>
+          </div>
+          <label class="inline-flex items-center cursor-pointer shrink-0 mt-1">
+            <input
+              type="checkbox"
+              class="sr-only peer"
+              i18n-aria-label="@@account.notifications.mention-aria"
+              aria-label="Menciones en el muro"
+              [checked]="prefs.wallMentionEnabled"
+              [disabled]="savingPreferences() || !prefs.emailEnabled"
+              (change)="togglePreference('wallMentionEnabled')"
+            />
+            <span class="w-10 h-6 rounded-full bg-[color:var(--color-line)] peer-checked:bg-[color:var(--color-terra)] relative transition-colors">
+              <span class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4"></span>
+            </span>
+          </label>
+        </li>
+      </ul>
+    } @else {
+      <p i18n="@@account.notifications.loading" class="text-sm text-[color:var(--color-ink-3)]">Cargando preferencias…</p>
+    }
+
+    <div class="border-t border-[color:var(--color-line)] mt-4 pt-3 flex items-center justify-between gap-3 flex-wrap">
+      <div class="text-xs text-[color:var(--color-ink-3)] flex-1 min-w-0">
+        <p i18n="@@account.digest-preview.title" class="font-medium text-[color:var(--color-ink-2)]">Vista previa del resumen diario</p>
+        <p class="mt-0.5">
+          <ng-container i18n="@@account.digest-preview.intro">Envía el digest de hoy a tu email — sólo a ti, nadie más recibe nada.</ng-container>
+          @if (digestFlash()) {
+            · <span class="text-[color:var(--color-terra)]">{{ digestFlash() }}</span>
+          }
+        </p>
+      </div>
+      <button
+        type="button"
+        [disabled]="sendingDigest()"
+        (click)="sendDigestPreview()"
+        class="text-xs font-medium underline cursor-pointer text-[color:var(--color-terra)] disabled:opacity-50 shrink-0"
+      >
+        @if (sendingDigest()) {
+          <ng-container i18n="@@account.digest-preview.sending">Enviando…</ng-container>
+        } @else {
+          <ng-container i18n="@@account.digest-preview.send">Enviarme un preview</ng-container>
+        }
+      </button>
+    </div>
+  </article>
+
+  <article class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl p-5 mb-4">
+    <header class="mb-3">
+      <h2 i18n="@@account.widgets.heading" class="text-xs font-bold uppercase tracking-wider text-[color:var(--color-ink-3)]">
+        Widgets del panel
+      </h2>
+      <p i18n="@@account.widgets.intro" class="text-xs text-[color:var(--color-ink-3)] mt-1">
+        Activa o desactiva cada widget del panel y reordénalos con las flechas. Los cambios se aplican al instante.
+      </p>
+    </header>
+
+    @if (widgetsError()) {
+      <p class="text-xs text-[color:var(--color-error)] mb-2">{{ widgetsError() }}</p>
+    }
+
+    @if (widgets(); as list) {
+      <ul
+        cdkDropList
+        (cdkDropListDropped)="onWidgetDrop($event)"
+        class="flex flex-col gap-2"
+      >
+        @for (w of list; track w.id) {
+          <li
+            cdkDrag
+            [cdkDragDisabled]="savingWidgets()"
+            class="flex items-center gap-3 bg-[color:var(--color-bg-2)] rounded-lg px-3 py-2"
+          >
+            <button
+              type="button"
+              cdkDragHandle
+              [disabled]="savingWidgets()"
+              class="text-[color:var(--color-ink-3)] cursor-grab active:cursor-grabbing disabled:opacity-30 disabled:cursor-not-allowed hover:text-[color:var(--color-terra)] select-none touch-none"
+              i18n-aria-label="@@account.widgets.drag-aria"
+              aria-label="Arrastrar para reordenar"
+              i18n-title="@@account.widgets.drag-title"
+              title="Arrastrar para reordenar"
+            >⋮⋮</button>
+            <p class="text-sm font-medium flex-1" [class.opacity-50]="!w.visible">
+              {{ widgetLabel(w.id) }}
+            </p>
+            <label class="inline-flex items-center cursor-pointer shrink-0">
+              <input
+                type="checkbox"
+                class="sr-only peer"
+                [attr.aria-label]="widgetLabel(w.id)"
+                [checked]="w.visible"
+                [disabled]="savingWidgets()"
+                (change)="toggleWidget(w.id)"
+              />
+              <span class="w-10 h-6 rounded-full bg-[color:var(--color-line)] peer-checked:bg-[color:var(--color-terra)] relative transition-colors">
+                <span class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4"></span>
+              </span>
+            </label>
+          </li>
+        }
+      </ul>
+    } @else {
+      <p i18n="@@account.widgets.loading" class="text-sm text-[color:var(--color-ink-3)]">Cargando widgets…</p>
+    }
+  </article>
+
+  @if (isAdmin()) {
+    <article class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl p-5 mb-4">
+      <header class="mb-3">
+        <h2 i18n="@@account.api-keys.heading" class="text-xs font-bold uppercase tracking-wider text-[color:var(--color-ink-3)]">
+          Claves de API para integraciones
+        </h2>
+        <p i18n="@@account.api-keys.intro" class="text-xs text-[color:var(--color-ink-3)] mt-1">
+          Genera una clave por cada cliente externo (scripts, atajos del iPhone…).
+          Solo dan acceso a <code>/api/integrations/*</code>, no al resto de la app. La clave en
+          claro se muestra <strong>una única vez</strong> al crearla — cópiala y pégala en el
+          cliente antes de cerrar el panel.
+        </p>
+      </header>
+
+      @if (apiKeysError()) {
+        <p class="text-xs text-[color:var(--color-error)] mb-2">{{ apiKeysError() }}</p>
+      }
+
+      @if (newKeyPlaintext(); as token) {
+        <div class="bg-[color:var(--color-ochre-bg)] border border-[color:var(--color-line)] rounded-xl p-3 mb-3">
+          <p i18n="@@account.api-keys.new-key.label" class="text-xs font-medium text-[color:var(--color-ink-2)] mb-2">
+            Esta es tu nueva clave. Cópiala ahora — no podrás volver a verla.
+          </p>
+          <code class="block text-xs break-all bg-white border border-[color:var(--color-line)] rounded-md px-2 py-1 font-mono">
+            {{ token }}
+          </code>
+          <div class="flex items-center gap-3 mt-2">
+            <button
+              type="button"
+              (click)="copyPlaintext()"
+              class="text-xs font-medium underline cursor-pointer text-[color:var(--color-terra)]"
+              i18n="@@account.api-keys.new-key.copy"
+            >Copiar</button>
+            <button
+              type="button"
+              (click)="dismissPlaintext()"
+              class="text-xs font-medium underline cursor-pointer text-[color:var(--color-ink-3)]"
+              i18n="@@account.api-keys.new-key.dismiss"
+            >Ya la he copiado</button>
+            @if (newKeyCopyFlash()) {
+              <span class="text-xs text-[color:var(--color-terra)]">{{ newKeyCopyFlash() }}</span>
+            }
+          </div>
+        </div>
+      }
+
+      <form (submit)="$event.preventDefault(); createApiKey()" class="flex gap-2 mb-4">
+        <input
+          type="text"
+          maxlength="80"
+          i18n-placeholder="@@account.api-keys.name-placeholder"
+          placeholder="Nombre (p. ej. atajo de iOS)"
+          class="flex-1 px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+          [value]="newKeyName()"
+          (input)="onNewKeyNameInput($event)"
+        />
+        <button
+          type="submit"
+          [disabled]="creatingKey()"
+          class="px-4 py-2 rounded-full bg-[color:var(--color-terra)] text-white font-bold tracking-wide cursor-pointer border-0 disabled:opacity-50 text-sm shrink-0"
+        >
+          @if (creatingKey()) {
+            <ng-container i18n="@@account.api-keys.creating">Creando…</ng-container>
+          } @else {
+            <ng-container i18n="@@account.api-keys.create">Crear clave</ng-container>
+          }
+        </button>
+      </form>
+
+      @if (apiKeys().length === 0) {
+        <p i18n="@@account.api-keys.empty" class="text-sm text-[color:var(--color-ink-3)]">
+          Todavía no tienes claves. Crea una para empezar a integrar.
+        </p>
+      } @else {
+        <ul class="flex flex-col gap-2">
+          @for (key of apiKeys(); track key.id) {
+            <li class="flex items-center justify-between gap-3 bg-[color:var(--color-bg-2)] rounded-lg px-3 py-2">
+              <div class="min-w-0 flex-1">
+                <p class="text-sm font-medium" [class.line-through]="key.revokedAt" [class.opacity-60]="key.revokedAt">
+                  {{ key.name }}
+                  @if (key.revokedAt) {
+                    <span i18n="@@account.api-keys.revoked-tag" class="text-xs font-normal text-[color:var(--color-ink-3)]">· revocada</span>
+                  }
+                </p>
+                <p class="text-xs text-[color:var(--color-ink-3)] truncate">
+                  <code class="font-mono">{{ key.prefix }}…</code>
+                  <ng-container i18n="@@account.api-keys.created">· creada</ng-container> {{ key.createdAt | date:'shortDate' }}
+                  @if (key.lastUsedAt) {
+                    <ng-container i18n="@@account.api-keys.used">· usada</ng-container> {{ key.lastUsedAt | date:'short' }}
+                  } @else {
+                    <ng-container i18n="@@account.api-keys.unused">· sin usar</ng-container>
+                  }
+                </p>
+              </div>
+              @if (!key.revokedAt) {
+                <button
+                  type="button"
+                  (click)="revokeApiKey(key)"
+                  [disabled]="revokingKeyId() === key.id"
+                  class="text-xs font-medium underline cursor-pointer text-[color:var(--color-error)] disabled:opacity-50 shrink-0"
+                >
+                  @if (revokingKeyId() === key.id) {
+                    <ng-container i18n="@@account.api-keys.revoking">Revocando…</ng-container>
+                  } @else {
+                    <ng-container i18n="@@account.api-keys.revoke">Revocar</ng-container>
+                  }
+                </button>
+              }
+            </li>
+          }
+        </ul>
+      }
+    </article>
+
+    <article class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl p-5 mb-4">
+      <header class="mb-3">
+        <h2 i18n="@@account.location.heading" class="text-xs font-bold uppercase tracking-wider text-[color:var(--color-ink-3)]">
+          Ubicación de la familia
+        </h2>
+        <p i18n="@@account.location.intro" class="text-xs text-[color:var(--color-ink-3)] mt-1">
+          Latitud y longitud (decimales) y etiqueta visible. Activan el widget de meteo en el panel.
+          Déjalas vacías para desactivarlo.
+        </p>
+      </header>
+
+      @if (locationFlash()) {
+        <p class="text-xs bg-[color:var(--color-ochre-bg)] border border-[color:var(--color-line)] rounded-lg px-2 py-1 mb-2">
+          {{ locationFlash() }}
+        </p>
+      }
+      @if (locationError()) {
+        <p class="text-xs text-[color:var(--color-error)] mb-2">{{ locationError() }}</p>
+      }
+
+      <form (submit)="$event.preventDefault(); saveLocation()" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <label class="flex flex-col gap-1">
+          <span i18n="@@account.location.latitude" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Latitud</span>
+          <input
+            type="text"
+            inputmode="decimal"
+            placeholder="43.2630"
+            class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+            [value]="locationLat()"
+            (input)="onLatInput($event)"
+          />
+        </label>
+        <label class="flex flex-col gap-1">
+          <span i18n="@@account.location.longitude" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Longitud</span>
+          <input
+            type="text"
+            inputmode="decimal"
+            placeholder="-2.9350"
+            class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+            [value]="locationLon()"
+            (input)="onLonInput($event)"
+          />
+        </label>
+        <label class="flex flex-col gap-1 sm:col-span-2">
+          <span i18n="@@account.location.label" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Etiqueta</span>
+          <input
+            type="text"
+            placeholder="Bilbao"
+            maxlength="120"
+            class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+            [value]="locationLabel()"
+            (input)="onLocationLabelInput($event)"
+          />
+        </label>
+        <div class="sm:col-span-2 flex justify-end">
+          <button
+            type="submit"
+            [disabled]="savingLocation()"
+            class="px-5 py-2 rounded-full bg-[color:var(--color-terra)] text-white font-bold tracking-wide cursor-pointer border-0 disabled:opacity-50"
+          >
+            @if (savingLocation()) {
+              <ng-container i18n="@@account.location.saving">Guardando…</ng-container>
+            } @else {
+              <ng-container i18n="@@account.location.save">Guardar</ng-container>
+            }
+          </button>
+        </div>
+      </form>
+    </article>
+  }
+
+  <article class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl p-5 mb-4">
+    <header class="mb-3">
+      <h2 i18n="@@account.language.heading" class="text-xs font-bold uppercase tracking-wider text-[color:var(--color-ink-3)]">
+        Idioma de la interfaz
+      </h2>
+      <p i18n="@@account.language.intro" class="text-xs text-[color:var(--color-ink-3)] mt-1">
+        Cambia el idioma de FamilyNido. Al guardar, recargamos la página para servir el bundle correcto.
+      </p>
+    </header>
+
+    @if (languageError()) {
+      <p class="text-xs text-[color:var(--color-error)] mb-2">{{ languageError() }}</p>
+    }
+
+    <div class="flex flex-wrap items-end gap-3">
+      <label class="flex flex-col gap-1 flex-1 min-w-[180px]">
+        <span i18n="@@account.language.label" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Idioma</span>
+        <select
+          class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+          [value]="languageDraft()"
+          (change)="onLanguageDraftChange($event)"
+          [disabled]="savingLanguage()"
+        >
+          <option value="es-ES" i18n="@@account.language.option.es">Español (es-ES)</option>
+          <option value="en-US" i18n="@@account.language.option.en">English (en-US)</option>
+        </select>
+      </label>
+      <button
+        type="button"
+        (click)="saveLanguage()"
+        [disabled]="savingLanguage() || languageDraft() === currentLanguage()"
+        class="px-5 py-2 rounded-full bg-[color:var(--color-terra)] text-white font-bold tracking-wide cursor-pointer border-0 disabled:opacity-50"
+      >
+        @if (savingLanguage()) {
+          <ng-container i18n="@@account.language.saving">Aplicando…</ng-container>
+        } @else {
+          <ng-container i18n="@@account.language.save">Aplicar</ng-container>
+        }
+      </button>
+    </div>
+  </article>
+
+  <article class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl p-5">
+    <h2 i18n="@@account.session.heading" class="text-xs font-bold uppercase tracking-wider text-[color:var(--color-ink-3)] mb-3">
+      Sesión
+    </h2>
+    <button
+      type="button"
+      (click)="logout()"
+      class="text-sm font-medium text-[color:var(--color-terra)] underline cursor-pointer"
+      i18n="@@account.session.logout"
+    >Cerrar sesión</button>
+  </article>
+</section>

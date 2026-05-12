@@ -1,0 +1,345 @@
+<div class="tablet-root paper text-[color:var(--color-ink)] min-h-screen flex flex-col" (click)="onTap()">
+  <header class="flex items-center justify-between px-10 lg:px-16 pt-8 pb-4 shrink-0">
+    <div class="flex items-baseline gap-5">
+      <span class="font-serif text-7xl lg:text-8xl font-semibold tracking-tight tabular-nums leading-none">
+        {{ clockTime() }}
+      </span>
+      <div class="leading-tight">
+        <p class="text-sm uppercase tracking-widest text-[color:var(--color-ink-3)] font-bold">
+          {{ familyName() }}
+        </p>
+        <p class="text-2xl font-serif capitalize">{{ dateLabel() }}</p>
+      </div>
+    </div>
+    <button
+      type="button"
+      (click)="exit(); $event.stopPropagation()"
+      class="text-xs uppercase tracking-widest text-[color:var(--color-ink-3)] border border-[color:var(--color-line)] bg-[color:var(--color-card)] rounded-full px-4 py-2 cursor-pointer hover:text-[color:var(--color-ink)]"
+      i18n="@@tablet.exit"
+    >
+      Salir
+    </button>
+  </header>
+
+  <main class="flex-1 flex flex-col px-10 lg:px-16 pb-6 min-h-0">
+    @switch (currentPage()) {
+      @case ('home') {
+        <section class="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+          <div class="flex flex-col gap-6">
+            <p class="font-serif text-5xl lg:text-6xl leading-tight">
+              {{ greeting() }}
+              <em class="text-[color:var(--color-terra)] italic font-normal" i18n="@@tablet.family">familia</em>
+            </p>
+            @if (todayHoliday(); as hol) {
+              <p class="text-3xl font-serif text-[color:var(--color-terra)]" [innerHTML]="holidayLine(hol.label)"></p>
+            } @else {
+              @if (pendingTasks().length > 0) {
+                <p class="text-2xl text-[color:var(--color-ink-2)]">
+                  {{ pendingTasksLabel() }}
+                </p>
+              } @else {
+                <p i18n="@@tablet.calm" class="text-2xl text-[color:var(--color-ink-3)]">Hoy parece tranquilo.</p>
+              }
+            }
+            @if (upcomingBirthdays().length > 0 && upcomingBirthdays()[0].daysAhead <= 7) {
+              <p class="text-xl text-[color:var(--color-ink-2)] flex items-center gap-2">
+                <span class="text-3xl">🎂</span>
+                <span [innerHTML]="birthdayLine(upcomingBirthdays()[0])"></span>
+              </p>
+            }
+          </div>
+
+          <div class="flex flex-col items-center text-center gap-3">
+            @if (weather(); as w) {
+              <span class="text-9xl leading-none">{{ w.weatherIcon }}</span>
+              <p class="font-serif text-7xl font-semibold tabular-nums">
+                {{ w.currentTemperature | number: '1.0-0' }}°
+              </p>
+              <p class="text-2xl text-[color:var(--color-ink-2)]">{{ w.weatherLabel }}</p>
+              <p class="text-lg text-[color:var(--color-ink-3)]">
+                @if (w.locationLabel) { {{ w.locationLabel }} · }
+                <ng-container i18n="@@tablet.weather.min">Mín</ng-container> {{ w.minTemperature | number: '1.0-0' }}°
+                ·
+                <ng-container i18n="@@tablet.weather.max">Máx</ng-container> {{ w.maxTemperature | number: '1.0-0' }}°
+                @if (w.precipitationProbability !== null) {
+                  · 💧 {{ w.precipitationProbability }}%
+                }
+              </p>
+              @if (w.sunrise && w.sunset) {
+                <p class="text-base text-[color:var(--color-ink-3)] tabular-nums">
+                  🌅 {{ w.sunrise }} · 🌇 {{ w.sunset }}
+                </p>
+              }
+            } @else {
+              <p i18n="@@tablet.weather.no-location" class="text-2xl text-[color:var(--color-ink-3)] italic">
+                Configura la ubicación para ver el tiempo.
+              </p>
+            }
+          </div>
+        </section>
+      }
+
+      @case ('cole') {
+        <section class="flex-1 flex flex-col gap-6">
+          <h2 class="font-serif text-5xl lg:text-6xl">
+            <ng-container i18n="@@tablet.school.title-prefix">Hoy en el</ng-container>
+            <em class="text-[color:var(--color-terra)] italic font-normal" i18n="@@tablet.school.title-emph">cole</em>
+          </h2>
+
+          @if (todayHoliday(); as hol) {
+            <p class="text-3xl text-[color:var(--color-terra)]" [innerHTML]="holidayLineLarge(hol.label)"></p>
+          } @else if (todaySchoolDays().length === 0 && todayExtras().length === 0) {
+            <p i18n="@@tablet.school.empty" class="text-2xl text-[color:var(--color-ink-3)] italic">
+              Sin actividad de cole programada para hoy.
+            </p>
+          } @else {
+            <ul class="flex flex-col gap-4">
+              @for (b of todaySchoolDays(); track b.memberId) {
+                <li class="flex items-center gap-5 bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-3xl px-6 py-5">
+                  <span class="text-5xl shrink-0">{{ schoolModeIcon(b.transportMode) }}</span>
+                  <fn-avatar [name]="memberName(b.memberId)" [colorHex]="memberColor(b.memberId)"
+                    [photoUrl]="memberPhotoUrl(b.memberId)" [size]="56" />
+                  <div class="flex-1 min-w-0">
+                    @if (b.isCancelled) {
+                      <p class="text-3xl font-serif line-through text-[color:var(--color-ink-3)]">
+                        {{ memberName(b.memberId) }}
+                        <ng-container i18n="@@tablet.school.no-school">· sin cole</ng-container>
+                      </p>
+                    } @else {
+                      <p class="text-3xl font-serif leading-snug" [innerHTML]="schoolDayLine(b)"></p>
+                    }
+                    @if (b.notes) {
+                      <p class="text-lg text-[color:var(--color-ink-3)] mt-1">{{ b.notes }}</p>
+                    }
+                  </div>
+                </li>
+              }
+              @for (e of todayExtras(); track e.extracurricularId) {
+                <li class="flex items-center gap-5 bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-3xl px-6 py-5"
+                    [class.opacity-60]="e.isCancelled">
+                  <span class="text-5xl shrink-0">🎒</span>
+                  <fn-avatar [name]="memberName(e.memberId)" [colorHex]="memberColor(e.memberId)"
+                    [photoUrl]="memberPhotoUrl(e.memberId)" [size]="56" />
+                  <div class="flex-1 min-w-0">
+                    <p class="text-3xl font-serif leading-snug" [class.line-through]="e.isCancelled">
+                      <strong>{{ e.name }}</strong>
+                      · {{ memberName(e.memberId) }}
+                      · {{ formatTime(e.startTime) }}–{{ formatTime(e.endTime) }}
+                      @if (e.location) { · {{ e.location }} }
+                    </p>
+                    @if (!e.isCancelled) {
+                      <p class="text-lg text-[color:var(--color-ink-3)] mt-1">
+                        {{ extraTransportLine(e) }}
+                      </p>
+                    }
+                  </div>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+      }
+
+      @case ('tasks') {
+        <section class="flex-1 flex flex-col gap-6">
+          <h2 class="font-serif text-5xl lg:text-6xl">
+            <em class="text-[color:var(--color-terra)] italic font-normal" i18n="@@tablet.tasks.title-emph">Tareas</em>
+            <ng-container i18n="@@tablet.tasks.title-suffix">de hoy</ng-container>
+          </h2>
+
+          @if (pendingTasks().length === 0) {
+            <p i18n="@@tablet.tasks.empty" class="text-2xl text-[color:var(--color-ink-3)] italic">Hoy no queda nada por hacer ✨</p>
+          } @else {
+            <ul class="flex flex-col gap-4">
+              @for (row of pendingTasks(); track row.task.id) {
+                <li class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-3xl px-6 py-5 flex items-center gap-5">
+                  <span class="w-12 h-12 rounded-full border-4 border-[color:var(--color-line)] shrink-0"></span>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-3xl font-serif leading-snug">{{ row.task.title }}</p>
+                    <p class="text-lg text-[color:var(--color-ink-3)] mt-1">
+                      @if (row.task.isFloating) {
+                        <ng-container i18n="@@tablet.tasks.no-date">Sin fecha</ng-container>
+                      } @else if (row.task.timeOfDay) {
+                        {{ row.task.timeOfDay.slice(0, 5) }}
+                      } @else {
+                        {{ row.task.category }}
+                      }
+                    </p>
+                  </div>
+                  @if (row.task.responsibleMemberId) {
+                    <fn-avatar [name]="memberName(row.task.responsibleMemberId)"
+                      [colorHex]="memberColor(row.task.responsibleMemberId)"
+                      [photoUrl]="memberPhotoUrl(row.task.responsibleMemberId)" [size]="48" [ring]="true" />
+                  }
+                </li>
+              }
+            </ul>
+          }
+        </section>
+      }
+
+      @case ('calendar') {
+        <section class="flex-1 flex flex-col gap-6">
+          <h2 class="font-serif text-5xl lg:text-6xl">
+            <ng-container i18n="@@tablet.calendar.title-prefix">Próxima</ng-container>
+            <em class="text-[color:var(--color-terra)] italic font-normal" i18n="@@tablet.calendar.title-emph">agenda</em>
+          </h2>
+
+          @if (upcomingEvents().length === 0) {
+            <p i18n="@@tablet.calendar.empty" class="text-2xl text-[color:var(--color-ink-3)] italic">Sin eventos en los próximos 7 días.</p>
+          } @else {
+            <ul class="flex flex-col gap-4">
+              @for (event of upcomingEvents(); track event.id) {
+                <li class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-3xl px-6 py-5 flex items-center gap-5">
+                  <div class="text-center w-28 shrink-0">
+                    <p class="text-sm uppercase tracking-widest text-[color:var(--color-ink-3)] font-bold">
+                      {{ eventDayLabel(event) }}
+                    </p>
+                    <p class="font-serif text-4xl font-semibold tabular-nums">
+                      {{ eventTimeLabel(event) }}
+                    </p>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-3xl font-serif leading-snug">{{ event.title }}</p>
+                    @if (event.location) {
+                      <p class="text-lg text-[color:var(--color-ink-3)] mt-1">📍 {{ event.location }}</p>
+                    }
+                  </div>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+      }
+
+      @case ('meals') {
+        <section class="flex-1 flex flex-col gap-6">
+          <h2 class="font-serif text-5xl lg:text-6xl">
+            <ng-container i18n="@@tablet.meals.title-prefix">Hoy se come en</ng-container>
+            <em class="text-[color:var(--color-terra)] italic font-normal" i18n="@@tablet.meals.title-emph">la mesa</em>
+          </h2>
+
+          @if (!hasMeals()) {
+            <p class="text-2xl text-[color:var(--color-ink-3)] italic">
+              <ng-container i18n="@@tablet.meals.empty">Sin planificación para hoy.</ng-container>
+              <span class="not-italic" i18n="@@tablet.meals.empty-prompt">Hora de inventar algo.</span>
+            </p>
+          } @else {
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1">
+              <div class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-3xl px-8 py-6 flex flex-col gap-3">
+                <p class="text-2xl uppercase tracking-widest text-[color:var(--color-ink-2)] font-bold flex items-center gap-3">
+                  <span class="text-4xl">☀️</span>
+                  <ng-container i18n="@@tablet.meals.lunch">Comida</ng-container>
+                </p>
+                @if (todayLunch()?.firstCourse || todayLunch()?.secondCourse) {
+                  @if (todayLunch()?.firstCourse) {
+                    <p class="font-serif text-3xl flex items-baseline gap-3">
+                      <span class="w-3 h-3 rounded-full bg-[color:var(--color-terra)] shrink-0 self-center"></span>
+                      <span>{{ todayLunch()?.firstCourse }}</span>
+                    </p>
+                  }
+                  @if (todayLunch()?.secondCourse) {
+                    <p class="font-serif text-3xl flex items-baseline gap-3">
+                      <span class="w-3 h-3 rounded-full bg-[color:var(--color-ochre)] shrink-0 self-center"></span>
+                      <span>{{ todayLunch()?.secondCourse }}</span>
+                    </p>
+                  }
+                } @else {
+                  <p i18n="@@tablet.meals.unplanned" class="text-xl text-[color:var(--color-ink-3)] italic">sin planificar</p>
+                }
+              </div>
+              <div class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-3xl px-8 py-6 flex flex-col gap-3">
+                <p class="text-2xl uppercase tracking-widest text-[color:var(--color-ink-2)] font-bold flex items-center gap-3">
+                  <span class="text-4xl">🌙</span>
+                  <ng-container i18n="@@tablet.meals.dinner">Cena</ng-container>
+                </p>
+                @if (todayDinner()?.firstCourse || todayDinner()?.secondCourse) {
+                  @if (todayDinner()?.firstCourse) {
+                    <p class="font-serif text-3xl flex items-baseline gap-3">
+                      <span class="w-3 h-3 rounded-full bg-[color:var(--color-terra)] shrink-0 self-center"></span>
+                      <span>{{ todayDinner()?.firstCourse }}</span>
+                    </p>
+                  }
+                  @if (todayDinner()?.secondCourse) {
+                    <p class="font-serif text-3xl flex items-baseline gap-3">
+                      <span class="w-3 h-3 rounded-full bg-[color:var(--color-ochre)] shrink-0 self-center"></span>
+                      <span>{{ todayDinner()?.secondCourse }}</span>
+                    </p>
+                  }
+                } @else {
+                  <p i18n="@@tablet.meals.unplanned" class="text-xl text-[color:var(--color-ink-3)] italic">sin planificar</p>
+                }
+              </div>
+            </div>
+          }
+        </section>
+      }
+
+      @case ('wall') {
+        <section class="flex-1 flex flex-col gap-6">
+          <h2 class="font-serif text-5xl lg:text-6xl">
+            <ng-container i18n="@@tablet.wall.title-prefix">Lo último en el</ng-container>
+            <em class="text-[color:var(--color-terra)] italic font-normal" i18n="@@tablet.wall.title-emph">muro</em>
+          </h2>
+
+          @if (pinned().length === 0 && recentMessages().length === 0) {
+            <p i18n="@@tablet.wall.empty" class="text-2xl text-[color:var(--color-ink-3)] italic">El muro está en silencio.</p>
+          } @else {
+            <ul class="flex flex-col gap-4">
+              @for (msg of pinned(); track msg.id) {
+                <li class="bg-[color:var(--color-card)] border-2 border-[color:var(--color-terra)] rounded-3xl px-6 py-5 flex gap-4">
+                  <span class="text-3xl shrink-0">📌</span>
+                  <fn-avatar [name]="memberName(msg.authorMemberId)" [colorHex]="memberColor(msg.authorMemberId)"
+                    [photoUrl]="memberPhotoUrl(msg.authorMemberId)" [size]="48" />
+                  <div class="flex-1 min-w-0">
+                    <p class="text-base uppercase tracking-widest text-[color:var(--color-ink-3)] font-bold">
+                      {{ memberName(msg.authorMemberId) }} · {{ msg.createdAt | date: 'd MMM' }}
+                    </p>
+                    <div class="wall-markdown text-2xl font-serif leading-snug mt-1" [innerHTML]="msg.textHtml"></div>
+                  </div>
+                </li>
+              }
+              @for (msg of recentMessages(); track msg.id) {
+                <li class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-3xl px-6 py-5 flex gap-4">
+                  <fn-avatar [name]="memberName(msg.authorMemberId)" [colorHex]="memberColor(msg.authorMemberId)"
+                    [photoUrl]="memberPhotoUrl(msg.authorMemberId)" [size]="48" />
+                  <div class="flex-1 min-w-0">
+                    <p class="text-base uppercase tracking-widest text-[color:var(--color-ink-3)] font-bold">
+                      {{ memberName(msg.authorMemberId) }} · {{ msg.createdAt | date: 'd MMM HH:mm' }}
+                    </p>
+                    <div class="wall-markdown text-2xl font-serif leading-snug mt-1" [innerHTML]="msg.textHtml"></div>
+                  </div>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+      }
+    }
+  </main>
+
+  <footer class="flex items-center justify-center gap-3 pb-8 shrink-0">
+    @for (page of pages; track page.id; let i = $index) {
+      <button
+        type="button"
+        (click)="goToPage(i); $event.stopPropagation()"
+        class="flex flex-col items-center gap-1.5 cursor-pointer group"
+        [attr.aria-label]="page.label"
+      >
+        <span
+          class="w-3 h-3 rounded-full transition-all"
+          [class.bg-\[color\:var\(--color-terra\)\]]="i === pageIndex()"
+          [class.bg-\[color\:var\(--color-line\)\]]="i !== pageIndex()"
+          [class.scale-125]="i === pageIndex()"
+        ></span>
+        <span
+          class="text-xs uppercase tracking-widest font-bold"
+          [class.text-\[color\:var\(--color-terra\)\]]="i === pageIndex()"
+          [class.text-\[color\:var\(--color-ink-3\)\]]="i !== pageIndex()"
+        >
+          {{ page.label }}
+        </span>
+      </button>
+    }
+  </footer>
+</div>

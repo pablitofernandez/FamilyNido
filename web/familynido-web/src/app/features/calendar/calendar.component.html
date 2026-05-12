@@ -1,0 +1,234 @@
+<section class="max-w-3xl mx-auto px-5 pt-6 lg:pt-8 pb-6">
+  <header class="flex items-end justify-between mb-6">
+    <div>
+      <h1 class="font-serif text-3xl lg:text-5xl font-medium tracking-tight">
+        <ng-container i18n="@@calendar.title-prefix">El</ng-container>
+        <em class="text-[color:var(--color-terra)] italic font-normal" i18n="@@calendar.title-emph">calendario</em>
+      </h1>
+      <p class="text-sm text-[color:var(--color-ink-3)] mt-1">{{ subtitle() }}</p>
+    </div>
+    <div class="flex gap-2">
+      <button
+        type="button"
+        class="w-11 h-11 rounded-full border border-[color:var(--color-line)] bg-white text-[color:var(--color-ink)] flex items-center justify-center cursor-pointer"
+        i18n-aria-label="@@calendar.refresh-aria"
+        aria-label="Refrescar eventos"
+        (click)="refresh()"
+      >
+        <fn-icon name="refresh-cw" [size]="18" [strokeWidth]="2.2" />
+      </button>
+      <a
+        routerLink="/calendar/accounts"
+        class="w-11 h-11 rounded-full border-0 bg-[color:var(--color-terra)] text-white flex items-center justify-center cursor-pointer"
+        i18n-aria-label="@@calendar.accounts-aria"
+        aria-label="Cuentas vinculadas"
+      >
+        <fn-icon name="settings" [size]="18" [strokeWidth]="2.2" />
+      </a>
+    </div>
+  </header>
+
+  <!-- ─── Compact month grid (RF-CAL-009) ────────────────────────────────── -->
+  <section
+    class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl p-4 mb-5"
+    i18n-aria-label="@@calendar.month-view-aria"
+    aria-label="Vista mensual"
+  >
+    <p class="text-xs font-bold uppercase tracking-wider text-[color:var(--color-ink-3)] mb-2 capitalize">
+      {{ monthLabel() }}
+    </p>
+    <div class="grid grid-cols-7 gap-1 text-[10px] uppercase text-[color:var(--color-ink-3)] mb-1">
+      @for (label of weekdayInitials; track label) {
+        <span class="text-center">{{ label }}</span>
+      }
+    </div>
+    <div class="grid grid-cols-7 gap-1">
+      @for (cell of monthGrid(); track cell.date) {
+        <button
+          type="button"
+          (click)="scrollToDay(cell.date)"
+          class="h-12 rounded-lg border flex flex-col items-center justify-center cursor-pointer"
+          [class.opacity-30]="!cell.isCurrentMonth"
+          [ngClass]="cell.isToday
+            ? 'bg-[color:var(--color-terra-bg)] border-[color:var(--color-terra)]'
+            : 'bg-[color:var(--color-bg-2)] border-transparent hover:border-[color:var(--color-line)]'"
+          [attr.aria-label]="dayCellAriaLabel(cell)"
+        >
+          <span
+            class="text-xs leading-none"
+            [ngClass]="cell.isToday ? 'font-bold text-[color:var(--color-terra)]' : ''"
+          >{{ cell.dayNumber }}</span>
+          @if (cell.totalEvents > 0) {
+            <span class="flex items-center gap-0.5 mt-1">
+              @for (color of cell.dotColors; track $index) {
+                <span class="w-1.5 h-1.5 rounded-full" [style.background-color]="color"></span>
+              }
+              @if (cell.totalEvents > cell.dotColors.length) {
+                <span class="text-[8px] leading-none text-[color:var(--color-ink-3)]">
+                  +{{ cell.totalEvents - cell.dotColors.length }}
+                </span>
+              }
+            </span>
+          }
+        </button>
+      }
+    </div>
+  </section>
+
+  @if (loading()) {
+    <p i18n="@@calendar.loading" class="text-sm text-[color:var(--color-ink-3)]">Cargando eventos…</p>
+  } @else if (error()) {
+    <p class="text-sm text-[color:var(--color-error)]">{{ error() }}</p>
+  } @else if (buckets().length === 0) {
+    <div class="rounded-xl bg-[color:var(--color-bg-2)] p-6 text-center">
+      <p i18n="@@calendar.empty" class="text-sm text-[color:var(--color-ink-3)] mb-3">
+        No hay eventos sincronizados todavía.
+      </p>
+      <a
+        routerLink="/calendar/accounts"
+        class="inline-block px-4 py-2 rounded-lg bg-[color:var(--color-terra)] text-white text-sm"
+        i18n="@@calendar.link-google"
+      >
+        Vincular Google Calendar
+      </a>
+    </div>
+  } @else {
+    <ol class="flex flex-col gap-6">
+      @for (bucket of buckets(); track bucket.date) {
+        <li [id]="'agenda-day-' + bucket.date" class="scroll-mt-4">
+          <h2 class="font-serif text-lg font-medium capitalize mb-2 text-[color:var(--color-ink-2)]">
+            {{ bucket.label }}
+          </h2>
+          <ul class="flex flex-col gap-2">
+            @for (event of bucket.events; track event.id) {
+              <li>
+                <button
+                  type="button"
+                  class="w-full flex gap-3 p-3 rounded-xl bg-white border border-[color:var(--color-line)] text-left cursor-pointer hover:border-[color:var(--color-terra)]"
+                  (click)="openEvent(event)"
+                >
+                  <span
+                    class="w-1 rounded-full self-stretch shrink-0"
+                    [style.background-color]="memberColorFor(event)"
+                    aria-hidden="true"
+                  ></span>
+                  <div class="flex-1 min-w-0">
+                    <p class="font-medium text-[color:var(--color-ink)] truncate">
+                      {{ event.title }}
+                    </p>
+                    <p class="text-xs text-[color:var(--color-ink-3)] mt-0.5">
+                      {{ timeLabel(event) }}
+                      @if (event.location) {
+                        · {{ event.location }}
+                      }
+                    </p>
+                    @if (event.relatedMemberIds.length > 0) {
+                      <div class="flex gap-1 mt-1.5">
+                        @for (memberId of event.relatedMemberIds; track memberId) {
+                          @if (memberById(memberId); as m) {
+                            <span [title]="m.displayName" class="inline-flex">
+                              <fn-avatar
+                                [name]="m.displayName"
+                                [colorHex]="m.colorHex"
+                                [photoUrl]="m.photoPath ? '/api/family-members/' + m.id + '/photo' : null"
+                                [size]="20"
+                              />
+                            </span>
+                          }
+                        }
+                      </div>
+                    }
+                  </div>
+                </button>
+              </li>
+            }
+          </ul>
+        </li>
+      }
+    </ol>
+  }
+
+  @if (editingEvent(); as ev) {
+    <div
+      class="fixed inset-0 z-30 bg-black/40 flex items-end lg:items-center justify-center"
+      (click)="closeDrawer()"
+    >
+      <div
+        class="w-full max-w-md bg-white rounded-t-2xl lg:rounded-2xl p-5 m-0 lg:m-4 max-h-[85vh] overflow-y-auto"
+        (click)="$event.stopPropagation()"
+      >
+        <header class="mb-3">
+          <p i18n="@@calendar.drawer.event-label" class="text-xs uppercase tracking-wider text-[color:var(--color-ink-3)]">
+            Evento
+          </p>
+          <h2 class="font-serif text-xl font-semibold leading-tight mt-1">
+            {{ ev.title }}
+          </h2>
+          <p class="text-xs text-[color:var(--color-ink-3)] mt-1">
+            {{ timeLabel(ev) }}
+            @if (ev.location) {
+              · {{ ev.location }}
+            }
+          </p>
+          @if (ev.htmlLink) {
+            <a
+              [href]="ev.htmlLink"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-xs text-[color:var(--color-terra)] underline mt-1 inline-block"
+              i18n="@@calendar.drawer.open-google"
+            >Abrir en Google Calendar ↗</a>
+          }
+        </header>
+
+        <p i18n="@@calendar.drawer.members-label" class="text-xs uppercase tracking-wider text-[color:var(--color-ink-3)] mt-4 mb-2">
+          A/con quién es este evento
+        </p>
+        @if (members().length === 0) {
+          <p i18n="@@calendar.drawer.no-members" class="text-sm text-[color:var(--color-ink-3)]">Sin miembros todavía.</p>
+        } @else {
+          <div class="flex flex-wrap gap-2">
+            @for (m of members(); track m.id) {
+              <button
+                type="button"
+                class="flex items-center gap-2 px-3 py-1.5 rounded-full border text-sm cursor-pointer"
+                [ngClass]="isDraftMember(m.id)
+                  ? 'bg-[color:var(--color-terra-bg)] border-[color:var(--color-terra)]'
+                  : 'bg-white border-[color:var(--color-line)]'"
+                (click)="toggleDraftMember(m.id)"
+              >
+                <span class="w-3 h-3 rounded-full" [style.background-color]="m.colorHex"></span>
+                {{ m.displayName }}
+              </button>
+            }
+          </div>
+        }
+
+        @if (drawerError()) {
+          <p class="text-sm text-[color:var(--color-error)] mt-3">{{ drawerError() }}</p>
+        }
+
+        <div class="flex gap-2 mt-5 justify-end">
+          <button
+            type="button"
+            class="px-4 py-2 rounded-full bg-white border border-[color:var(--color-line)] text-[color:var(--color-ink-2)] cursor-pointer text-sm"
+            (click)="closeDrawer()"
+            i18n="@@calendar.drawer.cancel"
+          >Cancelar</button>
+          <button
+            type="button"
+            [disabled]="savingDrawer()"
+            class="px-4 py-2 rounded-full bg-[color:var(--color-terra)] text-white font-bold tracking-wide cursor-pointer border-0 text-sm disabled:opacity-50"
+            (click)="saveDrawer()"
+          >
+            @if (savingDrawer()) {
+              <ng-container i18n="@@calendar.drawer.saving">Guardando…</ng-container>
+            } @else {
+              <ng-container i18n="@@calendar.drawer.save">Guardar</ng-container>
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</section>

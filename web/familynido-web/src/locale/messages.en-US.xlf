@@ -1,0 +1,1071 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+  <file source-language="es-ES" target-language="en-US" datatype="plaintext" original="ng2.template">
+    <body>
+      <trans-unit id="auth.login.subtitle" datatype="html">
+        <source> Entra en tu nido familiar </source>
+        <target> Welcome to your family nest </target>
+      </trans-unit>
+      <trans-unit id="auth.login.oidc-button" datatype="html">
+        <source> Continuar con PocketID </source>
+        <target> Continue with PocketID </target>
+      </trans-unit>
+      <trans-unit id="auth.login.separator" datatype="html">
+        <source>o</source>
+        <target>or</target>
+      </trans-unit>
+      <trans-unit id="auth.login.email-label" datatype="html">
+        <source> Email </source>
+        <target> Email </target>
+      </trans-unit>
+      <trans-unit id="auth.login.password-label" datatype="html">
+        <source> Contraseña </source>
+        <target> Password </target>
+      </trans-unit>
+      <trans-unit id="auth.login.submitting" datatype="html">
+        <source>Entrando…</source>
+        <target>Signing in…</target>
+      </trans-unit>
+      <trans-unit id="auth.login.submit" datatype="html">
+        <source>Iniciar sesión con email</source>
+        <target>Sign in with email</target>
+      </trans-unit>
+      <trans-unit id="auth.login.error.invalid-credentials" datatype="html">
+        <source>Email o contraseña incorrectos.</source>
+        <target>Wrong email or password.</target>
+      </trans-unit>
+      <trans-unit id="auth.login.error.rate-limited" datatype="html">
+        <source>Demasiados intentos. Espera unos minutos antes de volver a intentarlo.</source>
+        <target>Too many attempts. Wait a few minutes before trying again.</target>
+      </trans-unit>
+      <trans-unit id="auth.login.error.unknown" datatype="html">
+        <source>No se pudo iniciar sesión. Inténtalo de nuevo.</source>
+        <target>Could not sign you in. Please try again.</target>
+      </trans-unit>
+      <trans-unit id="7885821540535242934" datatype="html">
+        <source>Modo tablet (pantalla completa)</source>
+        <target>Tablet mode (fullscreen)</target>
+      </trans-unit>
+      <trans-unit id="dashboard.greeting.morning" datatype="html">
+        <source>Buenos días</source>
+        <target>Good morning</target>
+      </trans-unit>
+      <trans-unit id="dashboard.greeting.afternoon" datatype="html">
+        <source>Buenas tardes</source>
+        <target>Good afternoon</target>
+      </trans-unit>
+      <trans-unit id="dashboard.greeting.evening" datatype="html">
+        <source>Buenas noches</source>
+        <target>Good evening</target>
+      </trans-unit>
+      <trans-unit id="invitation.loading" datatype="html">
+        <source>Cargando…</source>
+        <target>Loading…</target>
+      </trans-unit>
+      <trans-unit id="invitation.fatal.title" datatype="html">
+        <source>Invitación no válida</source>
+        <target>Invalid invitation</target>
+      </trans-unit>
+      <trans-unit id="invitation.title" datatype="html">
+        <source> Te han invitado al nido </source>
+        <target> You've been invited to the nest </target>
+      </trans-unit>
+      <trans-unit id="invitation.preview.with-inviter" datatype="html">
+        <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/><x id="INTERPOLATION" equiv-text="{{ preview()!.inviterDisplayName }}"/><x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> te invita a unirte a la familia <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/><x id="INTERPOLATION_1" equiv-text="{{ preview()!.familyName }}"/><x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> como <x id="START_EMPHASISED_TEXT" ctype="x-em" equiv-text="&lt;em&gt;"/><x id="INTERPOLATION_2" equiv-text="{{ preview()!.memberDisplayName }}"/><x id="CLOSE_EMPHASISED_TEXT" ctype="x-em" equiv-text="&lt;/em&gt;"/>. </source>
+        <target><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/><x id="INTERPOLATION" equiv-text="{{ preview()!.inviterDisplayName }}"/><x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> is inviting you to join the family <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/><x id="INTERPOLATION_1" equiv-text="{{ preview()!.familyName }}"/><x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> as <x id="START_EMPHASISED_TEXT" ctype="x-em" equiv-text="&lt;em&gt;"/><x id="INTERPOLATION_2" equiv-text="{{ preview()!.memberDisplayName }}"/><x id="CLOSE_EMPHASISED_TEXT" ctype="x-em" equiv-text="&lt;/em&gt;"/>. </target>
+      </trans-unit>
+      <trans-unit id="invitation.preview.without-inviter" datatype="html">
+        <source> Te invitan a unirte a la familia <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/><x id="INTERPOLATION" equiv-text="{{ preview()!.familyName }}"/><x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> como <x id="START_EMPHASISED_TEXT" ctype="x-em" equiv-text="&lt;em&gt;"/><x id="INTERPOLATION_1" equiv-text="{{ preview()!.memberDisplayName }}"/><x id="CLOSE_EMPHASISED_TEXT" ctype="x-em" equiv-text="&lt;/em&gt;"/>. </source>
+        <target> You're invited to join the family <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/><x id="INTERPOLATION" equiv-text="{{ preview()!.familyName }}"/><x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> as <x id="START_EMPHASISED_TEXT" ctype="x-em" equiv-text="&lt;em&gt;"/><x id="INTERPOLATION_1" equiv-text="{{ preview()!.memberDisplayName }}"/><x id="CLOSE_EMPHASISED_TEXT" ctype="x-em" equiv-text="&lt;/em&gt;"/>. </target>
+      </trans-unit>
+      <trans-unit id="invitation.already-in-family" datatype="html">
+        <source> Ya estás dentro de una familia. Para aceptar esta invitación, primero pide al administrador que te desvincule. </source>
+        <target> You're already part of a family. To accept this invitation, ask your admin to unlink you first. </target>
+      </trans-unit>
+      <trans-unit id="invitation.back-to-home" datatype="html">
+        <source>Volver a mi nido</source>
+        <target>Back to my nest</target>
+      </trans-unit>
+      <trans-unit id="invitation.linking" datatype="html">
+        <source>Vinculando tu cuenta…</source>
+        <target>Linking your account…</target>
+      </trans-unit>
+      <trans-unit id="invitation.accept-oidc" datatype="html">
+        <source> Aceptar con PocketID </source>
+        <target> Accept with PocketID </target>
+      </trans-unit>
+      <trans-unit id="invitation.separator" datatype="html">
+        <source>o crea una contraseña</source>
+        <target>or create a password</target>
+      </trans-unit>
+      <trans-unit id="invitation.password-label" datatype="html">
+        <source> Contraseña nueva </source>
+        <target> New password </target>
+      </trans-unit>
+      <trans-unit id="invitation.password-confirm-label" datatype="html">
+        <source> Repite la contraseña </source>
+        <target> Repeat password </target>
+      </trans-unit>
+      <trans-unit id="invitation.password-help" datatype="html">
+        <source> Mínimo 8 caracteres con al menos una letra y un número. </source>
+        <target> At least 8 characters with one letter and one digit. </target>
+      </trans-unit>
+      <trans-unit id="invitation.creating" datatype="html">
+        <source>Creando cuenta…</source>
+        <target>Creating account…</target>
+      </trans-unit>
+      <trans-unit id="invitation.submit" datatype="html">
+        <source>Crear contraseña y entrar</source>
+        <target>Create password and enter</target>
+      </trans-unit>
+      <trans-unit id="invitation.error.password-too-short" datatype="html">
+        <source>La contraseña debe tener al menos 8 caracteres.</source>
+        <target>Password must be at least 8 characters.</target>
+      </trans-unit>
+      <trans-unit id="invitation.error.password-weak" datatype="html">
+        <source>La contraseña debe contener al menos una letra y un número.</source>
+        <target>Password must contain at least one letter and one digit.</target>
+      </trans-unit>
+      <trans-unit id="invitation.error.password-mismatch" datatype="html">
+        <source>Las dos contraseñas no coinciden.</source>
+        <target>The two passwords don't match.</target>
+      </trans-unit>
+      <trans-unit id="invitation.error.unavailable-detailed" datatype="html">
+        <source>Esta invitación ya no está disponible (caducada, usada o revocada).</source>
+        <target>This invitation is no longer available (expired, used or revoked).</target>
+      </trans-unit>
+      <trans-unit id="invitation.error.password-invalid" datatype="html">
+        <source>La contraseña no cumple los requisitos.</source>
+        <target>Password doesn't meet the requirements.</target>
+      </trans-unit>
+      <trans-unit id="invitation.error.submit-unknown" datatype="html">
+        <source>No se pudo completar el alta. Inténtalo de nuevo.</source>
+        <target>Could not complete your sign-up. Please try again.</target>
+      </trans-unit>
+      <trans-unit id="invitation.status.consumed" datatype="html">
+        <source>Esta invitación ya se ha utilizado.</source>
+        <target>This invitation has already been used.</target>
+      </trans-unit>
+      <trans-unit id="invitation.status.revoked" datatype="html">
+        <source>Esta invitación ha sido revocada por el administrador.</source>
+        <target>This invitation has been revoked by the admin.</target>
+      </trans-unit>
+      <trans-unit id="invitation.status.expired" datatype="html">
+        <source>Esta invitación ha caducado. Pide al administrador que te envíe una nueva.</source>
+        <target>This invitation has expired. Ask your admin to send you a new one.</target>
+      </trans-unit>
+      <trans-unit id="invitation.fatal.not-found" datatype="html">
+        <source>Esta invitación no existe o el enlace es incorrecto.</source>
+        <target>This invitation doesn't exist or the link is incorrect.</target>
+      </trans-unit>
+      <trans-unit id="invitation.fatal.unavailable" datatype="html">
+        <source>Esta invitación ya no está disponible.</source>
+        <target>This invitation is no longer available.</target>
+      </trans-unit>
+      <trans-unit id="invitation.fatal.unknown" datatype="html">
+        <source>Algo salió mal. Inténtalo de nuevo más tarde.</source>
+        <target>Something went wrong. Please try again later.</target>
+      </trans-unit>
+      <trans-unit id="layout.account-link.title" datatype="html">
+        <source>Mi cuenta</source>
+        <target>My account</target>
+      </trans-unit>
+      <trans-unit id="layout.account-link.aria" datatype="html">
+        <source>Mi cuenta</source>
+        <target>My account</target>
+      </trans-unit>
+      <trans-unit id="not-linked.title" datatype="html">
+        <source> Aún no estás en el nido </source>
+        <target> You're not in the nest yet </target>
+      </trans-unit>
+      <trans-unit id="not-linked.body" datatype="html">
+        <source> Pídele al administrador de tu familia que te envíe una invitación a tu correo. Una vez la aceptes, ya podrás usar FamilyNido. </source>
+        <target> Ask your family admin to send you an email invitation. Once you accept it, you'll be able to use FamilyNido. </target>
+      </trans-unit>
+      <trans-unit id="not-linked.logout" datatype="html">
+        <source> Cerrar sesión </source>
+        <target> Sign out </target>
+      </trans-unit>
+      <trans-unit id="nav.home" datatype="html">
+        <source>Inicio</source>
+        <target>Home</target>
+      </trans-unit>
+      <trans-unit id="nav.calendar" datatype="html">
+        <source>Calendario</source>
+        <target>Calendar</target>
+      </trans-unit>
+      <trans-unit id="nav.wall" datatype="html">
+        <source>Muro</source>
+        <target>Wall</target>
+      </trans-unit>
+      <trans-unit id="nav.tasks" datatype="html">
+        <source>Tareas</source>
+        <target>Tasks</target>
+      </trans-unit>
+      <trans-unit id="nav.meals" datatype="html">
+        <source>Mesa</source>
+        <target>Meals</target>
+      </trans-unit>
+      <trans-unit id="nav.health" datatype="html">
+        <source>Salud</source>
+        <target>Health</target>
+      </trans-unit>
+      <trans-unit id="nav.school" datatype="html">
+        <source>Cole</source>
+        <target>School</target>
+      </trans-unit>
+      <trans-unit id="nav.family" datatype="html">
+        <source>Nido</source>
+        <target>Nido</target>
+      </trans-unit>
+      <trans-unit id="meals.title-prefix" datatype="html">
+        <source>La</source>
+        <target>The</target>
+      </trans-unit>
+      <trans-unit id="meals.title-emph" datatype="html">
+        <source>mesa</source>
+        <target>table</target>
+      </trans-unit>
+      <trans-unit id="meals.this-week" datatype="html">
+        <source>· esta semana</source>
+        <target>· this week</target>
+      </trans-unit>
+      <trans-unit id="meals.previous-week-aria" datatype="html">
+        <source>Semana anterior</source>
+        <target>Previous week</target>
+      </trans-unit>
+      <trans-unit id="meals.today-button" datatype="html">
+        <source> Hoy </source>
+        <target> Today </target>
+      </trans-unit>
+      <trans-unit id="meals.next-week-aria" datatype="html">
+        <source>Semana siguiente</source>
+        <target>Next week</target>
+      </trans-unit>
+      <trans-unit id="meals.duplicate-previous" datatype="html">
+        <source> Duplicar semana anterior </source>
+        <target> Duplicate previous week </target>
+      </trans-unit>
+      <trans-unit id="meals.loading" datatype="html">
+        <source>Cargando…</source>
+        <target>Loading…</target>
+      </trans-unit>
+      <trans-unit id="meals.load-error" datatype="html">
+        <source> No se pudo cargar la planificación. Reintenta en un momento. </source>
+        <target> Could not load the meal plan. Try again in a moment. </target>
+      </trans-unit>
+      <trans-unit id="meals.today-suffix" datatype="html">
+        <source>· hoy</source>
+        <target>· today</target>
+      </trans-unit>
+      <trans-unit id="meals.input-placeholder" datatype="html">
+        <source>¿Qué toca?</source>
+        <target>What's for this slot?</target>
+      </trans-unit>
+      <trans-unit id="meals.slot.lunch" datatype="html">
+        <source>Comida</source>
+        <target>Lunch</target>
+      </trans-unit>
+      <trans-unit id="meals.slot.dinner" datatype="html">
+        <source>Cena</source>
+        <target>Dinner</target>
+      </trans-unit>
+      <trans-unit id="meals.course.first-placeholder" datatype="html">
+        <source>+ primero</source>
+        <target>+ first course</target>
+      </trans-unit>
+      <trans-unit id="meals.course.second-placeholder" datatype="html">
+        <source>+ segundo</source>
+        <target>+ second course</target>
+      </trans-unit>
+      <trans-unit id="calendar.accounts.back-link" datatype="html">
+        <source><x id="START_TAG_FN_ICON" ctype="x-bx_icon" equiv-text="&lt;bx-icon name=&quot;arrow-left&quot; [size]=&quot;14&quot; [strokeWidth]=&quot;2&quot; /&gt;"/><x id="CLOSE_TAG_FN_ICON" ctype="x-bx_icon" equiv-text="&lt;bx-icon name=&quot;arrow-left&quot; [size]=&quot;14&quot; [strokeWidth]=&quot;2&quot; /&gt;"/> Calendario </source>
+        <target><x id="START_TAG_FN_ICON" ctype="x-bx_icon" equiv-text="&lt;bx-icon name=&quot;arrow-left&quot; [size]=&quot;14&quot; [strokeWidth]=&quot;2&quot; /&gt;"/><x id="CLOSE_TAG_FN_ICON" ctype="x-bx_icon" equiv-text="&lt;bx-icon name=&quot;arrow-left&quot; [size]=&quot;14&quot; [strokeWidth]=&quot;2&quot; /&gt;"/> Calendar </target>
+      </trans-unit>
+      <trans-unit id="calendar.accounts.title-prefix" datatype="html">
+        <source>Cuentas</source>
+        <target>Linked</target>
+      </trans-unit>
+      <trans-unit id="calendar.accounts.title-emph" datatype="html">
+        <source>vinculadas</source>
+        <target>accounts</target>
+      </trans-unit>
+      <trans-unit id="calendar.accounts.subtitle" datatype="html">
+        <source> Las cuentas de Google que sincronizan eventos al nido. </source>
+        <target> Google accounts that sync events to the nest. </target>
+      </trans-unit>
+      <trans-unit id="calendar.accounts.link-aria" datatype="html">
+        <source>Vincular cuenta de Google</source>
+        <target>Link Google account</target>
+      </trans-unit>
+      <trans-unit id="calendar.accounts.loading" datatype="html">
+        <source>Cargando…</source>
+        <target>Loading…</target>
+      </trans-unit>
+      <trans-unit id="calendar.accounts.empty" datatype="html">
+        <source> Aún no hay ninguna cuenta vinculada. </source>
+        <target> No accounts linked yet. </target>
+      </trans-unit>
+      <trans-unit id="calendar.accounts.link-google" datatype="html">
+        <source> Vincular Google Calendar </source>
+        <target> Link Google Calendar </target>
+      </trans-unit>
+      <trans-unit id="calendar.accounts.revoked" datatype="html">
+        <source> Acceso revocado — vincula la cuenta de nuevo. </source>
+        <target> Access revoked — link the account again. </target>
+      </trans-unit>
+      <trans-unit id="calendar.accounts.last-error-prefix" datatype="html">
+        <source>Último error:</source>
+        <target>Last error:</target>
+      </trans-unit>
+      <trans-unit id="calendar.accounts.sync-aria" datatype="html">
+        <source>Sincronizar ahora</source>
+        <target>Sync now</target>
+      </trans-unit>
+      <trans-unit id="calendar.accounts.unlink-aria" datatype="html">
+        <source>Desvincular cuenta</source>
+        <target>Unlink account</target>
+      </trans-unit>
+      <trans-unit id="calendar.accounts.unassigned" datatype="html">
+        <source>Sin asignar</source>
+        <target>Unassigned</target>
+      </trans-unit>
+      <trans-unit id="calendar.accounts.import" datatype="html">
+        <source>Importar</source>
+        <target>Import</target>
+      </trans-unit>
+      <trans-unit id="calendar.accounts.member-assign-aria" datatype="html">
+        <source>Miembro asignado a <x id="NAME" equiv-text="calendarSummary"/></source>
+        <target>Member assigned to <x id="NAME" equiv-text="calendarSummary"/></target>
+      </trans-unit>
+      <trans-unit id="calendar.title-prefix" datatype="html">
+        <source>El</source>
+        <target>The</target>
+      </trans-unit>
+      <trans-unit id="calendar.title-emph" datatype="html">
+        <source>calendario</source>
+        <target>calendar</target>
+      </trans-unit>
+      <trans-unit id="calendar.refresh-aria" datatype="html">
+        <source>Refrescar eventos</source>
+        <target>Refresh events</target>
+      </trans-unit>
+      <trans-unit id="calendar.accounts-aria" datatype="html">
+        <source>Cuentas vinculadas</source>
+        <target>Linked accounts</target>
+      </trans-unit>
+      <trans-unit id="calendar.month-view-aria" datatype="html">
+        <source>Vista mensual</source>
+        <target>Month view</target>
+      </trans-unit>
+      <trans-unit id="calendar.loading" datatype="html">
+        <source>Cargando eventos…</source>
+        <target>Loading events…</target>
+      </trans-unit>
+      <trans-unit id="calendar.empty" datatype="html">
+        <source> No hay eventos sincronizados todavía. </source>
+        <target> No events synced yet. </target>
+      </trans-unit>
+      <trans-unit id="calendar.link-google" datatype="html">
+        <source> Vincular Google Calendar </source>
+        <target> Link Google Calendar </target>
+      </trans-unit>
+      <trans-unit id="calendar.drawer.event-label" datatype="html">
+        <source> Evento </source>
+        <target> Event </target>
+      </trans-unit>
+      <trans-unit id="calendar.drawer.open-google" datatype="html">
+        <source>Abrir en Google Calendar ↗</source>
+        <target>Open in Google Calendar ↗</target>
+      </trans-unit>
+      <trans-unit id="calendar.drawer.members-label" datatype="html">
+        <source> A/con quién es este evento </source>
+        <target> Who this event is for </target>
+      </trans-unit>
+      <trans-unit id="calendar.drawer.no-members" datatype="html">
+        <source>Sin miembros todavía.</source>
+        <target>No members yet.</target>
+      </trans-unit>
+      <trans-unit id="calendar.drawer.cancel" datatype="html">
+        <source>Cancelar</source>
+        <target>Cancel</target>
+      </trans-unit>
+      <trans-unit id="calendar.drawer.saving" datatype="html">
+        <source>Guardando…</source>
+        <target>Saving…</target>
+      </trans-unit>
+      <trans-unit id="calendar.drawer.save" datatype="html">
+        <source>Guardar</source>
+        <target>Save</target>
+      </trans-unit>
+      <trans-unit id="calendar.day-cell.no-events" datatype="html">
+        <source><x id="DAY" equiv-text="cell.dayNumber"/>, sin eventos</source>
+        <target><x id="DAY" equiv-text="cell.dayNumber"/>, no events</target>
+      </trans-unit>
+      <trans-unit id="calendar.day-cell.with-events" datatype="html">
+        <source><x id="DAY" equiv-text="cell.dayNumber"/>, <x id="COUNT" equiv-text="cell.totalEvents"/> eventos</source>
+        <target><x id="DAY" equiv-text="cell.dayNumber"/>, <x id="COUNT" equiv-text="cell.totalEvents"/> events</target>
+      </trans-unit>
+      <trans-unit id="tasks.title-prefix" datatype="html"><source>Las</source><target>The</target></trans-unit>
+      <trans-unit id="tasks.title-emph" datatype="html"><source>tareas</source><target>tasks</target></trans-unit>
+      <trans-unit id="tasks.loading" datatype="html"><source>Cargando…</source><target>Loading…</target></trans-unit>
+      <trans-unit id="tasks.load-error" datatype="html"><source> No hemos podido cargar las tareas. Reintenta en un momento. </source><target> Couldn't load tasks. Try again in a moment. </target></trans-unit>
+      <trans-unit id="tasks.week-empty" datatype="html"><source>Semana tranquila 🌿</source><target>Quiet week 🌿</target></trans-unit>
+      <trans-unit id="tasks.show-completed" datatype="html"><source>Mostrar completadas</source><target>Show completed</target></trans-unit>
+      <trans-unit id="tasks.hide-completed" datatype="html"><source>Ocultar completadas</source><target>Hide completed</target></trans-unit>
+      <trans-unit id="tasks.no-date-badge" datatype="html"><source> Sin fecha </source><target> No date </target></trans-unit>
+      <trans-unit id="tasks.floating-detail" datatype="html"><source>Pendiente todos los días hasta marcarse</source><target>Pending every day until checked off</target></trans-unit>
+      <trans-unit id="tasks.no-responsible" datatype="html"><source> sin responsable </source><target> unassigned </target></trans-unit>
+      <trans-unit id="tasks.related-prefix" datatype="html"><source>para</source><target>for</target></trans-unit>
+      <trans-unit id="tasks.edit" datatype="html"><source> Editar </source><target> Edit </target></trans-unit>
+      <trans-unit id="tasks.restore" datatype="html"><source> Recuperar </source><target> Restore </target></trans-unit>
+      <trans-unit id="tasks.archive" datatype="html"><source> Archivar </source><target> Archive </target></trans-unit>
+      <trans-unit id="tasks.delete" datatype="html"><source> Eliminar </source><target> Delete </target></trans-unit>
+      <trans-unit id="tasks.all-empty" datatype="html"><source> Aún no hay tareas. Crea la primera con el botón <x id="START_BOLD_TEXT" ctype="x-b" equiv-text="&lt;b&gt;"/>+<x id="CLOSE_BOLD_TEXT" ctype="x-b" equiv-text="&lt;/b&gt;"/>. </source><target> No tasks yet. Create the first one with the <x id="START_BOLD_TEXT" ctype="x-b" equiv-text="&lt;b&gt;"/>+<x id="CLOSE_BOLD_TEXT" ctype="x-b" equiv-text="&lt;/b&gt;"/> button. </target></trans-unit>
+      <trans-unit id="tasks.floating-short" datatype="html"><source>Pendiente todos los días</source><target>Pending every day</target></trans-unit>
+      <trans-unit id="tasks.day-empty" datatype="html"><source> Nada por hacer aquí ✨ </source><target> Nothing to do here ✨ </target></trans-unit>
+      <trans-unit id="tasks.tab.today" datatype="html"><source>Hoy</source><target>Today</target></trans-unit>
+      <trans-unit id="tasks.tab.week" datatype="html"><source>Esta semana</source><target>This week</target></trans-unit>
+      <trans-unit id="tasks.tab.all" datatype="html"><source>Todas</source><target>All</target></trans-unit>
+      <trans-unit id="tasks.new-task-aria" datatype="html"><source>Nueva tarea</source><target>New task</target></trans-unit>
+      <trans-unit id="tasks.close-editor-aria" datatype="html"><source>Cerrar editor</source><target>Close editor</target></trans-unit>
+      <trans-unit id="tasks.undo-aria" datatype="html"><source>Deshacer</source><target>Undo</target></trans-unit>
+      <trans-unit id="tasks.complete-aria" datatype="html"><source>Completar</source><target>Complete</target></trans-unit>
+      <trans-unit id="tasks.edit-aria" datatype="html"><source>Editar <x id="TITLE" equiv-text="title"/></source><target>Edit <x id="TITLE" equiv-text="title"/></target></trans-unit>
+      <trans-unit id="tasks.reward-title" datatype="html"><source>Recompensa: <x id="POINTS" equiv-text="points"/> puntos</source><target>Reward: <x id="POINTS" equiv-text="points"/> points</target></trans-unit>
+      <trans-unit id="tasks.responsible-title" datatype="html"><source>Responsable: <x id="NAME" equiv-text="this.memberName(memberId)"/></source><target>Assigned to: <x id="NAME" equiv-text="this.memberName(memberId)"/></target></trans-unit>
+      <trans-unit id="tasks.completed-by" datatype="html"><source>por <x id="NAME" equiv-text="this.memberName(memberId)"/></source><target>by <x id="NAME" equiv-text="this.memberName(memberId)"/></target></trans-unit>
+      <trans-unit id="tasks.hidden-count" datatype="html"><source><x id="N" equiv-text="n"/> oculta(s)</source><target><x id="N" equiv-text="n"/> hidden</target></trans-unit>
+      <trans-unit id="tasks.count-one" datatype="html"><source><x id="N" equiv-text="n"/> tarea</source><target><x id="N" equiv-text="n"/> task</target></trans-unit>
+      <trans-unit id="tasks.count-many" datatype="html"><source><x id="N" equiv-text="n"/> tareas</source><target><x id="N" equiv-text="n"/> tasks</target></trans-unit>
+      <trans-unit id="tasks.subtitle.empty" datatype="html"><source>Nada urgente hoy</source><target>Nothing urgent today</target></trans-unit>
+      <trans-unit id="tasks.subtitle.one" datatype="html"><source><x id="N" equiv-text="pending"/> pendiente hoy</source><target><x id="N" equiv-text="pending"/> pending today</target></trans-unit>
+      <trans-unit id="tasks.subtitle.many" datatype="html"><source><x id="N" equiv-text="pending"/> pendientes hoy</source><target><x id="N" equiv-text="pending"/> pending today</target></trans-unit>
+      <trans-unit id="tasks.delete-confirm" datatype="html"><source>¿Eliminar definitivamente &quot;<x id="TITLE" equiv-text="task.title"/>&quot;? Se borrará junto a su historial de completados.</source><target>Delete &quot;<x id="TITLE" equiv-text="task.title"/>&quot; permanently? Its completion history will be removed too.</target></trans-unit>
+      <trans-unit id="tasks.recurrence.once-on" datatype="html"><source>Única · <x id="DATE" equiv-text="this.shortDate(task.dueDate)"/></source><target>One-off · <x id="DATE" equiv-text="this.shortDate(task.dueDate)"/></target></trans-unit>
+      <trans-unit id="tasks.recurrence.once" datatype="html"><source>Única</source><target>One-off</target></trans-unit>
+      <trans-unit id="tasks.recurrence.daily" datatype="html"><source>Cada día</source><target>Every day</target></trans-unit>
+      <trans-unit id="tasks.recurrence.weekly" datatype="html"><source>Semanal · <x id="DAYS" equiv-text="this.weeklyLabel(task.weeklyDays)"/></source><target>Weekly · <x id="DAYS" equiv-text="this.weeklyLabel(task.weeklyDays)"/></target></trans-unit>
+      <trans-unit id="tasks.recurrence.monthly-last" datatype="html"><source>Mensual · último día</source><target>Monthly · last day</target></trans-unit>
+      <trans-unit id="tasks.recurrence.monthly-day" datatype="html"><source>Mensual · día <x id="DAY" equiv-text="task.monthlyDay"/></source><target>Monthly · day <x id="DAY" equiv-text="task.monthlyDay"/></target></trans-unit>
+      <trans-unit id="tasks.done-on-by" datatype="html"><source>Hecha el <x id="DATE" equiv-text="when"/> por <x id="NAME" equiv-text="name"/></source><target>Done on <x id="DATE" equiv-text="when"/> by <x id="NAME" equiv-text="name"/></target></trans-unit>
+      <trans-unit id="tasks.done-on" datatype="html"><source>Hecha el <x id="DATE" equiv-text="when"/></source><target>Done on <x id="DATE" equiv-text="when"/></target></trans-unit>
+      <trans-unit id="task-form.title.edit" datatype="html"><source>Editar tarea</source><target>Edit task</target></trans-unit>
+      <trans-unit id="task-form.title.new" datatype="html"><source>Nueva tarea</source><target>New task</target></trans-unit>
+      <trans-unit id="task-form.label.title" datatype="html"><source> Título </source><target> Title </target></trans-unit>
+      <trans-unit id="task-form.title.placeholder" datatype="html"><source>Fregar el baño</source><target>Mop the bathroom</target></trans-unit>
+      <trans-unit id="task-form.label.description" datatype="html"><source> Descripción </source><target> Description </target></trans-unit>
+      <trans-unit id="task-form.label.category" datatype="html"><source> Categoría </source><target> Category </target></trans-unit>
+      <trans-unit id="task-form.label.time" datatype="html"><source> Hora (opcional) </source><target> Time (optional) </target></trans-unit>
+      <trans-unit id="task-form.label.reward" datatype="html"><source> Recompensa </source><target> Reward </target></trans-unit>
+      <trans-unit id="task-form.reward-aria" datatype="html"><source>Recompensa de la tarea</source><target>Task reward</target></trans-unit>
+      <trans-unit id="task-form.reward-hint" datatype="html"><source> 1 = trivial · 5 = normal · 10 = una paliza </source><target> 1 = trivial · 5 = normal · 10 = a slog </target></trans-unit>
+      <trans-unit id="task-form.floating-explainer" datatype="html"><source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Tarea sin fecha<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> — aparece en &quot;Hoy&quot; todos los días hasta que se marque como hecha. <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;block text-xs text-[color:var(--color-ink-3)] mt-0.5&quot;&gt;"/> Útil para &quot;encargar el jarabe&quot; y similares. <x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/></source><target><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>Dateless task<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> — appears under &quot;Today&quot; every day until checked off. <x id="START_TAG_SPAN" ctype="x-span" equiv-text="&lt;span class=&quot;block text-xs text-[color:var(--color-ink-3)] mt-0.5&quot;&gt;"/> Handy for &quot;order the syrup&quot; and similar. <x id="CLOSE_TAG_SPAN" ctype="x-span" equiv-text="&lt;/span&gt;"/></target></trans-unit>
+      <trans-unit id="task-form.label.recurrence" datatype="html"><source> Recurrencia </source><target> Recurrence </target></trans-unit>
+      <trans-unit id="task-form.label.weekdays" datatype="html"><source> Días </source><target> Days </target></trans-unit>
+      <trans-unit id="task-form.label.monthly-day" datatype="html"><source> Día del mes </source><target> Day of the month </target></trans-unit>
+      <trans-unit id="task-form.last-day" datatype="html"><source>último día</source><target>last day</target></trans-unit>
+      <trans-unit id="task-form.label.start-date" datatype="html"><source> Desde </source><target> From </target></trans-unit>
+      <trans-unit id="task-form.label.due-date" datatype="html"><source> Fecha límite </source><target> Due date </target></trans-unit>
+      <trans-unit id="task-form.label.responsible" datatype="html"><source> Responsable </source><target> Assigned to </target></trans-unit>
+      <trans-unit id="task-form.responsible.none" datatype="html"><source>Sin responsable (lo puede hacer cualquiera)</source><target>Anyone (no fixed assignee)</target></trans-unit>
+      <trans-unit id="task-form.label.related" datatype="html"><source>Relacionados</source><target>Related</target></trans-unit>
+      <trans-unit id="task-form.label.related-hint" datatype="html"><source> (a/con quién es la tarea) </source><target> (who the task concerns) </target></trans-unit>
+      <trans-unit id="task-form.no-members" datatype="html"><source>Sin miembros todavía.</source><target>No members yet.</target></trans-unit>
+      <trans-unit id="task-form.cancel" datatype="html"><source> Cancelar </source><target> Cancel </target></trans-unit>
+      <trans-unit id="task-form.save" datatype="html"><source> Guardar </source><target> Save </target></trans-unit>
+      <trans-unit id="task-form.recurrence.once" datatype="html"><source>Única</source><target>One-off</target></trans-unit>
+      <trans-unit id="task-form.recurrence.daily" datatype="html"><source>Diaria</source><target>Daily</target></trans-unit>
+      <trans-unit id="task-form.recurrence.weekly" datatype="html"><source>Semanal</source><target>Weekly</target></trans-unit>
+      <trans-unit id="task-form.recurrence.monthly" datatype="html"><source>Mensual</source><target>Monthly</target></trans-unit>
+      <trans-unit id="task-form.reward-segment-aria" datatype="html"><source>Recompensa <x id="N" equiv-text="n"/></source><target>Reward <x id="N" equiv-text="n"/></target></trans-unit>
+      <trans-unit id="wall.title-prefix" datatype="html"><source>El</source><target>The</target></trans-unit>
+      <trans-unit id="wall.title-emph" datatype="html"><source>muro</source><target>wall</target></trans-unit>
+      <trans-unit id="wall.subtitle" datatype="html"><source> Pizarra de la cocina digital. </source><target> The digital kitchen pinboard. </target></trans-unit>
+      <trans-unit id="wall.composer.title.edit" datatype="html"><source>Editar mensaje</source><target>Edit message</target></trans-unit>
+      <trans-unit id="wall.composer.title.new" datatype="html"><source>Nuevo mensaje</source><target>New message</target></trans-unit>
+      <trans-unit id="wall.composer.text-label" datatype="html"><source> Texto (markdown) </source><target> Text (markdown) </target></trans-unit>
+      <trans-unit id="wall.composer.text-hint" datatype="html"><source> Escribe <x id="START_TAG_CODE" ctype="x-code" equiv-text="&lt;code&gt;"/>@<x id="CLOSE_TAG_CODE" ctype="x-code" equiv-text="&lt;/code&gt;"/> para mencionar · pega o arrastra una imagen para adjuntarla. </source><target> Type <x id="START_TAG_CODE" ctype="x-code" equiv-text="&lt;code&gt;"/>@<x id="CLOSE_TAG_CODE" ctype="x-code" equiv-text="&lt;/code&gt;"/> to mention · paste or drop an image to attach it. </target></trans-unit>
+      <trans-unit id="wall.composer.preview" datatype="html"><source>Vista previa</source><target>Preview</target></trans-unit>
+      <trans-unit id="wall.composer.preview-loading" datatype="html"><source>renderizando…</source><target>rendering…</target></trans-unit>
+      <trans-unit id="wall.composer.image-label" datatype="html"><source> Imagen (opcional) </source><target> Image (optional) </target></trans-unit>
+      <trans-unit id="wall.composer.uploading" datatype="html"><source>Subiendo…</source><target>Uploading…</target></trans-unit>
+      <trans-unit id="wall.composer.change-image" datatype="html"><source>Cambiar</source><target>Change</target></trans-unit>
+      <trans-unit id="wall.composer.attach-image" datatype="html"><source>Adjuntar</source><target>Attach</target></trans-unit>
+      <trans-unit id="wall.composer.remove-image" datatype="html"><source> Quitar </source><target> Remove </target></trans-unit>
+      <trans-unit id="wall.composer.cancel" datatype="html"><source> Cancelar </source><target> Cancel </target></trans-unit>
+      <trans-unit id="wall.composer.save" datatype="html"><source>Guardar</source><target>Save</target></trans-unit>
+      <trans-unit id="wall.composer.publish" datatype="html"><source>Publicar</source><target>Publish</target></trans-unit>
+      <trans-unit id="wall.loading" datatype="html"><source>Cargando…</source><target>Loading…</target></trans-unit>
+      <trans-unit id="wall.load-error" datatype="html"><source> No hemos podido cargar el muro. Reintenta en un momento. </source><target> Couldn't load the wall. Try again in a moment. </target></trans-unit>
+      <trans-unit id="wall.pinned-section" datatype="html"><source>Fijados</source><target>Pinned</target></trans-unit>
+      <trans-unit id="wall.empty" datatype="html"><source> Todavía nada en el muro. Publica el primer mensaje con el botón <x id="START_BOLD_TEXT" ctype="x-b" equiv-text="&lt;b&gt;"/>+<x id="CLOSE_BOLD_TEXT" ctype="x-b" equiv-text="&lt;/b&gt;"/>. </source><target> Nothing on the wall yet. Post the first message with the <x id="START_BOLD_TEXT" ctype="x-b" equiv-text="&lt;b&gt;"/>+<x id="CLOSE_BOLD_TEXT" ctype="x-b" equiv-text="&lt;/b&gt;"/> button. </target></trans-unit>
+      <trans-unit id="wall.load-more" datatype="html"><source> Cargar más </source><target> Load more </target></trans-unit>
+      <trans-unit id="wall.pinned-badge" datatype="html"><source> Fijado </source><target> Pinned </target></trans-unit>
+      <trans-unit id="wall.edit-aria" datatype="html"><source>Editar</source><target>Edit</target></trans-unit>
+      <trans-unit id="wall.delete-aria" datatype="html"><source>Borrar</source><target>Delete</target></trans-unit>
+      <trans-unit id="wall.open-image-aria" datatype="html"><source>Ver imagen completa</source><target>View full image</target></trans-unit>
+      <trans-unit id="wall.react-aria" datatype="html"><source>Reaccionar</source><target>React</target></trans-unit>
+      <trans-unit id="wall.delete-comment-aria" datatype="html"><source>Borrar comentario</source><target>Delete comment</target></trans-unit>
+      <trans-unit id="wall.no-comments" datatype="html"><source> Sin comentarios todavía. </source><target> No comments yet. </target></trans-unit>
+      <trans-unit id="wall.send-comment" datatype="html"><source> Enviar </source><target> Send </target></trans-unit>
+      <trans-unit id="wall.lightbox-aria" datatype="html"><source>Imagen ampliada</source><target>Expanded image</target></trans-unit>
+      <trans-unit id="wall.close-lightbox-aria" datatype="html"><source>Cerrar</source><target>Close</target></trans-unit>
+      <trans-unit id="wall.new-message-aria" datatype="html"><source>Nuevo mensaje</source><target>New message</target></trans-unit>
+      <trans-unit id="wall.close-aria" datatype="html"><source>Cerrar</source><target>Close</target></trans-unit>
+      <trans-unit id="wall.pin-aria" datatype="html"><source>Fijar</source><target>Pin</target></trans-unit>
+      <trans-unit id="wall.unpin-aria" datatype="html"><source>Despinchar</source><target>Unpin</target></trans-unit>
+      <trans-unit id="wall.composer.placeholder" datatype="html"><source>Recuerda sacar al perro 🐕. Escribe @ para mencionar.</source><target>Remember to walk the dog 🐕. Type @ to mention.</target></trans-unit>
+      <trans-unit id="wall.comment.placeholder" datatype="html"><source>Responder… (usa @ para mencionar)</source><target>Reply… (use @ to mention)</target></trans-unit>
+      <trans-unit id="wall.comment-count.one" datatype="html"><source><x id="N" equiv-text="count"/> comentario</source><target><x id="N" equiv-text="count"/> comment</target></trans-unit>
+      <trans-unit id="wall.comment-count.many" datatype="html"><source><x id="N" equiv-text="count"/> comentarios</source><target><x id="N" equiv-text="count"/> comments</target></trans-unit>
+      <trans-unit id="wall.delete-message-confirm" datatype="html"><source>¿Borrar este mensaje?</source><target>Delete this message?</target></trans-unit>
+      <trans-unit id="wall.delete-comment-confirm" datatype="html"><source>¿Borrar este comentario?</source><target>Delete this comment?</target></trans-unit>
+      <trans-unit id="dashboard.tablet-mode-title" datatype="html"><source>Modo tablet (pantalla completa)</source><target>Tablet mode (fullscreen)</target></trans-unit>
+      <trans-unit id="dashboard.tablet-mode" datatype="html"><source>Modo tablet</source><target>Tablet mode</target></trans-unit>
+      <trans-unit id="dashboard.broken-accounts.help" datatype="html"><source> Toca aquí para revisar y vincular de nuevo. </source><target> Tap here to review and re-link. </target></trans-unit>
+      <trans-unit id="dashboard.school-heading" datatype="html"><source>Hoy en el cole</source><target>School today</target></trans-unit>
+      <trans-unit id="dashboard.school.see-more" datatype="html"><source>Ver más</source><target>See more</target></trans-unit>
+      <trans-unit id="dashboard.school.holiday-badge" datatype="html"><source> Festivo </source><target> Holiday </target></trans-unit>
+      <trans-unit id="dashboard.school.no-school" datatype="html"><source>Sin cole</source><target>No school</target></trans-unit>
+      <trans-unit id="dashboard.agenda-heading" datatype="html"><source>Hoy fuera de casa</source><target>Out of the house today</target></trans-unit>
+      <trans-unit id="dashboard.tasks-heading" datatype="html"><source>Tareas de hoy</source><target>Today's tasks</target></trans-unit>
+      <trans-unit id="dashboard.tasks.see-all" datatype="html"><source>Ver todas</source><target>See all</target></trans-unit>
+      <trans-unit id="dashboard.loading" datatype="html"><source>Cargando…</source><target>Loading…</target></trans-unit>
+      <trans-unit id="dashboard.tasks.empty" datatype="html"><source>Nada urgente hoy.</source><target>Nothing urgent today.</target></trans-unit>
+      <trans-unit id="dashboard.calendar-heading" datatype="html"><source>Próximos eventos</source><target>Upcoming events</target></trans-unit>
+      <trans-unit id="dashboard.calendar.see-all" datatype="html"><source>Calendario</source><target>Calendar</target></trans-unit>
+      <trans-unit id="dashboard.calendar.empty" datatype="html"><source>Sin eventos en los próximos días.</source><target>No events in the next few days.</target></trans-unit>
+      <trans-unit id="dashboard.meals-heading" datatype="html"><source>A la mesa</source><target>To the table</target></trans-unit>
+      <trans-unit id="dashboard.meals.plan" datatype="html"><source>Planificar</source><target>Plan</target></trans-unit>
+      <trans-unit id="dashboard.meals.empty" datatype="html"><source>Sin planificación para hoy ni mañana.</source><target>Nothing planned for today or tomorrow.</target></trans-unit>
+      <trans-unit id="dashboard.meals.plan-week" datatype="html"><source>Planifica la semana</source><target>Plan the week</target></trans-unit>
+      <trans-unit id="dashboard.meals.unplanned" datatype="html"><source>sin planificar</source><target>unplanned</target></trans-unit>
+      <trans-unit id="dashboard.wall-heading" datatype="html"><source>Fijados en el muro</source><target>Pinned on the wall</target></trans-unit>
+      <trans-unit id="dashboard.wall.go" datatype="html"><source>Ir al muro</source><target>Go to the wall</target></trans-unit>
+      <trans-unit id="dashboard.wall.empty" datatype="html"><source>Sin notas fijadas. Fija un mensaje desde el muro para que aparezca aquí.</source><target>No pinned notes. Pin a message from the wall to see it here.</target></trans-unit>
+      <trans-unit id="dashboard.scores-heading" datatype="html"><source>Marcador de la semana</source><target>This week's scoreboard</target></trans-unit>
+      <trans-unit id="dashboard.birthdays-heading" datatype="html"><source>Cumpleaños próximos</source><target>Upcoming birthdays</target></trans-unit>
+      <trans-unit id="dashboard.birthdays.see-all" datatype="html"><source>Nido</source><target>Nido</target></trans-unit>
+      <trans-unit id="dashboard.summary.tasks-one" datatype="html"><source><x id="N" equiv-text="pending"/> tarea hoy</source><target><x id="N" equiv-text="pending"/> task today</target></trans-unit>
+      <trans-unit id="dashboard.summary.tasks-many" datatype="html"><source><x id="N" equiv-text="pending"/> tareas hoy</source><target><x id="N" equiv-text="pending"/> tasks today</target></trans-unit>
+      <trans-unit id="dashboard.summary.events-one" datatype="html"><source><x id="N" equiv-text="events"/> evento próximos</source><target><x id="N" equiv-text="events"/> upcoming event</target></trans-unit>
+      <trans-unit id="dashboard.summary.events-many" datatype="html"><source><x id="N" equiv-text="events"/> eventos próximos</source><target><x id="N" equiv-text="events"/> upcoming events</target></trans-unit>
+      <trans-unit id="dashboard.summary.calm" datatype="html"><source>Hoy parece tranquilo.</source><target>Today looks calm.</target></trans-unit>
+      <trans-unit id="dashboard.tasks.undo-aria" datatype="html"><source>Deshacer</source><target>Undo</target></trans-unit>
+      <trans-unit id="dashboard.tasks.done-aria" datatype="html"><source>Marcar como hecha</source><target>Mark as done</target></trans-unit>
+      <trans-unit id="dashboard.meals.today" datatype="html"><source>Hoy</source><target>Today</target></trans-unit>
+      <trans-unit id="dashboard.meals.tomorrow" datatype="html"><source>Mañana</source><target>Tomorrow</target></trans-unit>
+      <trans-unit id="dashboard.meals.lunch" datatype="html"><source>Comida</source><target>Lunch</target></trans-unit>
+      <trans-unit id="dashboard.meals.dinner" datatype="html"><source>Cena</source><target>Dinner</target></trans-unit>
+      <trans-unit id="dashboard.broken-accounts.one-revoked" datatype="html"><source>La cuenta de Google de <x id="EMAIL" equiv-text="acc.email"/> tiene el acceso revocado.</source><target>The Google account <x id="EMAIL" equiv-text="acc.email"/> has had its access revoked.</target></trans-unit>
+      <trans-unit id="dashboard.broken-accounts.one-error" datatype="html"><source>La cuenta de Google de <x id="EMAIL" equiv-text="acc.email"/> ha tenido un error al sincronizar.</source><target>The Google account <x id="EMAIL" equiv-text="acc.email"/> hit an error while syncing.</target></trans-unit>
+      <trans-unit id="dashboard.broken-accounts.many" datatype="html"><source><x id="N" equiv-text="broken.length"/> cuentas de Google necesitan atención.</source><target><x id="N" equiv-text="broken.length"/> Google accounts need attention.</target></trans-unit>
+      <trans-unit id="dashboard.school.holiday" datatype="html"><source><x id="LABEL" equiv-text="label"/> — hoy no hay cole.</source><target><x id="LABEL" equiv-text="label"/> — no school today.</target></trans-unit>
+      <trans-unit id="dashboard.school.row.unassigned-time" datatype="html"><source><x id="KID" equiv-text="kid"/> · &lt;em&gt;sin asignar&lt;/em&gt; · a las <x id="TIME" equiv-text="afternoon"/></source><target><x id="KID" equiv-text="kid"/> · &lt;em&gt;unassigned&lt;/em&gt; · at <x id="TIME" equiv-text="afternoon"/></target></trans-unit>
+      <trans-unit id="dashboard.school.row.unassigned" datatype="html"><source><x id="KID" equiv-text="kid"/> · &lt;em&gt;sin asignar&lt;/em&gt;</source><target><x id="KID" equiv-text="kid"/> · &lt;em&gt;unassigned&lt;/em&gt;</target></trans-unit>
+      <trans-unit id="dashboard.school.row.drop-time" datatype="html"><source> · lleva <x id="NAME" equiv-text="drop"/> a las <x id="TIME" equiv-text="morning"/></source><target> · drop-off by <x id="NAME" equiv-text="drop"/> at <x id="TIME" equiv-text="morning"/></target></trans-unit>
+      <trans-unit id="dashboard.school.row.drop" datatype="html"><source> · lleva <x id="NAME" equiv-text="drop"/></source><target> · drop-off by <x id="NAME" equiv-text="drop"/></target></trans-unit>
+      <trans-unit id="dashboard.school.row.pickup-time" datatype="html"><source> · recoge <x id="NAME" equiv-text="pick"/> a las <x id="TIME" equiv-text="afternoon"/></source><target> · pickup by <x id="NAME" equiv-text="pick"/> at <x id="TIME" equiv-text="afternoon"/></target></trans-unit>
+      <trans-unit id="dashboard.school.row.pickup" datatype="html"><source> · recoge <x id="NAME" equiv-text="pick"/></source><target> · pickup by <x id="NAME" equiv-text="pick"/></target></trans-unit>
+      <trans-unit id="dashboard.school.extra.base" datatype="html"><source><x id="NAME" equiv-text="name"/> · <x id="KID" equiv-text="kidName"/> · <x id="START" equiv-text="start"/>–<x id="END" equiv-text="end"/></source><target><x id="NAME" equiv-text="name"/> · <x id="KID" equiv-text="kidName"/> · <x id="START" equiv-text="start"/>–<x id="END" equiv-text="end"/></target></trans-unit>
+      <trans-unit id="dashboard.school.extra.drop" datatype="html"><source> · lleva <x id="NAME" equiv-text="drop"/></source><target> · drop-off by <x id="NAME" equiv-text="drop"/></target></trans-unit>
+      <trans-unit id="dashboard.school.extra.pickup" datatype="html"><source> · recoge <x id="NAME" equiv-text="pick"/></source><target> · pickup by <x id="NAME" equiv-text="pick"/></target></trans-unit>
+      <trans-unit id="dashboard.scores.tasks-one" datatype="html"><source><x id="N" equiv-text="count"/> tarea</source><target><x id="N" equiv-text="count"/> task</target></trans-unit>
+      <trans-unit id="dashboard.scores.tasks-many" datatype="html"><source><x id="N" equiv-text="count"/> tareas</source><target><x id="N" equiv-text="count"/> tasks</target></trans-unit>
+      <trans-unit id="dashboard.birthdays.age" datatype="html"><source><x id="N" equiv-text="age"/> años</source><target><x id="N" equiv-text="age"/> years old</target></trans-unit>
+      <trans-unit id="account.title-prefix" datatype="html"><source>Mi</source><target>My</target></trans-unit>
+      <trans-unit id="account.title-emph" datatype="html"><source>cuenta</source><target>account</target></trans-unit>
+      <trans-unit id="account.credentials.heading" datatype="html"><source> Métodos de inicio de sesión </source><target> Sign-in methods </target></trans-unit>
+      <trans-unit id="account.credentials.set-password" datatype="html"><source>Establecer contraseña local</source><target>Set local password</target></trans-unit>
+      <trans-unit id="account.credentials.change-password" datatype="html"><source>Cambiar contraseña</source><target>Change password</target></trans-unit>
+      <trans-unit id="account.loading" datatype="html"><source>Cargando…</source><target>Loading…</target></trans-unit>
+      <trans-unit id="account.credentials.none" datatype="html"><source>No hay credenciales registradas.</source><target>No credentials registered.</target></trans-unit>
+      <trans-unit id="account.credentials.added-on" datatype="html"><source>Añadida el</source><target>Added on</target></trans-unit>
+      <trans-unit id="account.credentials.last-used" datatype="html"><source>· última vez</source><target>· last used</target></trans-unit>
+      <trans-unit id="account.credentials.remove" datatype="html"><source>Eliminar</source><target>Remove</target></trans-unit>
+      <trans-unit id="account.password-form.current" datatype="html"><source> Contraseña actual </source><target> Current password </target></trans-unit>
+      <trans-unit id="account.password-form.new" datatype="html"><source> Contraseña nueva </source><target> New password </target></trans-unit>
+      <trans-unit id="account.password-form.repeat" datatype="html"><source> Repítela </source><target> Repeat it </target></trans-unit>
+      <trans-unit id="account.password-form.help" datatype="html"><source> Mínimo 8 caracteres con al menos una letra y un número. </source><target> At least 8 characters with one letter and one digit. </target></trans-unit>
+      <trans-unit id="account.password-form.saving" datatype="html"><source>Guardando…</source><target>Saving…</target></trans-unit>
+      <trans-unit id="account.password-form.save" datatype="html"><source>Guardar</source><target>Save</target></trans-unit>
+      <trans-unit id="account.password-form.cancel" datatype="html"><source>Cancelar</source><target>Cancel</target></trans-unit>
+      <trans-unit id="account.notifications.heading" datatype="html"><source> Notificaciones por email </source><target> Email notifications </target></trans-unit>
+      <trans-unit id="account.notifications.intro" datatype="html"><source> Activa cada tipo de aviso de forma independiente. Si desactivas el primero, no recibirás ningún email. </source><target> Toggle each notification type on or off. If you turn off the first one, you won't receive any emails. </target></trans-unit>
+      <trans-unit id="account.notifications.master-name" datatype="html"><source>Recibir cualquier email</source><target>Receive any email</target></trans-unit>
+      <trans-unit id="account.notifications.master-desc" datatype="html"><source>Interruptor general — apaga todos los avisos por email.</source><target>Master switch — turns off all email notifications.</target></trans-unit>
+      <trans-unit id="account.notifications.digest-name" datatype="html"><source>Resumen diario por la mañana</source><target>Daily morning digest</target></trans-unit>
+      <trans-unit id="account.notifications.digest-desc" datatype="html"><source>Tareas, eventos y cumpleaños del día.</source><target>Today's tasks, events and birthdays.</target></trans-unit>
+      <trans-unit id="account.notifications.task-name" datatype="html"><source>Tareas asignadas</source><target>Assigned tasks</target></trans-unit>
+      <trans-unit id="account.notifications.task-desc" datatype="html"><source>Cuando alguien te marca como responsable de una tarea.</source><target>When someone assigns a task to you.</target></trans-unit>
+      <trans-unit id="account.notifications.mention-name" datatype="html"><source>Menciones en el muro</source><target>Mentions on the wall</target></trans-unit>
+      <trans-unit id="account.notifications.mention-desc" datatype="html"><source>Cuando alguien te menciona con <x id="START_TAG_CODE" ctype="x-code" equiv-text="&lt;code&gt;"/>@<x id="CLOSE_TAG_CODE" ctype="x-code" equiv-text="&lt;/code&gt;"/> en un mensaje o comentario.</source><target>When someone mentions you with <x id="START_TAG_CODE" ctype="x-code" equiv-text="&lt;code&gt;"/>@<x id="CLOSE_TAG_CODE" ctype="x-code" equiv-text="&lt;/code&gt;"/> in a message or comment.</target></trans-unit>
+      <trans-unit id="account.notifications.loading" datatype="html"><source>Cargando preferencias…</source><target>Loading preferences…</target></trans-unit>
+      <trans-unit id="account.digest-preview.title" datatype="html"><source>Vista previa del resumen diario</source><target>Daily digest preview</target></trans-unit>
+      <trans-unit id="account.digest-preview.intro" datatype="html"><source>Envía el digest de hoy a tu email — sólo a ti, nadie más recibe nada.</source><target>Send today's digest to your email — only you, nobody else.</target></trans-unit>
+      <trans-unit id="account.digest-preview.sending" datatype="html"><source>Enviando…</source><target>Sending…</target></trans-unit>
+      <trans-unit id="account.digest-preview.send" datatype="html"><source>Enviarme un preview</source><target>Send me a preview</target></trans-unit>
+      <trans-unit id="account.widgets.heading" datatype="html"><source> Widgets del panel </source><target> Dashboard widgets </target></trans-unit>
+      <trans-unit id="account.widgets.intro" datatype="html"><source> Activa o desactiva cada widget del panel y reordénalos con las flechas. Los cambios se aplican al instante. </source><target> Toggle each dashboard widget and reorder them with the arrows. Changes apply instantly. </target></trans-unit>
+      <trans-unit id="account.widgets.drag-aria" datatype="html"><source>Arrastrar para reordenar</source><target>Drag to reorder</target></trans-unit>
+      <trans-unit id="account.widgets.drag-title" datatype="html"><source>Arrastrar para reordenar</source><target>Drag to reorder</target></trans-unit>
+      <trans-unit id="account.widgets.loading" datatype="html"><source>Cargando widgets…</source><target>Loading widgets…</target></trans-unit>
+      <trans-unit id="account.api-keys.heading" datatype="html"><source> Claves de API para integraciones </source><target> API keys for integrations </target></trans-unit>
+      <trans-unit id="account.api-keys.intro" datatype="html"><source> Genera una clave por cada cliente externo (scripts, atajos del iPhone…). Solo dan acceso a <x id="START_TAG_CODE" ctype="x-code" equiv-text="&lt;code&gt;"/>/api/integrations/*<x id="CLOSE_TAG_CODE" ctype="x-code" equiv-text="&lt;/code&gt;"/>, no al resto de la app. La clave en claro se muestra <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>una única vez<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> al crearla — cópiala y pégala en el cliente antes de cerrar el panel. </source><target> Generate one key per external client (scripts, iPhone shortcuts…). Each key only grants access to <x id="START_TAG_CODE" ctype="x-code" equiv-text="&lt;code&gt;"/>/api/integrations/*<x id="CLOSE_TAG_CODE" ctype="x-code" equiv-text="&lt;/code&gt;"/>, not the rest of the app. The plaintext key is shown <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>only once<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> when created — copy and paste it into the client before closing this panel. </target></trans-unit>
+      <trans-unit id="account.api-keys.new-key.label" datatype="html"><source> Esta es tu nueva clave. Cópiala ahora — no podrás volver a verla. </source><target> This is your new key. Copy it now — you won't be able to see it again. </target></trans-unit>
+      <trans-unit id="account.api-keys.new-key.copy" datatype="html"><source>Copiar</source><target>Copy</target></trans-unit>
+      <trans-unit id="account.api-keys.new-key.dismiss" datatype="html"><source>Ya la he copiado</source><target>I've copied it</target></trans-unit>
+      <trans-unit id="account.api-keys.name-placeholder" datatype="html"><source>Nombre (p. ej. atajo de iOS)</source><target>Name (e.g. an iOS shortcut)</target></trans-unit>
+      <trans-unit id="account.api-keys.creating" datatype="html"><source>Creando…</source><target>Creating…</target></trans-unit>
+      <trans-unit id="account.api-keys.create" datatype="html"><source>Crear clave</source><target>Create key</target></trans-unit>
+      <trans-unit id="account.api-keys.empty" datatype="html"><source> Todavía no tienes claves. Crea una para empezar a integrar. </source><target> No keys yet. Create one to start integrating. </target></trans-unit>
+      <trans-unit id="account.api-keys.revoked-tag" datatype="html"><source>· revocada</source><target>· revoked</target></trans-unit>
+      <trans-unit id="account.api-keys.created" datatype="html"><source>· creada</source><target>· created</target></trans-unit>
+      <trans-unit id="account.api-keys.used" datatype="html"><source>· usada</source><target>· used</target></trans-unit>
+      <trans-unit id="account.api-keys.unused" datatype="html"><source>· sin usar</source><target>· unused</target></trans-unit>
+      <trans-unit id="account.api-keys.revoking" datatype="html"><source>Revocando…</source><target>Revoking…</target></trans-unit>
+      <trans-unit id="account.api-keys.revoke" datatype="html"><source>Revocar</source><target>Revoke</target></trans-unit>
+      <trans-unit id="account.location.heading" datatype="html"><source> Ubicación de la familia </source><target> Family location </target></trans-unit>
+      <trans-unit id="account.location.intro" datatype="html"><source> Latitud y longitud (decimales) y etiqueta visible. Activan el widget de meteo en el panel. Déjalas vacías para desactivarlo. </source><target> Latitude and longitude (decimals) and a visible label. Enables the weather widget on the dashboard. Leave them empty to disable it. </target></trans-unit>
+      <trans-unit id="account.location.latitude" datatype="html"><source>Latitud</source><target>Latitude</target></trans-unit>
+      <trans-unit id="account.location.longitude" datatype="html"><source>Longitud</source><target>Longitude</target></trans-unit>
+      <trans-unit id="account.location.label" datatype="html"><source>Etiqueta</source><target>Label</target></trans-unit>
+      <trans-unit id="account.location.saving" datatype="html"><source>Guardando…</source><target>Saving…</target></trans-unit>
+      <trans-unit id="account.location.save" datatype="html"><source>Guardar</source><target>Save</target></trans-unit>
+      <trans-unit id="account.session.heading" datatype="html"><source> Sesión </source><target> Session </target></trans-unit>
+      <trans-unit id="account.session.logout" datatype="html"><source>Cerrar sesión</source><target>Sign out</target></trans-unit>
+      <trans-unit id="account.api-keys.error.load" datatype="html"><source>No se pudieron cargar las claves de integración.</source><target>Couldn't load the integration keys.</target></trans-unit>
+      <trans-unit id="account.api-keys.error.no-name" datatype="html"><source>Dale un nombre a la clave (p. ej. &quot;an iOS shortcut&quot;).</source><target>Give the key a name (e.g. &quot;an iOS shortcut&quot;).</target></trans-unit>
+      <trans-unit id="account.api-keys.error.create" datatype="html"><source>No se pudo crear la clave.</source><target>Couldn't create the key.</target></trans-unit>
+      <trans-unit id="account.api-keys.copied" datatype="html"><source>Copiado.</source><target>Copied.</target></trans-unit>
+      <trans-unit id="account.api-keys.copy-failed" datatype="html"><source>No se pudo copiar — selecciona el texto manualmente.</source><target>Couldn't copy — select the text manually.</target></trans-unit>
+      <trans-unit id="account.api-keys.revoke-confirm" datatype="html"><source>¿Revocar la clave &quot;<x id="NAME" equiv-text="key.name"/>&quot;? Cualquier integración que la use dejará de funcionar.</source><target>Revoke the key &quot;<x id="NAME" equiv-text="key.name"/>&quot;? Any integration using it will stop working.</target></trans-unit>
+      <trans-unit id="account.api-keys.error.revoke" datatype="html"><source>No se pudo revocar la clave.</source><target>Couldn't revoke the key.</target></trans-unit>
+      <trans-unit id="account.widgets.weather" datatype="html"><source>Tiempo</source><target>Weather</target></trans-unit>
+      <trans-unit id="account.widgets.school" datatype="html"><source>Hoy en el cole</source><target>School today</target></trans-unit>
+      <trans-unit id="account.widgets.agenda" datatype="html"><source>Hoy fuera de casa</source><target>Out of the house today</target></trans-unit>
+      <trans-unit id="account.widgets.tasks" datatype="html"><source>Tareas de hoy</source><target>Today's tasks</target></trans-unit>
+      <trans-unit id="account.widgets.calendar" datatype="html"><source>Próximos eventos</source><target>Upcoming events</target></trans-unit>
+      <trans-unit id="account.widgets.meals" datatype="html"><source>A la mesa</source><target>To the table</target></trans-unit>
+      <trans-unit id="account.widgets.wall" datatype="html"><source>Fijados en el muro</source><target>Pinned on the wall</target></trans-unit>
+      <trans-unit id="account.widgets.scores" datatype="html"><source>Marcador de la semana</source><target>This week's scoreboard</target></trans-unit>
+      <trans-unit id="account.widgets.birthdays" datatype="html"><source>Cumpleaños próximos</source><target>Upcoming birthdays</target></trans-unit>
+      <trans-unit id="account.credentials.cannot-remove" datatype="html"><source>No puedes eliminar el último método.</source><target>You can't remove the last method.</target></trans-unit>
+      <trans-unit id="account.widgets.error.load" datatype="html"><source>No se pudieron cargar los widgets del panel.</source><target>Couldn't load the dashboard widgets.</target></trans-unit>
+      <trans-unit id="account.widgets.error.save" datatype="html"><source>No se pudieron guardar los widgets.</source><target>Couldn't save the widgets.</target></trans-unit>
+      <trans-unit id="account.location.error.load" datatype="html"><source>No se pudieron cargar los datos de la familia.</source><target>Couldn't load family data.</target></trans-unit>
+      <trans-unit id="account.location.error.both-required" datatype="html"><source>Latitud y longitud deben rellenarse o vaciarse a la vez.</source><target>Latitude and longitude must both be set or both be empty.</target></trans-unit>
+      <trans-unit id="account.location.error.not-numbers" datatype="html"><source>Latitud y longitud deben ser números.</source><target>Latitude and longitude must be numbers.</target></trans-unit>
+      <trans-unit id="account.location.error.out-of-range" datatype="html"><source>Coordenadas fuera de rango (lat ±90, lon ±180).</source><target>Coordinates out of range (lat ±90, lon ±180).</target></trans-unit>
+      <trans-unit id="account.location.flash.cleared" datatype="html"><source>Ubicación borrada.</source><target>Location cleared.</target></trans-unit>
+      <trans-unit id="account.location.flash.saved" datatype="html"><source>Ubicación guardada.</source><target>Location saved.</target></trans-unit>
+      <trans-unit id="account.location.error.save" datatype="html"><source>No se pudo guardar la ubicación.</source><target>Couldn't save the location.</target></trans-unit>
+      <trans-unit id="account.notifications.error.load" datatype="html"><source>No se pudieron cargar las preferencias.</source><target>Couldn't load the preferences.</target></trans-unit>
+      <trans-unit id="account.notifications.error.save" datatype="html"><source>No se pudo guardar la preferencia.</source><target>Couldn't save the preference.</target></trans-unit>
+      <trans-unit id="account.digest-preview.flash.empty" datatype="html"><source>Hoy el digest no tiene contenido (ningún email enviado).</source><target>Today's digest has no content (no email was sent).</target></trans-unit>
+      <trans-unit id="account.digest-preview.flash.sent" datatype="html"><source>Enviado a <x id="EMAIL" equiv-text="result.email"/>.</source><target>Sent to <x id="EMAIL" equiv-text="result.email"/>.</target></trans-unit>
+      <trans-unit id="account.digest-preview.flash.error" datatype="html"><source>No se pudo enviar — revisa la configuración SMTP.</source><target>Couldn't send — check the SMTP configuration.</target></trans-unit>
+      <trans-unit id="account.error.load-credentials" datatype="html"><source>No se pudieron cargar tus métodos de inicio de sesión.</source><target>Couldn't load your sign-in methods.</target></trans-unit>
+      <trans-unit id="account.password-form.error.too-short" datatype="html"><source>La contraseña debe tener al menos 8 caracteres.</source><target>Password must be at least 8 characters.</target></trans-unit>
+      <trans-unit id="account.password-form.error.weak" datatype="html"><source>La contraseña debe contener al menos una letra y un número.</source><target>Password must contain at least one letter and one digit.</target></trans-unit>
+      <trans-unit id="account.password-form.error.mismatch" datatype="html"><source>Las dos contraseñas no coinciden.</source><target>The two passwords don't match.</target></trans-unit>
+      <trans-unit id="account.password-form.error.current-required" datatype="html"><source>Introduce tu contraseña actual para cambiarla.</source><target>Enter your current password to change it.</target></trans-unit>
+      <trans-unit id="account.password-form.flash.updated" datatype="html"><source>Contraseña actualizada.</source><target>Password updated.</target></trans-unit>
+      <trans-unit id="account.password-form.flash.created" datatype="html"><source>Contraseña local creada. Ya puedes iniciar sesión con email y contraseña.</source><target>Local password created. You can now sign in with email and password.</target></trans-unit>
+      <trans-unit id="account.password-form.error.wrong-current" datatype="html"><source>La contraseña actual no es correcta.</source><target>The current password is incorrect.</target></trans-unit>
+      <trans-unit id="account.password-form.error.invalid" datatype="html"><source>La contraseña no cumple los requisitos.</source><target>The password doesn't meet the requirements.</target></trans-unit>
+      <trans-unit id="account.password-form.error.save-unknown" datatype="html"><source>No se pudo guardar la contraseña. Inténtalo de nuevo.</source><target>Couldn't save the password. Please try again.</target></trans-unit>
+      <trans-unit id="account.credentials.remove-confirm" datatype="html"><source>¿Eliminar el método &quot;<x id="LABEL" equiv-text="label"/>&quot;? Podrás añadirlo de nuevo más tarde.</source><target>Remove the &quot;<x id="LABEL" equiv-text="label"/>&quot; method? You'll be able to add it again later.</target></trans-unit>
+      <trans-unit id="account.credentials.flash.removed" datatype="html"><source>Método de inicio de sesión eliminado.</source><target>Sign-in method removed.</target></trans-unit>
+      <trans-unit id="account.credentials.error.last" datatype="html"><source>No puedes eliminar el último método de inicio de sesión.</source><target>You can't remove the last sign-in method.</target></trans-unit>
+      <trans-unit id="account.credentials.error.remove" datatype="html"><source>No se pudo eliminar el método.</source><target>Couldn't remove the method.</target></trans-unit>
+      <trans-unit id="account.credentials.provider.local" datatype="html"><source>Contraseña local</source><target>Local password</target></trans-unit>
+      <trans-unit id="member.type.adult" datatype="html"><source>Adulto</source><target>Adult</target></trans-unit>
+      <trans-unit id="member.type.child" datatype="html"><source>Niño</source><target>Child</target></trans-unit>
+      <trans-unit id="member.type.other" datatype="html"><source>Otro</source><target>Other</target></trans-unit>
+      <trans-unit id="member.age.months" datatype="html"><source><x id="N" equiv-text="months"/> meses</source><target><x id="N" equiv-text="months"/> months</target></trans-unit>
+      <trans-unit id="member.age.years" datatype="html"><source><x id="N" equiv-text="years"/> años</source><target><x id="N" equiv-text="years"/> years</target></trans-unit>
+      <trans-unit id="member-detail.back" datatype="html"><source>Volver al nido</source><target>Back to the nest</target></trans-unit>
+      <trans-unit id="member-detail.loading" datatype="html"><source>Cargando…</source><target>Loading…</target></trans-unit>
+      <trans-unit id="member-detail.not-found.title" datatype="html"><source>No encontramos a este miembro</source><target>We couldn't find this member</target></trans-unit>
+      <trans-unit id="member-detail.not-found.body" datatype="html"><source> Quizá fue eliminado. Vuelve al nido para ver la lista actualizada. </source><target> They may have been removed. Go back to the nest for the updated list. </target></trans-unit>
+      <trans-unit id="nido.badge.admin" datatype="html"><source> Admin </source><target> Admin </target></trans-unit>
+      <trans-unit id="nido.badge.account" datatype="html"><source> Cuenta </source><target> Account </target></trans-unit>
+      <trans-unit id="nido.badge.invited" datatype="html"><source> Invitado </source><target> Invited </target></trans-unit>
+      <trans-unit id="nido.badge.archived" datatype="html"><source> Archivado </source><target> Archived </target></trans-unit>
+      <trans-unit id="member-detail.remove-photo" datatype="html"><source>Quitar foto</source><target>Remove photo</target></trans-unit>
+      <trans-unit id="member-detail.scores.heading" datatype="html"><source>Puntos</source><target>Points</target></trans-unit>
+      <trans-unit id="member-detail.scores.this-week" datatype="html"><source>Esta semana</source><target>This week</target></trans-unit>
+      <trans-unit id="member-detail.scores.this-month" datatype="html"><source>Este mes</source><target>This month</target></trans-unit>
+      <trans-unit id="member-detail.scores.all-time" datatype="html"><source>Total</source><target>Total</target></trans-unit>
+      <trans-unit id="member-detail.history.heading" datatype="html"><source> Historial de tareas hechas </source><target> Completed tasks history </target></trans-unit>
+      <trans-unit id="member-detail.history.empty" datatype="html"><source> Aún no ha completado ninguna tarea. </source><target> They haven't completed any task yet. </target></trans-unit>
+      <trans-unit id="member-detail.tasks.heading" datatype="html"><source> Sus tareas </source><target> Their tasks </target></trans-unit>
+      <trans-unit id="member-detail.tasks.empty" datatype="html"><source>No tiene tareas asignadas.</source><target>No tasks assigned.</target></trans-unit>
+      <trans-unit id="member-detail.tasks.assign" datatype="html"><source>Asígnale una</source><target>Assign one</target></trans-unit>
+      <trans-unit id="member-detail.tasks.responsible" datatype="html"><source> Responsable </source><target> Assignee </target></trans-unit>
+      <trans-unit id="member-detail.tasks.related" datatype="html"><source> Relacionado </source><target> Related </target></trans-unit>
+      <trans-unit id="member-detail.tasks.open" datatype="html"><source>Abrir</source><target>Open</target></trans-unit>
+      <trans-unit id="member-detail.agenda.heading" datatype="html"><source> Su agenda · próximos 30 días </source><target> Their agenda · next 30 days </target></trans-unit>
+      <trans-unit id="member-detail.agenda.empty" datatype="html"><source>No hay eventos en este miembro.</source><target>No events for this member.</target></trans-unit>
+      <trans-unit id="member-detail.agenda.link-calendar" datatype="html"><source>Vincula un calendario</source><target>Link a calendar</target></trans-unit>
+      <trans-unit id="member-detail.actions.heading" datatype="html"><source> Acciones </source><target> Actions </target></trans-unit>
+      <trans-unit id="member-detail.edit.name" datatype="html"><source>Nombre</source><target>Name</target></trans-unit>
+      <trans-unit id="member-detail.edit.color" datatype="html"><source>Color</source><target>Color</target></trans-unit>
+      <trans-unit id="member-detail.edit.birthday" datatype="html"><source>Cumpleaños</source><target>Birthday</target></trans-unit>
+      <trans-unit id="member-detail.edit.email" datatype="html"><source>Email</source><target>Email</target></trans-unit>
+      <trans-unit id="member-detail.edit.saving" datatype="html"><source>Guardando…</source><target>Saving…</target></trans-unit>
+      <trans-unit id="member-detail.edit.save" datatype="html"><source>Guardar</source><target>Save</target></trans-unit>
+      <trans-unit id="member-detail.edit.cancel" datatype="html"><source>Cancelar</source><target>Cancel</target></trans-unit>
+      <trans-unit id="member-detail.actions.edit" datatype="html"><source>Editar</source><target>Edit</target></trans-unit>
+      <trans-unit id="member-detail.actions.archive" datatype="html"><source>Archivar</source><target>Archive</target></trans-unit>
+      <trans-unit id="member-detail.actions.restore" datatype="html"><source>Restaurar</source><target>Restore</target></trans-unit>
+      <trans-unit id="member-detail.actions.delete" datatype="html"><source>Eliminar</source><target>Delete</target></trans-unit>
+      <trans-unit id="member-detail.actions.help" datatype="html"><source> &quot;Archivar&quot; oculta al miembro en los selectores; &quot;Eliminar&quot; lo borra permanentemente. </source><target> &quot;Archive&quot; hides the member from selectors; &quot;Delete&quot; removes them permanently. </target></trans-unit>
+      <trans-unit id="member-detail.photo.uploading-title" datatype="html"><source>Subiendo…</source><target>Uploading…</target></trans-unit>
+      <trans-unit id="member-detail.photo.change-title" datatype="html"><source>Cambiar foto</source><target>Change photo</target></trans-unit>
+      <trans-unit id="member-detail.history.summary" datatype="html"><source>últimas <x id="N" equiv-text="n"/> · 🏆 <x id="POINTS" equiv-text="total"/></source><target>last <x id="N" equiv-text="n"/> · 🏆 <x id="POINTS" equiv-text="total"/></target></trans-unit>
+      <trans-unit id="member-detail.error.load" datatype="html"><source>No hemos podido cargar la información de este miembro.</source><target>We couldn't load this member's information.</target></trans-unit>
+      <trans-unit id="nido.form.error.name-required" datatype="html"><source>Necesitas un nombre.</source><target>A name is required.</target></trans-unit>
+      <trans-unit id="nido.form.error.color-format" datatype="html"><source>El color debe tener formato #RRGGBB.</source><target>The color must use the #RRGGBB format.</target></trans-unit>
+      <trans-unit id="nido.form.error.invalid-fields" datatype="html"><source>Algún campo no es válido. Revisa el formulario.</source><target>Some field is invalid. Check the form.</target></trans-unit>
+      <trans-unit id="nido.form.error.save-unknown" datatype="html"><source>No se pudo guardar. Inténtalo de nuevo.</source><target>Couldn't save. Please try again.</target></trans-unit>
+      <trans-unit id="member-detail.photo.error.invalid" datatype="html"><source>El archivo no es una imagen válida o supera el tamaño permitido.</source><target>The file isn't a valid image or it exceeds the allowed size.</target></trans-unit>
+      <trans-unit id="member-detail.photo.error.forbidden" datatype="html"><source>No tienes permiso para cambiar esta foto.</source><target>You don't have permission to change this photo.</target></trans-unit>
+      <trans-unit id="member-detail.photo.error.unknown" datatype="html"><source>No se pudo subir la foto. Inténtalo de nuevo.</source><target>Couldn't upload the photo. Please try again.</target></trans-unit>
+      <trans-unit id="member-detail.photo.remove-confirm" datatype="html"><source>¿Quitar la foto de perfil?</source><target>Remove the profile photo?</target></trans-unit>
+      <trans-unit id="member-detail.photo.error.remove" datatype="html"><source>No se pudo quitar la foto.</source><target>Couldn't remove the photo.</target></trans-unit>
+      <trans-unit id="member-detail.archive-confirm" datatype="html"><source>¿Archivar a <x id="NAME" equiv-text="m.displayName"/>? Quedará oculto en los selectores hasta que lo restaures.</source><target>Archive <x id="NAME" equiv-text="m.displayName"/>? They'll be hidden from selectors until you restore them.</target></trans-unit>
+      <trans-unit id="member-detail.error.archive" datatype="html"><source>No se pudo archivar el miembro.</source><target>Couldn't archive the member.</target></trans-unit>
+      <trans-unit id="member-detail.error.restore" datatype="html"><source>No se pudo restaurar el miembro.</source><target>Couldn't restore the member.</target></trans-unit>
+      <trans-unit id="member-detail.delete-confirm" datatype="html"><source>¿Eliminar a <x id="NAME" equiv-text="m.displayName"/> de forma permanente?
+
+Esta acción no se puede deshacer y solo conviene cuando el miembro fue creado por error. Si solo quieres ocultarlo, usa &quot;Archivar&quot;.</source><target>Permanently delete <x id="NAME" equiv-text="m.displayName"/>?
+
+This action can't be undone and is only useful when the member was created by mistake. To just hide them, use &quot;Archive&quot;.</target></trans-unit>
+      <trans-unit id="member-detail.error.delete-pending-invitation" datatype="html"><source>No se puede eliminar mientras tenga una invitación pendiente. Revócala antes desde el nido.</source><target>Can't delete while a pending invitation exists. Revoke it from the nest first.</target></trans-unit>
+      <trans-unit id="member-detail.error.delete" datatype="html"><source>No se pudo eliminar el miembro.</source><target>Couldn't delete the member.</target></trans-unit>
+      <trans-unit id="member-detail.event.all-day" datatype="html"><source>todo el día</source><target>all day</target></trans-unit>
+      <trans-unit id="member-detail.recurrence.due-on" datatype="html"><source>vence el <x id="DATE" equiv-text="task.dueDate"/></source><target>due <x id="DATE" equiv-text="task.dueDate"/></target></trans-unit>
+      <trans-unit id="member-detail.recurrence.none" datatype="html"><source>sin recurrencia</source><target>no recurrence</target></trans-unit>
+      <trans-unit id="member-detail.recurrence.daily" datatype="html"><source>cada día</source><target>every day</target></trans-unit>
+      <trans-unit id="member-detail.recurrence.weekly" datatype="html"><source>cada semana</source><target>every week</target></trans-unit>
+      <trans-unit id="member-detail.recurrence.monthly-last" datatype="html"><source>último día del mes</source><target>last day of the month</target></trans-unit>
+      <trans-unit id="member-detail.recurrence.monthly-day" datatype="html"><source>día <x id="DAY" equiv-text="task.monthlyDay"/> de cada mes</source><target>day <x id="DAY" equiv-text="task.monthlyDay"/> of each month</target></trans-unit>
+      <trans-unit id="nido.title-prefix" datatype="html"><source>El</source><target>The</target></trans-unit>
+      <trans-unit id="nido.title-emph" datatype="html"><source>nido</source><target>nido</target></trans-unit>
+      <trans-unit id="nido.add-member-aria" datatype="html"><source>Añadir miembro</source><target>Add member</target></trans-unit>
+      <trans-unit id="nido.invitation.created" datatype="html"><source>Invitación creada para</source><target>Invitation created for</target></trans-unit>
+      <trans-unit id="nido.invitation.email-sent" datatype="html"><source>Se ha enviado el email.</source><target>The email has been sent.</target></trans-unit>
+      <trans-unit id="nido.invitation.email-failed" datatype="html"><source>No se pudo enviar el email — copia el enlace y mándaselo tú.</source><target>The email couldn't be sent — copy the link and send it yourself.</target></trans-unit>
+      <trans-unit id="nido.invitation.copy" datatype="html"><source>Copiar</source><target>Copy</target></trans-unit>
+      <trans-unit id="nido.invitation.close" datatype="html"><source>Cerrar</source><target>Close</target></trans-unit>
+      <trans-unit id="nido.add.title" datatype="html"><source>Añadir miembro</source><target>Add member</target></trans-unit>
+      <trans-unit id="nido.add.name-label" datatype="html"><source>Nombre</source><target>Name</target></trans-unit>
+      <trans-unit id="nido.add.type-label" datatype="html"><source>Tipo</source><target>Type</target></trans-unit>
+      <trans-unit id="nido.add.type.adult" datatype="html"><source>Adulto</source><target>Adult</target></trans-unit>
+      <trans-unit id="nido.add.type.child" datatype="html"><source>Niño</source><target>Child</target></trans-unit>
+      <trans-unit id="nido.add.type.other" datatype="html"><source>Otro</source><target>Other</target></trans-unit>
+      <trans-unit id="nido.add.color-label" datatype="html"><source>Color</source><target>Color</target></trans-unit>
+      <trans-unit id="nido.add.birthday-label" datatype="html"><source>Cumpleaños</source><target>Birthday</target></trans-unit>
+      <trans-unit id="nido.add.email-label" datatype="html"><source>Email</source><target>Email</target></trans-unit>
+      <trans-unit id="nido.add.send-invitation" datatype="html"><source>Enviar invitación por email</source><target>Send invitation by email</target></trans-unit>
+      <trans-unit id="nido.add.invite-as-admin" datatype="html"><source>Será administrador del nido</source><target>Will be a nest admin</target></trans-unit>
+      <trans-unit id="nido.add.saving" datatype="html"><source>Guardando…</source><target>Saving…</target></trans-unit>
+      <trans-unit id="nido.add.save" datatype="html"><source>Guardar</source><target>Save</target></trans-unit>
+      <trans-unit id="nido.add.cancel" datatype="html"><source>Cancelar</source><target>Cancel</target></trans-unit>
+      <trans-unit id="nido.loading" datatype="html"><source>Cargando…</source><target>Loading…</target></trans-unit>
+      <trans-unit id="nido.load-error" datatype="html"><source> No hemos podido cargar la información. Reintenta en un momento. </source><target> Couldn't load the information. Try again in a moment. </target></trans-unit>
+      <trans-unit id="nido.badge.no-account" datatype="html"><source> Sin cuenta </source><target> No account </target></trans-unit>
+      <trans-unit id="nido.invite-button" datatype="html"><source>Invitar</source><target>Invite</target></trans-unit>
+      <trans-unit id="nido.empty" datatype="html"><source> Aún no hay miembros. Añade el primero con el botón <x id="START_BOLD_TEXT" ctype="x-b" equiv-text="&lt;b&gt;"/>+<x id="CLOSE_BOLD_TEXT" ctype="x-b" equiv-text="&lt;/b&gt;"/>. </source><target> No members yet. Add the first one with the <x id="START_BOLD_TEXT" ctype="x-b" equiv-text="&lt;b&gt;"/>+<x id="CLOSE_BOLD_TEXT" ctype="x-b" equiv-text="&lt;/b&gt;"/> button. </target></trans-unit>
+      <trans-unit id="nido.pending-invitations.heading" datatype="html"><source> Invitaciones pendientes </source><target> Pending invitations </target></trans-unit>
+      <trans-unit id="nido.invitation.expires-on" datatype="html"><source>· caduca el</source><target>· expires on</target></trans-unit>
+      <trans-unit id="nido.invitation.resend" datatype="html"><source>Reenviar</source><target>Resend</target></trans-unit>
+      <trans-unit id="nido.invitation.revoke" datatype="html"><source>Revocar</source><target>Revoke</target></trans-unit>
+      <trans-unit id="nido.subtitle.empty" datatype="html"><source>Sin miembros todavía</source><target>No members yet</target></trans-unit>
+      <trans-unit id="nido.subtitle.one" datatype="html"><source><x id="N" equiv-text="n"/> miembro</source><target><x id="N" equiv-text="n"/> member</target></trans-unit>
+      <trans-unit id="nido.subtitle.many" datatype="html"><source><x id="N" equiv-text="n"/> miembros</source><target><x id="N" equiv-text="n"/> members</target></trans-unit>
+      <trans-unit id="nido.form.error.email-required" datatype="html"><source>Para invitar por email necesitas un correo.</source><target>To invite by email you need an email address.</target></trans-unit>
+      <trans-unit id="nido.invitation.revoke-confirm" datatype="html"><source>¿Revocar la invitación a <x id="EMAIL" equiv-text="invitation.email"/>?</source><target>Revoke the invitation to <x id="EMAIL" equiv-text="invitation.email"/>?</target></trans-unit>
+      <trans-unit id="health.title-prefix" datatype="html"><source>La</source><target>Family</target></trans-unit>
+      <trans-unit id="health.title-emph" datatype="html"><source>salud</source><target>health</target></trans-unit>
+      <trans-unit id="health.subtitle" datatype="html"><source> Ficha médica ligera, vacunas y medicación por miembro. </source><target> Lightweight medical profile, vaccines and medications per member. </target></trans-unit>
+      <trans-unit id="health.loading" datatype="html"><source>Cargando…</source><target>Loading…</target></trans-unit>
+      <trans-unit id="health.tab.profile" datatype="html"><source>Ficha</source><target>Profile</target></trans-unit>
+      <trans-unit id="health.tab.vaccinations" datatype="html"><source>Vacunas</source><target>Vaccines</target></trans-unit>
+      <trans-unit id="health.tab.medications" datatype="html"><source>Medicación</source><target>Medication</target></trans-unit>
+      <trans-unit id="health.profile.blood-type" datatype="html"><source>Grupo sanguíneo</source><target>Blood type</target></trans-unit>
+      <trans-unit id="health.profile.allergies" datatype="html"><source>Alergias</source><target>Allergies</target></trans-unit>
+      <trans-unit id="health.profile.conditions" datatype="html"><source>Condiciones crónicas</source><target>Chronic conditions</target></trans-unit>
+      <trans-unit id="health.profile.notes" datatype="html"><source>Notas generales</source><target>General notes</target></trans-unit>
+      <trans-unit id="health.cancel" datatype="html"><source>Cancelar</source><target>Cancel</target></trans-unit>
+      <trans-unit id="health.saving" datatype="html"><source>Guardando…</source><target>Saving…</target></trans-unit>
+      <trans-unit id="health.save" datatype="html"><source>Guardar</source><target>Save</target></trans-unit>
+      <trans-unit id="health.profile.notes-short" datatype="html"><source>Notas</source><target>Notes</target></trans-unit>
+      <trans-unit id="health.profile.empty" datatype="html"><source>Aún no hay ficha. Crea una para tener los datos básicos a mano.</source><target>No profile yet. Create one so the basics are at hand.</target></trans-unit>
+      <trans-unit id="health.profile.edit" datatype="html"><source>Editar ficha</source><target>Edit profile</target></trans-unit>
+      <trans-unit id="health.profile.create" datatype="html"><source>Crear ficha</source><target>Create profile</target></trans-unit>
+      <trans-unit id="health.vaccinations.add" datatype="html"><source>Vacuna</source><target>Vaccine</target></trans-unit>
+      <trans-unit id="health.vaccinations.edit-title" datatype="html"><source>Editar vacuna</source><target>Edit vaccine</target></trans-unit>
+      <trans-unit id="health.vaccinations.new-title" datatype="html"><source>Nueva vacuna</source><target>New vaccine</target></trans-unit>
+      <trans-unit id="health.vaccinations.name" datatype="html"><source>Nombre</source><target>Name</target></trans-unit>
+      <trans-unit id="health.vaccinations.date" datatype="html"><source>Fecha</source><target>Date</target></trans-unit>
+      <trans-unit id="health.vaccinations.next-date" datatype="html"><source>Próxima dosis</source><target>Next dose</target></trans-unit>
+      <trans-unit id="health.vaccinations.notes" datatype="html"><source>Notas</source><target>Notes</target></trans-unit>
+      <trans-unit id="health.vaccinations.next-dose" datatype="html"><source>· próxima dosis</source><target>· next dose</target></trans-unit>
+      <trans-unit id="health.edit-aria" datatype="html"><source>Editar</source><target>Edit</target></trans-unit>
+      <trans-unit id="health.delete-aria" datatype="html"><source>Borrar</source><target>Delete</target></trans-unit>
+      <trans-unit id="health.vaccinations.empty" datatype="html"><source> Sin vacunas registradas todavía. </source><target> No vaccines logged yet. </target></trans-unit>
+      <trans-unit id="health.medications.add" datatype="html"><source>Medicación</source><target>Medication</target></trans-unit>
+      <trans-unit id="health.medications.edit-title" datatype="html"><source>Editar medicación</source><target>Edit medication</target></trans-unit>
+      <trans-unit id="health.medications.new-title" datatype="html"><source>Nueva medicación</source><target>New medication</target></trans-unit>
+      <trans-unit id="health.medications.name" datatype="html"><source>Nombre</source><target>Name</target></trans-unit>
+      <trans-unit id="health.medications.dose" datatype="html"><source>Dosis</source><target>Dose</target></trans-unit>
+      <trans-unit id="health.medications.dose-placeholder" datatype="html"><source>5 ml, 1 comprimido…</source><target>5 ml, 1 tablet…</target></trans-unit>
+      <trans-unit id="health.medications.frequency" datatype="html"><source>Frecuencia</source><target>Frequency</target></trans-unit>
+      <trans-unit id="health.medications.frequency-placeholder" datatype="html"><source>cada 8 h, una vez al día…</source><target>every 8 h, once a day…</target></trans-unit>
+      <trans-unit id="health.medications.start" datatype="html"><source>Inicio</source><target>Start</target></trans-unit>
+      <trans-unit id="health.medications.end" datatype="html"><source>Fin (opcional)</source><target>End (optional)</target></trans-unit>
+      <trans-unit id="health.medications.instructions" datatype="html"><source>Instrucciones</source><target>Instructions</target></trans-unit>
+      <trans-unit id="health.medications.active-badge" datatype="html"><source> Activa </source><target> Active </target></trans-unit>
+      <trans-unit id="health.medications.from" datatype="html"><source>desde</source><target>from</target></trans-unit>
+      <trans-unit id="health.medications.until" datatype="html"><source>· hasta</source><target>· until</target></trans-unit>
+      <trans-unit id="health.medications.empty" datatype="html"><source> Sin medicaciones registradas. </source><target> No medications logged. </target></trans-unit>
+      <trans-unit id="health.no-member" datatype="html"><source>Selecciona un miembro arriba para ver su historial.</source><target>Pick a member above to see their history.</target></trans-unit>
+      <trans-unit id="health.error.save-profile" datatype="html"><source>No se pudo guardar la ficha.</source><target>Couldn't save the profile.</target></trans-unit>
+      <trans-unit id="health.error.vacc-required" datatype="html"><source>Falta el nombre o la fecha de la vacuna.</source><target>Missing vaccine name or date.</target></trans-unit>
+      <trans-unit id="health.error.save-vacc" datatype="html"><source>No se pudo guardar la vacuna.</source><target>Couldn't save the vaccine.</target></trans-unit>
+      <trans-unit id="health.delete-vacc-confirm" datatype="html"><source>¿Borrar la vacuna &quot;<x id="NAME" equiv-text="v.name"/>&quot;?</source><target>Delete the vaccine &quot;<x id="NAME" equiv-text="v.name"/>&quot;?</target></trans-unit>
+      <trans-unit id="health.error.delete-vacc" datatype="html"><source>No se pudo borrar la vacuna.</source><target>Couldn't delete the vaccine.</target></trans-unit>
+      <trans-unit id="health.error.med-required" datatype="html"><source>Falta el nombre o la fecha de inicio.</source><target>Missing name or start date.</target></trans-unit>
+      <trans-unit id="health.error.save-med" datatype="html"><source>No se pudo guardar la medicación.</source><target>Couldn't save the medication.</target></trans-unit>
+      <trans-unit id="health.delete-med-confirm" datatype="html"><source>¿Borrar la medicación &quot;<x id="NAME" equiv-text="m.name"/>&quot;?</source><target>Delete the medication &quot;<x id="NAME" equiv-text="m.name"/>&quot;?</target></trans-unit>
+      <trans-unit id="health.error.delete-med" datatype="html"><source>No se pudo borrar la medicación.</source><target>Couldn't delete the medication.</target></trans-unit>
+      <trans-unit id="health.error.load-members" datatype="html"><source>No se pudieron cargar los miembros.</source><target>Couldn't load members.</target></trans-unit>
+      <trans-unit id="health.error.load-profile" datatype="html"><source>No se pudo cargar la ficha.</source><target>Couldn't load the profile.</target></trans-unit>
+      <trans-unit id="school.title-prefix" datatype="html"><source>El</source><target>The</target></trans-unit>
+      <trans-unit id="school.title-emph" datatype="html"><source>cole</source><target>school</target></trans-unit>
+      <trans-unit id="school.subtitle" datatype="html"><source> Logística diaria, extraescolares y festivos. Quién lleva, quién recoge. </source><target> Daily logistics, extracurriculars and holidays. Who drops off, who picks up. </target></trans-unit>
+      <trans-unit id="school.loading" datatype="html"><source>Cargando…</source><target>Loading…</target></trans-unit>
+      <trans-unit id="school.this-week.heading" datatype="html"><source> Esta semana </source><target> This week </target></trans-unit>
+      <trans-unit id="school.previous-week-aria" datatype="html"><source>Semana anterior</source><target>Previous week</target></trans-unit>
+      <trans-unit id="school.today" datatype="html"><source> Hoy </source><target> Today </target></trans-unit>
+      <trans-unit id="school.next-week-aria" datatype="html"><source>Semana siguiente</source><target>Next week</target></trans-unit>
+      <trans-unit id="school.day.empty" datatype="html"><source>Sin cosas del cole.</source><target>Nothing school-related.</target></trans-unit>
+      <trans-unit id="school.day.no-school" datatype="html"><source>· sin cole</source><target>· no school</target></trans-unit>
+      <trans-unit id="school.kids.heading" datatype="html"><source> Niños — ficha y patrón semanal </source><target> Kids — profile and weekly pattern </target></trans-unit>
+      <trans-unit id="school.kids.empty" datatype="html"><source>Añade un miembro tipo &quot;Niño&quot; en /nido para empezar.</source><target>Add a &quot;Child&quot; member in /nido to get started.</target></trans-unit>
+      <trans-unit id="school.kids.profile-button" datatype="html"><source>Ficha</source><target>Profile</target></trans-unit>
+      <trans-unit id="school.kids.pattern-button" datatype="html"><source> Día a día </source><target> Day by day </target></trans-unit>
+      <trans-unit id="school.extras.heading" datatype="html"><source> Extraescolares </source><target> Extracurriculars </target></trans-unit>
+      <trans-unit id="school.extras.new" datatype="html"><source>Nueva</source><target>New</target></trans-unit>
+      <trans-unit id="school.extras.no-kids" datatype="html"><source>No hay niños activos en la familia.</source><target>No active children in the family.</target></trans-unit>
+      <trans-unit id="school.edit-aria" datatype="html"><source>Editar</source><target>Edit</target></trans-unit>
+      <trans-unit id="school.archive-aria" datatype="html"><source>Archivar</source><target>Archive</target></trans-unit>
+      <trans-unit id="school.extras.empty" datatype="html"><source>Sin extraescolares.</source><target>No extracurriculars.</target></trans-unit>
+      <trans-unit id="school.holidays.heading" datatype="html"><source> Festivos del curso </source><target> School-year holidays </target></trans-unit>
+      <trans-unit id="school.holidays.new" datatype="html"><source>Festivo</source><target>Holiday</target></trans-unit>
+      <trans-unit id="school.delete-aria" datatype="html"><source>Borrar</source><target>Delete</target></trans-unit>
+      <trans-unit id="school.holidays.empty" datatype="html"><source>Sin festivos del curso. Añade rangos para no tener que cancelar día a día.</source><target>No school-year holidays yet. Add date ranges so you don't have to cancel day by day.</target></trans-unit>
+      <trans-unit id="school.day-pattern.help-default" datatype="html"><source>Quién lleva por la mañana y quién recoge por la tarde. Deja &quot;—&quot; si ese día no hay cole o no aplica.</source><target>Who drops off in the morning and who picks up in the afternoon. Leave &quot;—&quot; if there's no school that day or it doesn't apply.</target></trans-unit>
+      <trans-unit id="school.day-pattern.help-bus" datatype="html"><source>Bus escolar: solo se rellena quién recoge por la tarde.</source><target>School bus: only the afternoon pickup is filled in.</target></trans-unit>
+      <trans-unit id="school.day-pattern.dropoff-col" datatype="html"><source>Lleva</source><target>Drop-off</target></trans-unit>
+      <trans-unit id="school.day-pattern.pickup-col" datatype="html"><source>Recoge</source><target>Pickup</target></trans-unit>
+      <trans-unit id="school.day-pattern.not-applicable" datatype="html"><source>no aplica</source><target>not applicable</target></trans-unit>
+      <trans-unit id="school.cancel" datatype="html"><source>Cancelar</source><target>Cancel</target></trans-unit>
+      <trans-unit id="school.saving" datatype="html"><source>Guardando…</source><target>Saving…</target></trans-unit>
+      <trans-unit id="school.save" datatype="html"><source>Guardar</source><target>Save</target></trans-unit>
+      <trans-unit id="school.day-exception.cancel" datatype="html"><source>Sin cole ese día</source><target>No school that day</target></trans-unit>
+      <trans-unit id="school.day-exception.dropoff" datatype="html"><source>Lleva ese día</source><target>Drop-off that day</target></trans-unit>
+      <trans-unit id="school.day-exception.no-change" datatype="html"><source>— sin cambio —</source><target>— no change —</target></trans-unit>
+      <trans-unit id="school.day-exception.pickup" datatype="html"><source>Recoge ese día</source><target>Pickup that day</target></trans-unit>
+      <trans-unit id="school.day-exception.morning-time" datatype="html"><source>Hora entrada (este día)</source><target>Drop-off time (this day)</target></trans-unit>
+      <trans-unit id="school.day-exception.afternoon-time" datatype="html"><source>Hora salida (este día)</source><target>Pickup time (this day)</target></trans-unit>
+      <trans-unit id="school.day-exception.times-help" datatype="html"><source> Deja en blanco si la hora habitual no cambia ese día. </source><target> Leave blank if the usual time doesn't change on this day. </target></trans-unit>
+      <trans-unit id="school.day-exception.note" datatype="html"><source>Nota (opcional)</source><target>Note (optional)</target></trans-unit>
+      <trans-unit id="school.day-exception.clear" datatype="html"><source>Quitar excepción</source><target>Clear exception</target></trans-unit>
+      <trans-unit id="school.extra-form.edit-title" datatype="html"><source>Editar extraescolar</source><target>Edit extracurricular</target></trans-unit>
+      <trans-unit id="school.extra-form.new-title" datatype="html"><source>Nueva extraescolar</source><target>New extracurricular</target></trans-unit>
+      <trans-unit id="school.extra-form.name" datatype="html"><source>Nombre</source><target>Name</target></trans-unit>
+      <trans-unit id="school.extra-form.kid" datatype="html"><source>Niño</source><target>Child</target></trans-unit>
+      <trans-unit id="school.extra-form.location" datatype="html"><source>Lugar</source><target>Location</target></trans-unit>
+      <trans-unit id="school.extra-form.weekdays" datatype="html"><source>Días de la semana</source><target>Weekdays</target></trans-unit>
+      <trans-unit id="school.extra-form.start-time" datatype="html"><source>Hora inicio</source><target>Start time</target></trans-unit>
+      <trans-unit id="school.extra-form.end-time" datatype="html"><source>Hora fin</source><target>End time</target></trans-unit>
+      <trans-unit id="school.extra-form.start-date" datatype="html"><source>Inicio del curso</source><target>School-year start</target></trans-unit>
+      <trans-unit id="school.extra-form.end-date" datatype="html"><source>Fin del curso (opcional)</source><target>School-year end (optional)</target></trans-unit>
+      <trans-unit id="school.extra-form.default-dropoff" datatype="html"><source>Lleva por defecto</source><target>Default drop-off</target></trans-unit>
+      <trans-unit id="school.extra-form.default-pickup" datatype="html"><source>Recoge por defecto</source><target>Default pickup</target></trans-unit>
+      <trans-unit id="school.extra-form.phone" datatype="html"><source>Teléfono de contacto</source><target>Contact phone</target></trans-unit>
+      <trans-unit id="school.extra-form.notes" datatype="html"><source>Notas</source><target>Notes</target></trans-unit>
+      <trans-unit id="school.extra-exception.title" datatype="html"><source>Excepción</source><target>Exception</target></trans-unit>
+      <trans-unit id="school.extra-exception.cancel" datatype="html"><source>Cancelar ese día</source><target>Cancel that day</target></trans-unit>
+      <trans-unit id="school.extra-exception.dropoff" datatype="html"><source>Lleva ese día</source><target>Drop-off that day</target></trans-unit>
+      <trans-unit id="school.extra-exception.pickup" datatype="html"><source>Recoge ese día</source><target>Pickup that day</target></trans-unit>
+      <trans-unit id="school.extra-exception.note" datatype="html"><source>Nota</source><target>Note</target></trans-unit>
+      <trans-unit id="school.extra-exception.clear" datatype="html"><source>Quitar excepción</source><target>Clear exception</target></trans-unit>
+      <trans-unit id="school.holiday-form.edit-title" datatype="html"><source>Editar festivo</source><target>Edit holiday</target></trans-unit>
+      <trans-unit id="school.holiday-form.new-title" datatype="html"><source>Nuevo festivo</source><target>New holiday</target></trans-unit>
+      <trans-unit id="school.holiday-form.label" datatype="html"><source>Etiqueta</source><target>Label</target></trans-unit>
+      <trans-unit id="school.holiday-form.start" datatype="html"><source>Inicio</source><target>Start</target></trans-unit>
+      <trans-unit id="school.holiday-form.end" datatype="html"><source>Fin</source><target>End</target></trans-unit>
+      <trans-unit id="school.profile-form.school" datatype="html"><source>Centro</source><target>School</target></trans-unit>
+      <trans-unit id="school.profile-form.grade" datatype="html"><source>Curso</source><target>Grade</target></trans-unit>
+      <trans-unit id="school.profile-form.tutor" datatype="html"><source>Tutor</source><target>Tutor</target></trans-unit>
+      <trans-unit id="school.profile-form.transport" datatype="html"><source>Tipo de transporte</source><target>Transport type</target></trans-unit>
+      <trans-unit id="school.profile-form.morning-time" datatype="html"><source>Hora de entrada</source><target>Drop-off time</target></trans-unit>
+      <trans-unit id="school.profile-form.afternoon-time" datatype="html"><source>Hora de salida</source><target>Pickup time</target></trans-unit>
+      <trans-unit id="school.profile-form.notes" datatype="html"><source>Notas</source><target>Notes</target></trans-unit>
+      <trans-unit id="school.transport.none" datatype="html"><source>Sin transporte gestionado</source><target>No managed transport</target></trans-unit>
+      <trans-unit id="school.transport.bus" datatype="html"><source>Bus escolar</source><target>School bus</target></trans-unit>
+      <trans-unit id="school.transport.walk" datatype="html"><source>Andando</source><target>Walking</target></trans-unit>
+      <trans-unit id="school.transport.car" datatype="html"><source>Coche</source><target>Car</target></trans-unit>
+      <trans-unit id="school.error.load" datatype="html"><source>No se pudo cargar el módulo del cole.</source><target>Couldn't load the school module.</target></trans-unit>
+      <trans-unit id="school.error.refresh-week" datatype="html"><source>No se pudo refrescar la semana.</source><target>Couldn't refresh the week.</target></trans-unit>
+      <trans-unit id="school.error.save-pattern" datatype="html"><source>No se pudo guardar el patrón.</source><target>Couldn't save the pattern.</target></trans-unit>
+      <trans-unit id="school.error.exception-empty" datatype="html"><source>Marca el día como cancelado o cambia al menos un responsable, una hora o añade una nota.</source><target>Mark the day as cancelled, or change at least an adult, a time, or add a note.</target></trans-unit>
+      <trans-unit id="school.error.save-day-exception" datatype="html"><source>No se pudo guardar la excepción.</source><target>Couldn't save the exception.</target></trans-unit>
+      <trans-unit id="school.error.clear-day-exception" datatype="html"><source>No se pudo quitar la excepción.</source><target>Couldn't clear the exception.</target></trans-unit>
+      <trans-unit id="school.error.holiday-label-required" datatype="html"><source>Falta la etiqueta del festivo.</source><target>Missing holiday label.</target></trans-unit>
+      <trans-unit id="school.error.save-holiday" datatype="html"><source>No se pudo guardar el festivo.</source><target>Couldn't save the holiday.</target></trans-unit>
+      <trans-unit id="school.holiday-delete-confirm" datatype="html"><source>¿Borrar el festivo &quot;<x id="LABEL" equiv-text="holiday.label"/>&quot;?</source><target>Delete the holiday &quot;<x id="LABEL" equiv-text="holiday.label"/>&quot;?</target></trans-unit>
+      <trans-unit id="school.error.delete-holiday" datatype="html"><source>No se pudo borrar el festivo.</source><target>Couldn't delete the holiday.</target></trans-unit>
+      <trans-unit id="school.error.extra-name-or-kid" datatype="html"><source>Falta el nombre o el niño.</source><target>Missing name or child.</target></trans-unit>
+      <trans-unit id="school.error.extra-no-days" datatype="html"><source>Selecciona al menos un día de la semana.</source><target>Pick at least one weekday.</target></trans-unit>
+      <trans-unit id="school.error.save-extra" datatype="html"><source>No se pudo guardar la extraescolar.</source><target>Couldn't save the extracurricular.</target></trans-unit>
+      <trans-unit id="school.error.archive-extra" datatype="html"><source>No se pudo archivar.</source><target>Couldn't archive.</target></trans-unit>
+      <trans-unit id="school.error.save-extra-exception" datatype="html"><source>No se pudo guardar la excepción.</source><target>Couldn't save the exception.</target></trans-unit>
+      <trans-unit id="school.error.clear-extra-exception" datatype="html"><source>No se pudo quitar la excepción.</source><target>Couldn't clear the exception.</target></trans-unit>
+      <trans-unit id="school.error.save-profile" datatype="html"><source>No se pudo guardar la ficha.</source><target>Couldn't save the profile.</target></trans-unit>
+      <trans-unit id="school.row.unassigned-time" datatype="html"><source><x id="KID" equiv-text="kid"/> · &lt;em&gt;sin asignar&lt;/em&gt; · a las <x id="TIME" equiv-text="afternoon"/></source><target><x id="KID" equiv-text="kid"/> · &lt;em&gt;unassigned&lt;/em&gt; · at <x id="TIME" equiv-text="afternoon"/></target></trans-unit>
+      <trans-unit id="school.row.unassigned" datatype="html"><source><x id="KID" equiv-text="kid"/> · &lt;em&gt;sin asignar&lt;/em&gt;</source><target><x id="KID" equiv-text="kid"/> · &lt;em&gt;unassigned&lt;/em&gt;</target></trans-unit>
+      <trans-unit id="school.row.drop-time" datatype="html"><source> · lleva <x id="NAME" equiv-text="drop"/> a las <x id="TIME" equiv-text="morning"/></source><target> · drop-off by <x id="NAME" equiv-text="drop"/> at <x id="TIME" equiv-text="morning"/></target></trans-unit>
+      <trans-unit id="school.row.drop" datatype="html"><source> · lleva <x id="NAME" equiv-text="drop"/></source><target> · drop-off by <x id="NAME" equiv-text="drop"/></target></trans-unit>
+      <trans-unit id="school.row.pickup-time" datatype="html"><source> · recoge <x id="NAME" equiv-text="pick"/> a las <x id="TIME" equiv-text="afternoon"/></source><target> · pickup by <x id="NAME" equiv-text="pick"/> at <x id="TIME" equiv-text="afternoon"/></target></trans-unit>
+      <trans-unit id="school.row.pickup" datatype="html"><source> · recoge <x id="NAME" equiv-text="pick"/></source><target> · pickup by <x id="NAME" equiv-text="pick"/></target></trans-unit>
+      <trans-unit id="school.extra.row" datatype="html"><source>Lleva <x id="DROP" equiv-text="drop"/> · recoge <x id="PICK" equiv-text="pick"/></source><target>Drop-off by <x id="DROP" equiv-text="drop"/> · pickup by <x id="PICK" equiv-text="pick"/></target></trans-unit>
+      <trans-unit id="school.extra.defaults" datatype="html"><source>Lleva <x id="DROP" equiv-text="drop"/> · recoge <x id="PICK" equiv-text="pick"/></source><target>Drop-off by <x id="DROP" equiv-text="drop"/> · pickup by <x id="PICK" equiv-text="pick"/></target></trans-unit>
+      <trans-unit id="school.day-pattern.heading" datatype="html"><source>Día a día — <x id="NAME" equiv-text="this.memberName(kidId)"/></source><target>Day by day — <x id="NAME" equiv-text="this.memberName(kidId)"/></target></trans-unit>
+      <trans-unit id="school.profile-form.heading" datatype="html"><source>Ficha — <x id="NAME" equiv-text="this.memberName(memberId)"/></source><target>Profile — <x id="NAME" equiv-text="this.memberName(memberId)"/></target></trans-unit>
+      <trans-unit id="tablet.exit" datatype="html"><source> Salir </source><target> Exit </target></trans-unit>
+      <trans-unit id="tablet.family" datatype="html"><source>familia</source><target>family</target></trans-unit>
+      <trans-unit id="tablet.calm" datatype="html"><source>Hoy parece tranquilo.</source><target>Today looks calm.</target></trans-unit>
+      <trans-unit id="tablet.weather.min" datatype="html"><source>Mín</source><target>Min</target></trans-unit>
+      <trans-unit id="tablet.weather.max" datatype="html"><source>Máx</source><target>Max</target></trans-unit>
+      <trans-unit id="tablet.weather.no-location" datatype="html"><source> Configura la ubicación para ver el tiempo. </source><target> Set the location to see the weather. </target></trans-unit>
+      <trans-unit id="tablet.school.title-prefix" datatype="html"><source>Hoy en el</source><target>Today at</target></trans-unit>
+      <trans-unit id="tablet.school.title-emph" datatype="html"><source>cole</source><target>school</target></trans-unit>
+      <trans-unit id="tablet.school.empty" datatype="html"><source> Sin actividad de cole programada para hoy. </source><target> No school activity scheduled for today. </target></trans-unit>
+      <trans-unit id="tablet.school.no-school" datatype="html"><source>· sin cole</source><target>· no school</target></trans-unit>
+      <trans-unit id="tablet.tasks.title-emph" datatype="html"><source>Tareas</source><target>Tasks</target></trans-unit>
+      <trans-unit id="tablet.tasks.title-suffix" datatype="html"><source>de hoy</source><target>for today</target></trans-unit>
+      <trans-unit id="tablet.tasks.empty" datatype="html"><source>Hoy no queda nada por hacer ✨</source><target>Nothing left to do today ✨</target></trans-unit>
+      <trans-unit id="tablet.tasks.no-date" datatype="html"><source>Sin fecha</source><target>No date</target></trans-unit>
+      <trans-unit id="tablet.calendar.title-prefix" datatype="html"><source>Próxima</source><target>Upcoming</target></trans-unit>
+      <trans-unit id="tablet.calendar.title-emph" datatype="html"><source>agenda</source><target>agenda</target></trans-unit>
+      <trans-unit id="tablet.calendar.empty" datatype="html"><source>Sin eventos en los próximos 7 días.</source><target>No events in the next 7 days.</target></trans-unit>
+      <trans-unit id="tablet.meals.title-prefix" datatype="html"><source>Hoy se come en</source><target>Today at</target></trans-unit>
+      <trans-unit id="tablet.meals.title-emph" datatype="html"><source>la mesa</source><target>the table</target></trans-unit>
+      <trans-unit id="tablet.meals.empty" datatype="html"><source>Sin planificación para hoy.</source><target>Nothing planned for today.</target></trans-unit>
+      <trans-unit id="tablet.meals.empty-prompt" datatype="html"><source>Hora de inventar algo.</source><target>Time to improvise.</target></trans-unit>
+      <trans-unit id="tablet.meals.lunch" datatype="html"><source>Comida</source><target>Lunch</target></trans-unit>
+      <trans-unit id="tablet.meals.unplanned" datatype="html"><source>sin planificar</source><target>unplanned</target></trans-unit>
+      <trans-unit id="tablet.meals.dinner" datatype="html"><source>Cena</source><target>Dinner</target></trans-unit>
+      <trans-unit id="tablet.wall.title-prefix" datatype="html"><source>Lo último en el</source><target>Latest on the</target></trans-unit>
+      <trans-unit id="tablet.wall.title-emph" datatype="html"><source>muro</source><target>wall</target></trans-unit>
+      <trans-unit id="tablet.wall.empty" datatype="html"><source>El muro está en silencio.</source><target>The wall is quiet.</target></trans-unit>
+      <trans-unit id="tablet.page.home" datatype="html"><source>Hoy</source><target>Today</target></trans-unit>
+      <trans-unit id="tablet.page.school" datatype="html"><source>Cole</source><target>School</target></trans-unit>
+      <trans-unit id="tablet.page.tasks" datatype="html"><source>Tareas</source><target>Tasks</target></trans-unit>
+      <trans-unit id="tablet.page.calendar" datatype="html"><source>Agenda</source><target>Agenda</target></trans-unit>
+      <trans-unit id="tablet.page.meals" datatype="html"><source>Mesa</source><target>Meals</target></trans-unit>
+      <trans-unit id="tablet.page.wall" datatype="html"><source>Muro</source><target>Wall</target></trans-unit>
+      <trans-unit id="tablet.event.all-day" datatype="html"><source>Todo el día</source><target>All day</target></trans-unit>
+      <trans-unit id="tablet.holiday.line" datatype="html"><source>Hoy es &lt;strong&gt;<x id="LABEL" equiv-text="this.escape(label)"/>&lt;/strong&gt; · sin cole</source><target>Today is &lt;strong&gt;<x id="LABEL" equiv-text="this.escape(label)"/>&lt;/strong&gt; · no school</target></trans-unit>
+      <trans-unit id="tablet.holiday.line-large" datatype="html"><source>&lt;strong&gt;<x id="LABEL" equiv-text="this.escape(label)"/>&lt;/strong&gt; — hoy no hay cole.</source><target>&lt;strong&gt;<x id="LABEL" equiv-text="this.escape(label)"/>&lt;/strong&gt; — no school today.</target></trans-unit>
+      <trans-unit id="tablet.tasks-pending.one" datatype="html"><source><x id="N" equiv-text="n"/> tarea pendiente para hoy</source><target><x id="N" equiv-text="n"/> task pending today</target></trans-unit>
+      <trans-unit id="tablet.tasks-pending.many" datatype="html"><source><x id="N" equiv-text="n"/> tareas pendientes para hoy</source><target><x id="N" equiv-text="n"/> tasks pending today</target></trans-unit>
+      <trans-unit id="tablet.birthday.line" datatype="html"><source><x id="WHEN" equiv-text="hint"/> cumple &lt;strong&gt;<x id="NAME" equiv-text="name"/>&lt;/strong&gt; (<x id="AGE" equiv-text="row.age"/>)</source><target><x id="WHEN" equiv-text="hint"/>, &lt;strong&gt;<x id="NAME" equiv-text="name"/>&lt;/strong&gt; turns (<x id="AGE" equiv-text="row.age"/>)</target></trans-unit>
+      <trans-unit id="tablet.extra.transport" datatype="html"><source>Lleva <x id="DROP" equiv-text="drop"/> · recoge <x id="PICK" equiv-text="pick"/></source><target>Drop-off by <x id="DROP" equiv-text="drop"/> · pickup by <x id="PICK" equiv-text="pick"/></target></trans-unit>
+      <trans-unit id="tablet.school.row.drop-time" datatype="html"><source> · lleva <x id="NAME" equiv-text="drop"/> a las <x id="TIME" equiv-text="morning"/></source><target> · drop-off by <x id="NAME" equiv-text="drop"/> at <x id="TIME" equiv-text="morning"/></target></trans-unit>
+      <trans-unit id="tablet.school.row.drop" datatype="html"><source> · lleva <x id="NAME" equiv-text="drop"/></source><target> · drop-off by <x id="NAME" equiv-text="drop"/></target></trans-unit>
+      <trans-unit id="tablet.school.row.pickup-time" datatype="html"><source> · recoge <x id="NAME" equiv-text="pick"/> a las <x id="TIME" equiv-text="afternoon"/></source><target> · pickup by <x id="NAME" equiv-text="pick"/> at <x id="TIME" equiv-text="afternoon"/></target></trans-unit>
+      <trans-unit id="tablet.school.row.pickup" datatype="html"><source> · recoge <x id="NAME" equiv-text="pick"/></source><target> · pickup by <x id="NAME" equiv-text="pick"/></target></trans-unit>
+      <trans-unit id="tablet.birthday.hint.today" datatype="html"><source>¡Hoy!</source><target>Today!</target></trans-unit>
+      <trans-unit id="tablet.birthday.hint.tomorrow" datatype="html"><source>Mañana</source><target>Tomorrow</target></trans-unit>
+      <trans-unit id="tablet.birthday.hint.days" datatype="html"><source>En <x id="N" equiv-text="row.daysAhead"/> días</source><target>In <x id="N" equiv-text="row.daysAhead"/> days</target></trans-unit>
+      <trans-unit id="member-agenda.heading" datatype="html"><source> Agenda · días fijos </source><target> Agenda · weekly pattern </target></trans-unit>
+      <trans-unit id="member-agenda.intro" datatype="html"><source> Lo que hace cada semana este miembro y los días puntuales. </source><target> What this member does every week, plus one-off days. </target></trans-unit>
+      <trans-unit id="member-agenda.add-pattern" datatype="html"><source>+ Día fijo</source><target>+ Weekly slot</target></trans-unit>
+      <trans-unit id="member-agenda.add-exception" datatype="html"><source>+ Día puntual</source><target>+ One-off</target></trans-unit>
+      <trans-unit id="member-agenda.loading" datatype="html"><source>Cargando…</source><target>Loading…</target></trans-unit>
+      <trans-unit id="member-agenda.away-badge" datatype="html"><source> fuera </source><target> away </target></trans-unit>
+      <trans-unit id="member-agenda.edit" datatype="html"><source>Editar</source><target>Edit</target></trans-unit>
+      <trans-unit id="member-agenda.delete" datatype="html"><source>Eliminar</source><target>Delete</target></trans-unit>
+      <trans-unit id="member-agenda.no-patterns" datatype="html"><source> Ningún día fijo configurado. </source><target> No weekly slots configured. </target></trans-unit>
+      <trans-unit id="member-agenda.upcoming-exceptions" datatype="html"><source> Próximos días puntuales </source><target> Upcoming one-offs </target></trans-unit>
+      <trans-unit id="member-agenda.cancelled-day" datatype="html"><source>cancelado ese día</source><target>cancelled on that day</target></trans-unit>
+      <trans-unit id="member-agenda.exception.remove" datatype="html"><source>Quitar</source><target>Remove</target></trans-unit>
+      <trans-unit id="member-agenda.pattern.edit-title" datatype="html"><source>Editar día fijo</source><target>Edit weekly slot</target></trans-unit>
+      <trans-unit id="member-agenda.pattern.new-title" datatype="html"><source>Nuevo día fijo</source><target>New weekly slot</target></trans-unit>
+      <trans-unit id="member-agenda.pattern.day" datatype="html"><source>Día</source><target>Day</target></trans-unit>
+      <trans-unit id="member-agenda.pattern.transport" datatype="html"><source>Transporte</source><target>Transport</target></trans-unit>
+      <trans-unit id="member-agenda.pattern.name" datatype="html"><source>Nombre</source><target>Name</target></trans-unit>
+      <trans-unit id="member-agenda.pattern.location" datatype="html"><source>Lugar (opcional)</source><target>Location (optional)</target></trans-unit>
+      <trans-unit id="member-agenda.pattern.start-time" datatype="html"><source>Desde</source><target>From</target></trans-unit>
+      <trans-unit id="member-agenda.pattern.end-time" datatype="html"><source>Hasta</source><target>To</target></trans-unit>
+      <trans-unit id="member-agenda.pattern.is-away" datatype="html"><source>Está fuera de casa ese día</source><target>Away from home that day</target></trans-unit>
+      <trans-unit id="member-agenda.pattern.notes" datatype="html"><source>Notas (opcional)</source><target>Notes (optional)</target></trans-unit>
+      <trans-unit id="member-agenda.saving" datatype="html"><source>Guardando…</source><target>Saving…</target></trans-unit>
+      <trans-unit id="member-agenda.save" datatype="html"><source>Guardar</source><target>Save</target></trans-unit>
+      <trans-unit id="member-agenda.cancel" datatype="html"><source>Cancelar</source><target>Cancel</target></trans-unit>
+      <trans-unit id="member-agenda.exception.new-title" datatype="html"><source> Nuevo día puntual </source><target> New one-off </target></trans-unit>
+      <trans-unit id="member-agenda.exception.date" datatype="html"><source>Fecha</source><target>Date</target></trans-unit>
+      <trans-unit id="member-agenda.weekday.monday" datatype="html"><source>lunes</source><target>Monday</target></trans-unit>
+      <trans-unit id="member-agenda.weekday.tuesday" datatype="html"><source>martes</source><target>Tuesday</target></trans-unit>
+      <trans-unit id="member-agenda.weekday.wednesday" datatype="html"><source>miércoles</source><target>Wednesday</target></trans-unit>
+      <trans-unit id="member-agenda.weekday.thursday" datatype="html"><source>jueves</source><target>Thursday</target></trans-unit>
+      <trans-unit id="member-agenda.weekday.friday" datatype="html"><source>viernes</source><target>Friday</target></trans-unit>
+      <trans-unit id="member-agenda.weekday.saturday" datatype="html"><source>sábado</source><target>Saturday</target></trans-unit>
+      <trans-unit id="member-agenda.weekday.sunday" datatype="html"><source>domingo</source><target>Sunday</target></trans-unit>
+      <trans-unit id="member-agenda.transport.none" datatype="html"><source>Sin transporte</source><target>No transport</target></trans-unit>
+      <trans-unit id="member-agenda.transport.car" datatype="html"><source>Coche</source><target>Car</target></trans-unit>
+      <trans-unit id="member-agenda.transport.bus" datatype="html"><source>Bus</source><target>Bus</target></trans-unit>
+      <trans-unit id="member-agenda.transport.walk" datatype="html"><source>A pie</source><target>Walking</target></trans-unit>
+      <trans-unit id="member-agenda.transport.train" datatype="html"><source>Tren</source><target>Train</target></trans-unit>
+      <trans-unit id="member-agenda.transport.plane" datatype="html"><source>Avión</source><target>Plane</target></trans-unit>
+      <trans-unit id="member-agenda.transport.other" datatype="html"><source>Otro</source><target>Other</target></trans-unit>
+      <trans-unit id="member-agenda.error.load" datatype="html"><source>No pudimos cargar la agenda.</source><target>Couldn't load the agenda.</target></trans-unit>
+      <trans-unit id="member-agenda.label-placeholder" datatype="html"><source>(sin etiqueta)</source><target>(no label)</target></trans-unit>
+      <trans-unit id="member-agenda.all-day" datatype="html"><source>Todo el día</source><target>All day</target></trans-unit>
+      <trans-unit id="member-agenda.form.error.name-required" datatype="html"><source>Necesitas un nombre.</source><target>A name is required.</target></trans-unit>
+      <trans-unit id="member-agenda.form.error.save" datatype="html"><source>No se pudo guardar.</source><target>Couldn't save.</target></trans-unit>
+      <trans-unit id="member-agenda.delete-pattern-confirm" datatype="html"><source>¿Eliminar el patrón &quot;<x id="LABEL" equiv-text="p.label"/>&quot; de los <x id="DAY" equiv-text="this.weekdayLabel(p.dayOfWeek)"/>?</source><target>Delete the &quot;<x id="LABEL" equiv-text="p.label"/>&quot; pattern on <x id="DAY" equiv-text="this.weekdayLabel(p.dayOfWeek)"/>s?</target></trans-unit>
+      <trans-unit id="member-agenda.error.delete" datatype="html"><source>No se pudo eliminar.</source><target>Couldn't delete.</target></trans-unit>
+      <trans-unit id="member-agenda.exception.error.name-required" datatype="html"><source>Pon un nombre al día.</source><target>Give the day a name.</target></trans-unit>
+      <trans-unit id="member-agenda.exception.error.date-required" datatype="html"><source>Falta la fecha.</source><target>Date is missing.</target></trans-unit>
+      <trans-unit id="member-agenda.delete-exception-confirm" datatype="html"><source>¿Eliminar la excepción del <x id="DATE" equiv-text="this.dateLabel(e.date)"/>?</source><target>Delete the exception on <x id="DATE" equiv-text="this.dateLabel(e.date)"/>?</target></trans-unit>
+      <trans-unit id="account.language.heading" datatype="html"><source> Idioma de la interfaz </source><target> Interface language </target></trans-unit>
+      <trans-unit id="account.language.intro" datatype="html"><source> Cambia el idioma de FamilyNido. Al guardar, recargamos la página para servir el bundle correcto. </source><target> Change FamilyNido's language. The page reloads on save so we can serve the right bundle. </target></trans-unit>
+      <trans-unit id="account.language.label" datatype="html"><source>Idioma</source><target>Language</target></trans-unit>
+      <trans-unit id="account.language.option.es" datatype="html"><source>Español (es-ES)</source><target>Spanish (es-ES)</target></trans-unit>
+      <trans-unit id="account.language.option.en" datatype="html"><source>English (en-US)</source><target>English (en-US)</target></trans-unit>
+      <trans-unit id="account.language.saving" datatype="html"><source>Aplicando…</source><target>Applying…</target></trans-unit>
+      <trans-unit id="account.language.save" datatype="html"><source>Aplicar</source><target>Apply</target></trans-unit>
+      <trans-unit id="account.language.error" datatype="html"><source>No se pudo cambiar el idioma. Inténtalo de nuevo.</source><target>Couldn't change the language. Please try again.</target></trans-unit>
+      <trans-unit id="dashboard.tasks.no-responsible" datatype="html"><source>Sin responsable</source><target>Unassigned</target></trans-unit>
+      <trans-unit id="dashboard.tasks.related-prefix" datatype="html"><source>Para <x id="NAMES" equiv-text="related"/></source><target>For <x id="NAMES" equiv-text="related"/></target></trans-unit>
+      <trans-unit id="dashboard.tasks.completed-by" datatype="html"><source>✓ por <x id="NAME" equiv-text="name"/></source><target>✓ by <x id="NAME" equiv-text="name"/></target></trans-unit>
+      <trans-unit id="dashboard.tasks.completed" datatype="html"><source>✓ hecha</source><target>✓ done</target></trans-unit>
+      <trans-unit id="calendar.subtitle.empty" datatype="html"><source>Sin eventos próximos</source><target>No upcoming events</target></trans-unit>
+      <trans-unit id="calendar.subtitle.one" datatype="html"><source><x id="N" equiv-text="total"/> evento próximo</source><target><x id="N" equiv-text="total"/> upcoming event</target></trans-unit>
+      <trans-unit id="calendar.subtitle.many" datatype="html"><source><x id="N" equiv-text="total"/> eventos próximos</source><target><x id="N" equiv-text="total"/> upcoming events</target></trans-unit>
+      <trans-unit id="calendar.event.all-day" datatype="html"><source>Todo el día</source><target>All day</target></trans-unit>
+      <trans-unit id="calendar.accounts.unassigned-fallback" datatype="html"><source>Sin asignar</source><target>Unassigned</target></trans-unit>
+      <trans-unit id="calendar.accounts.never-synced" datatype="html"><source>Sin sincronizar</source><target>Never synced</target></trans-unit>
+      <trans-unit id="calendar.accounts.last-sync" datatype="html"><source>Última sync · <x id="WHEN" equiv-text="when"/></source><target>Last sync · <x id="WHEN" equiv-text="when"/></target></trans-unit>
+    </body>
+  </file>
+</xliff>

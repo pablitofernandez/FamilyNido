@@ -1,0 +1,11 @@
+:host {
+  display: block;
+  /* Hide scrollbars on the tablet root — every page fits the viewport. */
+  overflow: hidden;
+}
+
+.tablet-root {
+  /* Disable text selection on tap so the rotation/advance feels like a kiosk. */
+  user-select: none;
+  -webkit-user-select: none;
+}

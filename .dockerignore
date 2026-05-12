@@ -1,0 +1,38 @@
+# Keep the build context lean for docker builds at the repo root.
+**/.git
+**/.gitignore
+**/.gitattributes
+**/.github
+**/README.md
+**/*.md
+!CLAUDE.md
+
+# .NET build artifacts
+**/bin
+**/obj
+artifacts/
+coverage/
+TestResults/
+
+# Node / Angular
+**/node_modules
+**/dist
+**/.angular
+**/.cache
+
+# Editor
+**/.vs
+**/.vscode
+**/.idea
+
+# Env files — never baked into images
+.env
+**/.env
+**/.env.local
+**/.env.*.local
+
+# Design bundle (reference only, not needed at build time)
+design/
+
+# Compose artifacts
+.docker-data/

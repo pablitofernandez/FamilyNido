@@ -1,0 +1,374 @@
+<article class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl p-5 mb-4">
+  <header class="flex items-center justify-between mb-3 gap-3 flex-wrap">
+    <div>
+      <h2 i18n="@@member-agenda.heading" class="text-xs font-bold uppercase tracking-wider text-[color:var(--color-ink-3)]">
+        Agenda · días fijos
+      </h2>
+      <p i18n="@@member-agenda.intro" class="text-xs text-[color:var(--color-ink-3)] mt-1">
+        Lo que hace cada semana este miembro y los días puntuales.
+      </p>
+    </div>
+    @if (canEdit() && !patternForm() && !exceptionForm()) {
+      <div class="flex gap-2">
+        <button
+          type="button"
+          (click)="openCreatePattern()"
+          class="text-xs font-medium underline cursor-pointer text-[color:var(--color-terra)]"
+          i18n="@@member-agenda.add-pattern"
+        >+ Día fijo</button>
+        <button
+          type="button"
+          (click)="openCreateException()"
+          class="text-xs font-medium underline cursor-pointer text-[color:var(--color-terra)]"
+          i18n="@@member-agenda.add-exception"
+        >+ Día puntual</button>
+      </div>
+    }
+  </header>
+
+  @if (loading()) {
+    <p i18n="@@member-agenda.loading" class="text-sm text-[color:var(--color-ink-3)]">Cargando…</p>
+  } @else if (error()) {
+    <p class="text-sm text-[color:var(--color-error)]">{{ error() }}</p>
+  } @else {
+    <ul class="flex flex-col gap-2">
+      @for (group of patternsByDay(); track group.day) {
+        @if (group.patterns.length > 0) {
+          <li>
+            <p class="text-[11px] font-bold uppercase tracking-wider text-[color:var(--color-ink-2)] mb-1">
+              {{ weekdayLabel(group.day) }}
+            </p>
+            <ul class="flex flex-col gap-1">
+              @for (p of group.patterns; track p.id) {
+                <li class="flex items-center gap-2 text-sm bg-[color:var(--color-bg-2)] rounded-lg px-3 py-2">
+                  @if (p.transportMode !== 'None') {
+                    <span aria-hidden="true">{{ transportIcon(p.transportMode) }}</span>
+                  }
+                  <span class="flex-1 min-w-0">
+                    <strong>{{ p.label }}</strong>
+                    @if (p.location) { · {{ p.location }} }
+                    <span class="text-xs text-[color:var(--color-ink-3)]">
+                      · {{ timeLabel(p.startTime, p.endTime) }}
+                    </span>
+                    @if (p.isAway) {
+                      <span i18n="@@member-agenda.away-badge" class="text-[10px] font-bold tracking-wide uppercase text-[color:var(--color-terra)] bg-[color:var(--color-terra-bg)] px-1.5 py-0.5 rounded-md ml-1">
+                        fuera
+                      </span>
+                    }
+                  </span>
+                  @if (canEdit()) {
+                    <button
+                      type="button"
+                      (click)="openEditPattern(p)"
+                      class="text-xs text-[color:var(--color-terra)] underline cursor-pointer shrink-0"
+                      i18n="@@member-agenda.edit"
+                    >Editar</button>
+                    <button
+                      type="button"
+                      (click)="deletePattern(p)"
+                      class="text-xs text-[color:var(--color-error)] underline cursor-pointer shrink-0"
+                      i18n="@@member-agenda.delete"
+                    >Eliminar</button>
+                  }
+                </li>
+              }
+            </ul>
+          </li>
+        }
+      }
+      @if (patterns().length === 0) {
+        <li i18n="@@member-agenda.no-patterns" class="text-sm text-[color:var(--color-ink-3)] italic">
+          Ningún día fijo configurado.
+        </li>
+      }
+    </ul>
+
+    @if (upcomingExceptions().length > 0) {
+      <div class="mt-4">
+        <p i18n="@@member-agenda.upcoming-exceptions" class="text-[11px] font-bold uppercase tracking-wider text-[color:var(--color-ink-2)] mb-1">
+          Próximos días puntuales
+        </p>
+        <ul class="flex flex-col gap-1">
+          @for (e of upcomingExceptions(); track e.id) {
+            <li class="flex items-center gap-2 text-sm bg-[color:var(--color-bg-2)] rounded-lg px-3 py-2">
+              <span class="text-xs text-[color:var(--color-ink-3)] shrink-0 w-32">
+                {{ dateLabel(e.date) }}
+              </span>
+              <span class="flex-1 min-w-0">
+                @if (e.patternId && e.isCancelled) {
+                  <em i18n="@@member-agenda.cancelled-day" class="text-[color:var(--color-ink-3)]">cancelado ese día</em>
+                } @else {
+                  @if (e.transportMode && e.transportMode !== 'None') {
+                    <span aria-hidden="true">{{ transportIcon(e.transportMode) }}</span>
+                  }
+                  <strong>{{ e.label || labelPlaceholder }}</strong>
+                  @if (e.location) { · {{ e.location }} }
+                  @if (e.startTime || e.endTime) {
+                    <span class="text-xs text-[color:var(--color-ink-3)]">
+                      · {{ timeLabel(e.startTime, e.endTime) }}
+                    </span>
+                  }
+                }
+              </span>
+              @if (canEdit()) {
+                <button
+                  type="button"
+                  (click)="deleteException(e)"
+                  class="text-xs text-[color:var(--color-error)] underline cursor-pointer shrink-0"
+                  i18n="@@member-agenda.exception.remove"
+                >Quitar</button>
+              }
+            </li>
+          }
+        </ul>
+      </div>
+    }
+  }
+
+  @if (patternForm(); as f) {
+    <form (submit)="$event.preventDefault(); submitPattern()" class="mt-4 flex flex-col gap-3 border-t border-[color:var(--color-line)] pt-4">
+      <p class="text-xs font-bold uppercase tracking-wider text-[color:var(--color-ink-3)]">
+        @if (f.id) {
+          <ng-container i18n="@@member-agenda.pattern.edit-title">Editar día fijo</ng-container>
+        } @else {
+          <ng-container i18n="@@member-agenda.pattern.new-title">Nuevo día fijo</ng-container>
+        }
+      </p>
+
+      <div class="grid grid-cols-2 gap-3">
+        <label class="flex flex-col gap-1">
+          <span i18n="@@member-agenda.pattern.day" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Día</span>
+          <select
+            class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+            (change)="updatePatternField('dayOfWeek', $event)"
+          >
+            @for (d of weekdayOrder; track d) {
+              <option [value]="d" [selected]="d === f.dayOfWeek">{{ weekdayLabel(d) }}</option>
+            }
+          </select>
+        </label>
+        <label class="flex flex-col gap-1">
+          <span i18n="@@member-agenda.pattern.transport" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Transporte</span>
+          <select
+            class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+            (change)="updatePatternField('transportMode', $event)"
+          >
+            @for (t of transportModes; track t) {
+              <option [value]="t" [selected]="t === f.transportMode">{{ transportLabel(t) }}</option>
+            }
+          </select>
+        </label>
+      </div>
+
+      <label class="flex flex-col gap-1">
+        <span i18n="@@member-agenda.pattern.name" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Nombre</span>
+        <input
+          type="text"
+          class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+          maxlength="120"
+          placeholder="Mondragón"
+          [value]="f.label"
+          (input)="updatePatternField('label', $event)"
+          required
+        />
+      </label>
+
+      <label class="flex flex-col gap-1">
+        <span i18n="@@member-agenda.pattern.location" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Lugar (opcional)</span>
+        <input
+          type="text"
+          class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+          maxlength="200"
+          [value]="f.location"
+          (input)="updatePatternField('location', $event)"
+        />
+      </label>
+
+      <div class="grid grid-cols-2 gap-3">
+        <label class="flex flex-col gap-1">
+          <span i18n="@@member-agenda.pattern.start-time" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Desde</span>
+          <input
+            type="time"
+            class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+            [value]="f.startTime"
+            (input)="updatePatternField('startTime', $event)"
+          />
+        </label>
+        <label class="flex flex-col gap-1">
+          <span i18n="@@member-agenda.pattern.end-time" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Hasta</span>
+          <input
+            type="time"
+            class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+            [value]="f.endTime"
+            (input)="updatePatternField('endTime', $event)"
+          />
+        </label>
+      </div>
+
+      <label class="inline-flex items-center gap-2 text-sm cursor-pointer">
+        <input
+          type="checkbox"
+          [checked]="f.isAway"
+          (change)="updatePatternField('isAway', $event)"
+        />
+        <ng-container i18n="@@member-agenda.pattern.is-away">Está fuera de casa ese día</ng-container>
+      </label>
+
+      <label class="flex flex-col gap-1">
+        <span i18n="@@member-agenda.pattern.notes" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Notas (opcional)</span>
+        <textarea
+          class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+          rows="2"
+          maxlength="500"
+          [value]="f.notes"
+          (input)="updatePatternField('notes', $event)"
+        ></textarea>
+      </label>
+
+      @if (formError()) {
+        <p class="text-sm text-[color:var(--color-error)]">{{ formError() }}</p>
+      }
+
+      <div class="flex gap-2">
+        <button
+          type="submit"
+          [disabled]="saving()"
+          class="px-5 py-2 rounded-full bg-[color:var(--color-terra)] text-white font-bold tracking-wide cursor-pointer border-0 disabled:opacity-50"
+        >
+          @if (saving()) {
+            <ng-container i18n="@@member-agenda.saving">Guardando…</ng-container>
+          } @else {
+            <ng-container i18n="@@member-agenda.save">Guardar</ng-container>
+          }
+        </button>
+        <button
+          type="button"
+          (click)="closePatternForm()"
+          class="px-5 py-2 rounded-full bg-white border border-[color:var(--color-line)] text-[color:var(--color-ink-2)] cursor-pointer"
+          i18n="@@member-agenda.cancel"
+        >Cancelar</button>
+      </div>
+    </form>
+  }
+
+  @if (exceptionForm(); as f) {
+    <form (submit)="$event.preventDefault(); submitException()" class="mt-4 flex flex-col gap-3 border-t border-[color:var(--color-line)] pt-4">
+      <p i18n="@@member-agenda.exception.new-title" class="text-xs font-bold uppercase tracking-wider text-[color:var(--color-ink-3)]">
+        Nuevo día puntual
+      </p>
+
+      <div class="grid grid-cols-2 gap-3">
+        <label class="flex flex-col gap-1">
+          <span i18n="@@member-agenda.exception.date" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Fecha</span>
+          <input
+            type="date"
+            class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+            [value]="f.date"
+            (input)="updateExceptionField('date', $event)"
+            required
+          />
+        </label>
+        <label class="flex flex-col gap-1">
+          <span i18n="@@member-agenda.pattern.transport" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Transporte</span>
+          <select
+            class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+            (change)="updateExceptionField('transportMode', $event)"
+          >
+            @for (t of transportModes; track t) {
+              <option [value]="t" [selected]="t === f.transportMode">{{ transportLabel(t) }}</option>
+            }
+          </select>
+        </label>
+      </div>
+
+      <label class="flex flex-col gap-1">
+        <span i18n="@@member-agenda.pattern.name" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Nombre</span>
+        <input
+          type="text"
+          class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+          maxlength="120"
+          placeholder="Mondragón"
+          [value]="f.label"
+          (input)="updateExceptionField('label', $event)"
+          required
+        />
+      </label>
+
+      <label class="flex flex-col gap-1">
+        <span i18n="@@member-agenda.pattern.location" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Lugar (opcional)</span>
+        <input
+          type="text"
+          class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+          maxlength="200"
+          [value]="f.location"
+          (input)="updateExceptionField('location', $event)"
+        />
+      </label>
+
+      <div class="grid grid-cols-2 gap-3">
+        <label class="flex flex-col gap-1">
+          <span i18n="@@member-agenda.pattern.start-time" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Desde</span>
+          <input
+            type="time"
+            class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+            [value]="f.startTime"
+            (input)="updateExceptionField('startTime', $event)"
+          />
+        </label>
+        <label class="flex flex-col gap-1">
+          <span i18n="@@member-agenda.pattern.end-time" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Hasta</span>
+          <input
+            type="time"
+            class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+            [value]="f.endTime"
+            (input)="updateExceptionField('endTime', $event)"
+          />
+        </label>
+      </div>
+
+      <label class="inline-flex items-center gap-2 text-sm cursor-pointer">
+        <input
+          type="checkbox"
+          [checked]="f.isAway"
+          (change)="updateExceptionField('isAway', $event)"
+        />
+        <ng-container i18n="@@member-agenda.pattern.is-away">Está fuera de casa ese día</ng-container>
+      </label>
+
+      <label class="flex flex-col gap-1">
+        <span i18n="@@member-agenda.pattern.notes" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Notas (opcional)</span>
+        <textarea
+          class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+          rows="2"
+          maxlength="500"
+          [value]="f.notes"
+          (input)="updateExceptionField('notes', $event)"
+        ></textarea>
+      </label>
+
+      @if (formError()) {
+        <p class="text-sm text-[color:var(--color-error)]">{{ formError() }}</p>
+      }
+
+      <div class="flex gap-2">
+        <button
+          type="submit"
+          [disabled]="saving()"
+          class="px-5 py-2 rounded-full bg-[color:var(--color-terra)] text-white font-bold tracking-wide cursor-pointer border-0 disabled:opacity-50"
+        >
+          @if (saving()) {
+            <ng-container i18n="@@member-agenda.saving">Guardando…</ng-container>
+          } @else {
+            <ng-container i18n="@@member-agenda.save">Guardar</ng-container>
+          }
+        </button>
+        <button
+          type="button"
+          (click)="closeExceptionForm()"
+          class="px-5 py-2 rounded-full bg-white border border-[color:var(--color-line)] text-[color:var(--color-ink-2)] cursor-pointer"
+          i18n="@@member-agenda.cancel"
+        >Cancelar</button>
+      </div>
+    </form>
+  }
+</article>

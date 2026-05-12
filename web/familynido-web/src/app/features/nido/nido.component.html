@@ -1,0 +1,276 @@
+<section class="max-w-3xl mx-auto px-5 pt-6 lg:pt-8 pb-6">
+  <header class="flex items-end justify-between mb-6">
+    <div>
+      <h1 class="font-serif text-3xl lg:text-5xl font-medium tracking-tight">
+        <ng-container i18n="@@nido.title-prefix">El</ng-container>
+        <em class="text-[color:var(--color-terra)] italic font-normal" i18n="@@nido.title-emph">nido</em>
+      </h1>
+      <p class="text-sm text-[color:var(--color-ink-3)] mt-1">
+        {{ subtitle() }}
+      </p>
+    </div>
+    @if (isAdmin()) {
+      <button
+        type="button"
+        class="w-11 h-11 rounded-full border-0 bg-[color:var(--color-terra)] text-white flex items-center justify-center cursor-pointer"
+        i18n-aria-label="@@nido.add-member-aria"
+        aria-label="Añadir miembro"
+        (click)="openAdd()"
+      >
+        <fn-icon name="plus" [size]="20" [strokeWidth]="2.2" />
+      </button>
+    }
+  </header>
+
+  @if (lastInvitation(); as last) {
+    <div class="mb-4 p-4 bg-[color:var(--color-ochre-bg)] border border-[color:var(--color-line)] rounded-2xl">
+      <p class="text-sm font-medium">
+        <ng-container i18n="@@nido.invitation.created">Invitación creada para</ng-container>
+        <strong>{{ last.invitation.email }}</strong>.
+        @if (last.emailDelivered) {
+          <ng-container i18n="@@nido.invitation.email-sent">Se ha enviado el email.</ng-container>
+        } @else {
+          <ng-container i18n="@@nido.invitation.email-failed">No se pudo enviar el email — copia el enlace y mándaselo tú.</ng-container>
+        }
+      </p>
+      <div class="flex gap-2 mt-2 items-center flex-wrap">
+        <input
+          type="text"
+          readonly
+          class="flex-1 min-w-0 px-2 py-1 rounded-md border border-[color:var(--color-line)] bg-white text-xs font-mono"
+          [value]="last.copyLink"
+        />
+        <button
+          type="button"
+          class="text-xs font-medium text-[color:var(--color-terra)] underline cursor-pointer"
+          (click)="copyLink(last.invitation)"
+          i18n="@@nido.invitation.copy"
+        >Copiar</button>
+        <button
+          type="button"
+          class="text-xs font-medium underline cursor-pointer text-[color:var(--color-ink-3)]"
+          (click)="lastInvitation.set(null)"
+          i18n="@@nido.invitation.close"
+        >Cerrar</button>
+      </div>
+    </div>
+  }
+
+  @if (addOpen()) {
+    <article class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl p-5 mb-4">
+      <h2 i18n="@@nido.add.title" class="font-serif text-xl font-semibold mb-3">Añadir miembro</h2>
+
+      <form (submit)="$event.preventDefault(); submitAdd()" class="flex flex-col gap-3">
+        <div>
+          <label i18n="@@nido.add.name-label" class="block text-xs uppercase tracking-wide text-[color:var(--color-ink-3)] mb-1">Nombre</label>
+          <input
+            type="text"
+            class="w-full px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+            [value]="addForm().displayName"
+            (input)="readField('displayName', $event)"
+            maxlength="120"
+            required
+          />
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label i18n="@@nido.add.type-label" class="block text-xs uppercase tracking-wide text-[color:var(--color-ink-3)] mb-1">Tipo</label>
+            <select
+              class="w-full px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+              [value]="addForm().memberType"
+              (change)="onTypeChange($any($event.target).value)"
+            >
+              <option value="Adult" i18n="@@nido.add.type.adult">Adulto</option>
+              <option value="Child" i18n="@@nido.add.type.child">Niño</option>
+              <option value="Other" i18n="@@nido.add.type.other">Otro</option>
+            </select>
+          </div>
+          <div>
+            <label i18n="@@nido.add.color-label" class="block text-xs uppercase tracking-wide text-[color:var(--color-ink-3)] mb-1">Color</label>
+            <input
+              type="color"
+              class="w-full h-10 px-1 py-1 rounded-lg border border-[color:var(--color-line)] bg-white cursor-pointer"
+              [value]="addForm().colorHex"
+              (input)="readField('colorHex', $event)"
+            />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label i18n="@@nido.add.birthday-label" class="block text-xs uppercase tracking-wide text-[color:var(--color-ink-3)] mb-1">Cumpleaños</label>
+            <input
+              type="date"
+              class="w-full px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+              [value]="addForm().birthDate"
+              (input)="readField('birthDate', $event)"
+            />
+          </div>
+          <div>
+            <label i18n="@@nido.add.email-label" class="block text-xs uppercase tracking-wide text-[color:var(--color-ink-3)] mb-1">Email</label>
+            <input
+              type="email"
+              class="w-full px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+              [value]="addForm().contactEmail"
+              (input)="readField('contactEmail', $event)"
+              maxlength="254"
+            />
+          </div>
+        </div>
+
+        @if (addForm().memberType === 'Adult' && addForm().contactEmail.trim().length > 0) {
+          <label class="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              [checked]="addForm().sendInvitation"
+              (change)="updateForm('sendInvitation', $any($event.target).checked)"
+            />
+            <ng-container i18n="@@nido.add.send-invitation">Enviar invitación por email</ng-container>
+          </label>
+          @if (addForm().sendInvitation) {
+            <label class="flex items-center gap-2 text-sm ml-6">
+              <input
+                type="checkbox"
+                [checked]="addForm().inviteAsAdmin"
+                (change)="updateForm('inviteAsAdmin', $any($event.target).checked)"
+              />
+              <ng-container i18n="@@nido.add.invite-as-admin">Será administrador del nido</ng-container>
+            </label>
+          }
+        }
+
+        @if (formError()) {
+          <p class="text-sm text-[color:var(--color-error)]">{{ formError() }}</p>
+        }
+
+        <div class="flex gap-2 mt-2">
+          <button
+            type="submit"
+            [disabled]="submitting()"
+            class="px-5 py-2 rounded-full bg-[color:var(--color-terra)] text-white font-bold tracking-wide cursor-pointer border-0 disabled:opacity-50"
+          >
+            @if (submitting()) {
+              <ng-container i18n="@@nido.add.saving">Guardando…</ng-container>
+            } @else {
+              <ng-container i18n="@@nido.add.save">Guardar</ng-container>
+            }
+          </button>
+          <button
+            type="button"
+            (click)="closeAdd()"
+            class="px-5 py-2 rounded-full bg-white border border-[color:var(--color-line)] text-[color:var(--color-ink-2)] cursor-pointer"
+            i18n="@@nido.add.cancel"
+          >Cancelar</button>
+        </div>
+      </form>
+    </article>
+  }
+
+  @if (loading()) {
+    <p i18n="@@nido.loading" class="text-center text-[color:var(--color-ink-3)] py-12">Cargando…</p>
+  } @else if (error()) {
+    <p i18n="@@nido.load-error" class="text-center text-[color:var(--color-terra)] py-12">
+      No hemos podido cargar la información. Reintenta en un momento.
+    </p>
+  } @else {
+    <ul class="flex flex-col gap-3">
+      @for (member of members(); track member.id) {
+        <li>
+          <a
+            [routerLink]="['/nido', member.id]"
+            class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl p-4 flex items-center gap-4 no-underline text-inherit hover:border-[color:var(--color-terra)] transition-colors"
+          >
+            <fn-avatar
+              [name]="member.displayName"
+              [colorHex]="member.colorHex"
+              [size]="56"
+              [ring]="true"
+              [photoUrl]="member.photoPath ? '/api/family-members/' + member.id + '/photo' : null"
+            />
+            <div class="flex-1 min-w-0">
+              <p class="font-serif text-lg font-semibold leading-tight">
+                {{ member.displayName }}
+              </p>
+              <p class="text-xs text-[color:var(--color-ink-3)] mt-0.5">
+                {{ memberSubtitle(member) }}
+              </p>
+              <div class="flex gap-2 mt-2 flex-wrap">
+                @if (member.role === 'Admin') {
+                  <span i18n="@@nido.badge.admin" class="text-[10px] font-bold tracking-wide uppercase text-[color:var(--color-terra)] bg-[color:var(--color-terra-bg)] px-2 py-0.5 rounded-md">
+                    Admin
+                  </span>
+                }
+                @if (member.hasAccount) {
+                  <span i18n="@@nido.badge.account" class="text-[10px] font-bold tracking-wide uppercase text-[color:var(--color-ink-3)] bg-[color:var(--color-bg-2)] px-2 py-0.5 rounded-md">
+                    Cuenta
+                  </span>
+                } @else {
+                  <span i18n="@@nido.badge.no-account" class="text-[10px] font-bold tracking-wide uppercase text-[color:var(--color-ink-3)] bg-[color:var(--color-bg-2)] px-2 py-0.5 rounded-md">
+                    Sin cuenta
+                  </span>
+                }
+                @if (member.pendingInvitation) {
+                  <span i18n="@@nido.badge.invited" class="text-[10px] font-bold tracking-wide uppercase text-white bg-[color:var(--color-terra)] px-2 py-0.5 rounded-md">
+                    Invitado
+                  </span>
+                }
+                @if (!member.isActive) {
+                  <span i18n="@@nido.badge.archived" class="text-[10px] font-bold tracking-wide uppercase text-white bg-[color:var(--color-ink-3)] px-2 py-0.5 rounded-md">
+                    Archivado
+                  </span>
+                }
+              </div>
+            </div>
+            @if (canInvite(member)) {
+              <button
+                type="button"
+                class="text-xs font-medium text-[color:var(--color-terra)] underline cursor-pointer"
+                (click)="$event.preventDefault(); $event.stopPropagation(); inviteExisting(member)"
+                i18n="@@nido.invite-button"
+              >Invitar</button>
+            }
+          </a>
+        </li>
+      } @empty {
+        <li i18n="@@nido.empty" class="text-center text-[color:var(--color-ink-3)] py-12">
+          Aún no hay miembros. Añade el primero con el botón <b>+</b>.
+        </li>
+      }
+    </ul>
+
+    @if (isAdmin() && invitations().length > 0) {
+      <article class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl p-5 mt-4">
+        <h2 i18n="@@nido.pending-invitations.heading" class="text-xs font-bold uppercase tracking-wider text-[color:var(--color-ink-3)] mb-3">
+          Invitaciones pendientes
+        </h2>
+        <ul class="flex flex-col gap-3">
+          @for (inv of invitations(); track inv.id) {
+            <li class="flex items-center justify-between gap-3">
+              <div class="min-w-0">
+                <p class="text-sm font-medium truncate">{{ inv.memberDisplayName }}</p>
+                <p class="text-xs text-[color:var(--color-ink-3)] truncate">
+                  {{ inv.email }} <ng-container i18n="@@nido.invitation.expires-on">· caduca el</ng-container> {{ inv.expiresAt | date:'shortDate' }}
+                </p>
+              </div>
+              <div class="flex gap-3 shrink-0">
+                <button
+                  type="button"
+                  class="text-xs font-medium underline cursor-pointer"
+                  (click)="resend(inv)"
+                  i18n="@@nido.invitation.resend"
+                >Reenviar</button>
+                <button
+                  type="button"
+                  class="text-xs font-medium underline cursor-pointer text-[color:var(--color-error)]"
+                  (click)="revoke(inv)"
+                  i18n="@@nido.invitation.revoke"
+                >Revocar</button>
+              </div>
+            </li>
+          }
+        </ul>
+      </article>
+    }
+  }
+</section>

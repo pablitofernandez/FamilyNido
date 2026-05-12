@@ -1,0 +1,76 @@
+name: 🐛 Bug report
+description: Something is broken or behaving unexpectedly.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug report. Please fill in the
+        fields below — the more specific the reproduction, the faster this
+        moves. **Do not file security issues here** — use the private
+        *Report a vulnerability* button on the Security tab.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened?
+      description: A clear and concise description of the bug.
+      placeholder: When I click X, the page errors with Y instead of doing Z.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Numbered list. Include the exact data or fixtures you used.
+      placeholder: |
+        1. Log in as an adult member
+        2. Navigate to /tasks
+        3. Click "New task" and submit with an empty title
+        4. Observe the 500 error in the network tab
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      placeholder: A 400 with a validation message, not a 500.
+    validations:
+      required: true
+
+  - type: input
+    id: deploy
+    attributes:
+      label: Deploy target
+      description: How are you running FamilyNido?
+      placeholder: docker compose on Debian 12 / native dev (dotnet run + ng serve) / …
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Git commit / version
+      description: Output of `git rev-parse --short HEAD` from your checkout, or the image tag you pulled.
+      placeholder: e.g. 2f3dcc7
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs and screenshots
+      description: Relevant log lines (API + browser console) and a screenshot if visual. Redact personal data before pasting.
+      render: shell
+    validations:
+      required: false
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else?
+      description: Custom configuration, integrations enabled, edge cases — anything that might explain the behavior.
+    validations:
+      required: false

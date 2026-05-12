@@ -1,0 +1,31 @@
+<div class="fn-mention-wrap">
+  <textarea
+    #textarea
+    [class]="textareaClass()"
+    [rows]="rows()"
+    [maxLength]="maxLength()"
+    [placeholder]="placeholder()"
+    [value]="value()"
+    (input)="onInput($event)"
+    (keydown)="onKeyDown($event)"
+    (click)="onClick($event)"
+    (blur)="onBlur()"
+    (paste)="onPaste($event)"
+  ></textarea>
+
+  @if (active() && suggestions().length > 0) {
+    <ul class="fn-mention-popover">
+      @for (m of suggestions(); track m.id; let i = $index) {
+        <li
+          class="fn-mention-item"
+          [class.is-active]="i === highlight()"
+          (mousedown)="pick(m); $event.preventDefault()"
+          (mouseenter)="highlight.set(i)"
+        >
+          <span class="fn-mention-color" [style.background]="m.colorHex"></span>
+          <span class="fn-mention-name">{{ m.displayName }}</span>
+        </li>
+      }
+    </ul>
+  }
+</div>

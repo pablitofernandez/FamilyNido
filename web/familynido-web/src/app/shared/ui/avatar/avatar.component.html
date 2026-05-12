@@ -1,0 +1,26 @@
+@if (showImage()) {
+  <img
+    [src]="photoUrl()"
+    [alt]="name()"
+    class="inline-block flex-shrink-0 object-cover"
+    [style.width.px]="size()"
+    [style.height.px]="size()"
+    [style.borderRadius.%]="50"
+    [style.border]="ring() ? '2px solid ' + fgColor() : '1.5px solid ' + softBorder()"
+    (error)="onImageError()"
+  />
+} @else {
+  <span
+    class="font-serif inline-flex items-center justify-center font-semibold flex-shrink-0"
+    [style.width.px]="size()"
+    [style.height.px]="size()"
+    [style.borderRadius.%]="50"
+    [style.background]="bgColor()"
+    [style.color]="fgColor()"
+    [style.fontSize.px]="size() * 0.42"
+    [style.letterSpacing.px]="-0.5"
+    [style.border]="ring() ? '2px solid ' + fgColor() : '1.5px solid ' + softBorder()"
+  >
+    {{ initial() }}
+  </span>
+}

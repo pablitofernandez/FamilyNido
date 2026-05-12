@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Política de privacidad — FamilyNido</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #1f1d1a;
+        --ink-2: #45413c;
+        --ink-3: #76716a;
+        --line: #e7e3dc;
+        --bg: #fbf7f0;
+        --terra: #b35a3a;
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family:
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          "Helvetica Neue",
+          Arial,
+          sans-serif;
+        font-size: 16px;
+        line-height: 1.65;
+      }
+      main {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 48px 24px 96px;
+      }
+      header {
+        margin-bottom: 32px;
+      }
+      h1 {
+        font-family: Georgia, "Times New Roman", serif;
+        font-weight: 500;
+        font-size: 36px;
+        margin: 0 0 8px;
+        line-height: 1.2;
+      }
+      h1 em {
+        color: var(--terra);
+        font-style: italic;
+        font-weight: 400;
+      }
+      h2 {
+        font-family: Georgia, "Times New Roman", serif;
+        font-weight: 500;
+        font-size: 22px;
+        margin: 40px 0 12px;
+      }
+      h3 {
+        font-size: 16px;
+        font-weight: 600;
+        margin: 24px 0 8px;
+      }
+      p,
+      ul,
+      ol {
+        margin: 0 0 14px;
+      }
+      ul,
+      ol {
+        padding-left: 22px;
+      }
+      li + li {
+        margin-top: 6px;
+      }
+      a {
+        color: var(--terra);
+      }
+      .meta {
+        color: var(--ink-3);
+        font-size: 14px;
+      }
+      .callout {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 16px 20px;
+        margin: 24px 0;
+      }
+      footer {
+        margin-top: 48px;
+        padding-top: 24px;
+        border-top: 1px solid var(--line);
+        font-size: 14px;
+        color: var(--ink-3);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Política de <em>privacidad</em></h1>
+        <p class="meta">
+          FamilyNido — instancia <code>familia.example.com</code>
+          · última actualización: 25 de abril de 2026
+        </p>
+      </header>
+
+      <section>
+        <h2>1. Quiénes somos</h2>
+        <p>
+          FamilyNido es una aplicación familiar
+          <strong>self-hosted, no comercial, de uso privado</strong>. Esta
+          instancia concreta (<code>familia.example.com</code>) la opera
+          el administrador del despliegue desde su propio servidor, para uso
+          exclusivo de su unidad familiar.
+        </p>
+        <p>
+          Dudas o solicitudes sobre esta política:
+          <a href="mailto:privacy@your-domain.example">privacy@your-domain.example</a>.
+        </p>
+      </section>
+
+      <section>
+        <h2>2. Qué datos tratamos</h2>
+
+        <h3>2.1 Cuenta de usuario (PocketID)</h3>
+        <ul>
+          <li>Identificador único (<em>sub</em>) emitido por PocketID.</li>
+          <li>Correo electrónico y nombre para mostrar.</li>
+          <li>
+            Cookie de sesión <code>HttpOnly</code> con duración de 8&nbsp;horas
+            que mantiene la sesión iniciada.
+          </li>
+        </ul>
+
+        <h3>2.2 Datos generados por el uso de la aplicación</h3>
+        <ul>
+          <li>
+            Mensajes y notas que publiques en el muro, incluyendo imágenes
+            adjuntas.
+          </li>
+          <li>
+            Tareas del hogar que crees (título, recurrencia, asignaciones,
+            historial de compleciones).
+          </li>
+          <li>
+            Información de la familia: miembros, colores, datos de contacto
+            opcionales.
+          </li>
+        </ul>
+
+        <h3>2.3 Integración con Google Calendar</h3>
+        <p>
+          La integración con Google Calendar es <strong>opcional</strong> y se
+          activa explícitamente cuando un adulto vincula su cuenta de Google
+          desde la pantalla "Cuentas vinculadas". Si lo haces, FamilyNido
+          almacena lo siguiente:
+        </p>
+        <ul>
+          <li>
+            <strong>Refresh token</strong> emitido por Google
+            (<em>cifrado en reposo</em> con ASP.NET Core Data Protection).
+          </li>
+          <li>Tu correo y nombre de la cuenta Google (extraídos del id_token).</li>
+          <li>
+            La lista de calendarios disponibles en tu cuenta y, para los que
+            decidas importar, los <strong>eventos sincronizados</strong>:
+            título, descripción, ubicación, fecha y hora, zona horaria, enlace
+            al evento en Google.
+          </li>
+          <li>
+            Un <em>sync token</em> opaco de Google para realizar
+            sincronizaciones incrementales eficientes.
+          </li>
+        </ul>
+        <p>
+          La aplicación pide únicamente el ámbito
+          <code>https://www.googleapis.com/auth/calendar.readonly</code>. No se
+          escribe en tu Google Calendar bajo ningún concepto.
+        </p>
+      </section>
+
+      <section>
+        <h2>3. Para qué usamos esos datos</h2>
+        <ul>
+          <li>
+            Mostrarte el calendario familiar agregado dentro de FamilyNido.
+          </li>
+          <li>Operar las funciones que tú o tu familia uséis activamente (muro, tareas, etc.).</li>
+          <li>
+            Mantener la sesión iniciada y recordar tu última lectura del muro
+            para el contador de mensajes nuevos.
+          </li>
+        </ul>
+        <div class="callout">
+          <strong>Limited Use (Google API Services User Data Policy).</strong>
+          El uso que FamilyNido hace de la información obtenida desde APIs de
+          Google se ajusta a la
+          <a
+            href="https://developers.google.com/terms/api-services-user-data-policy"
+            >Google API Services User Data Policy</a
+          >, incluido el requisito de uso limitado: los datos de Google
+          Calendar se usan exclusivamente para mostrar tus eventos en la
+          interfaz de FamilyNido, <strong>no se transfieren a terceros</strong>,
+          <strong>no se utilizan para entrenar modelos de IA</strong> y
+          <strong>no se emplean para mostrar publicidad</strong>.
+        </div>
+      </section>
+
+      <section>
+        <h2>4. Con quién compartimos los datos</h2>
+        <p>
+          <strong>Con nadie.</strong> FamilyNido no vende, no comparte ni cede
+          datos a terceros. No hay analítica de terceros (Google Analytics,
+          Mixpanel, etc.), no hay píxeles publicitarios, no hay redes sociales
+          embebidas. La única comunicación con servicios externos es:
+        </p>
+        <ul>
+          <li>
+            <strong>PocketID</strong> (autoalojado), para autenticarte mediante
+            OIDC.
+          </li>
+          <li>
+            <strong>Google Calendar API</strong>, exclusivamente cuando vinculas
+            voluntariamente tu cuenta y solo para descargar tus eventos.
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>5. Dónde se almacenan los datos</h2>
+        <p>
+          Los datos viven en una base de datos PostgreSQL alojada en un
+          servidor doméstico en España, accesible únicamente desde la red
+          interna del operador y expuesta a través de un proxy inverso
+          (Traefik) con TLS de Let's Encrypt. No hay copias en clouds de
+          terceros salvo las copias de seguridad cifradas que el operador
+          decida hacer.
+        </p>
+      </section>
+
+      <section>
+        <h2>6. Cuánto tiempo conservamos los datos</h2>
+        <ul>
+          <li>
+            <strong>Datos de la app</strong> (muro, tareas, miembros): mientras
+            la familia siga utilizando la instancia.
+          </li>
+          <li>
+            <strong>Eventos sincronizados desde Google</strong>: solo mientras
+            el calendario esté marcado como "Importar". Al desactivar el
+            interruptor, los eventos cacheados se eliminan inmediatamente.
+          </li>
+          <li>
+            <strong>Refresh token de Google</strong>: hasta que desvincules la
+            cuenta o revoques el acceso desde
+            <a href="https://myaccount.google.com/permissions"
+              >myaccount.google.com/permissions</a
+            >. Al desvincular se elimina junto con los calendarios y eventos
+            asociados.
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>7. Tus derechos</h2>
+        <p>
+          Como usuario tienes derecho a acceder, rectificar y borrar tus datos.
+          La aplicación incluye los controles para ello (editar tu miembro,
+          desvincular cuentas Google, etc.). Para un borrado total de tu
+          cuenta o cualquier otra solicitud, escríbenos a
+          <a href="mailto:privacy@your-domain.example">privacy@your-domain.example</a>.
+        </p>
+      </section>
+
+      <section>
+        <h2>8. Seguridad</h2>
+        <ul>
+          <li>Comunicación por HTTPS de extremo a extremo (TLS 1.2+).</li>
+          <li>
+            Cookies de sesión <code>HttpOnly</code>, <code>Secure</code> y
+            <code>SameSite=Lax</code>.
+          </li>
+          <li>
+            Contraseñas no almacenadas: la autenticación se delega a PocketID
+            (passkeys).
+          </li>
+          <li>
+            Tokens de Google cifrados en reposo con ASP.NET Core Data
+            Protection.
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>9. Cambios en esta política</h2>
+        <p>
+          Cualquier cambio relevante se reflejará en esta página y se anunciará
+          en el muro de la familia. La fecha de "última actualización" en la
+          cabecera siempre indica la versión vigente.
+        </p>
+      </section>
+
+      <footer>
+        <p>
+          Página servida estáticamente por la propia aplicación FamilyNido en
+          <code>/legal/privacidad.html</code>.
+        </p>
+      </footer>
+    </main>
+  </body>
+</html>

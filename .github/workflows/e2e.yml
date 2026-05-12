@@ -1,0 +1,300 @@
+name: E2E (Playwright)
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+# Run JS-based actions (checkout, setup-dotnet, setup-node, etc.) on Node 24
+# instead of the deprecated Node 20 runtime. Node 20 is being removed from
+# GitHub-hosted runners on 2026-09-16; this opt-in silences the warning and
+# avoids the forced switch on 2026-06-02.
+# Ref: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
+jobs:
+  playwright:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: familynido
+          POSTGRES_USER: familynido
+          POSTGRES_PASSWORD: familynido
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U familynido -d familynido"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      # The seeded testers' credentials. Stable across runs because the
+      # E2ETestDataSeeder upserts on email — it never rotates an existing
+      # password — and these values are only ever real on this ephemeral
+      # Postgres instance, never in production.
+      E2E_USER_EMAIL: e2e-a@familynido.test
+      E2E_USER_PASSWORD: SuperSecret123!
+      E2E_USER_B_EMAIL: e2e-b@familynido.test
+      E2E_USER_B_PASSWORD: SuperSecret123!
+      E2E_USER_B_NAME: Tester B
+      E2E_BASE_URL: http://localhost:5173
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: web/familynido-web/package-lock.json
+
+      - name: Restore .NET
+        run: dotnet restore
+
+      - name: Build & publish API
+        run: |
+          dotnet publish src/FamilyNido.Api -c Release -o publish/api --no-restore
+          ls -la publish/api/FamilyNido.Api.dll
+
+      - name: Install SPA deps
+        working-directory: web/familynido-web
+        run: npm ci
+
+      - name: Build SPA (es + en bundles)
+        working-directory: web/familynido-web
+        run: npm run build
+
+      - name: Install nginx
+        run: sudo apt-get update -y && sudo apt-get install -y nginx
+
+      - name: Configure nginx (proxy /api → :8080, serve SPA at :5173)
+        run: |
+          set -euxo pipefail
+          BUILT="$GITHUB_WORKSPACE/web/familynido-web/dist/familynido-web/browser"
+          if [ ! -d "$BUILT/es" ] || [ ! -d "$BUILT/en" ]; then
+            echo "Localized SPA bundles not found at $BUILT" >&2
+            ls -la "$BUILT" >&2 || true
+            exit 1
+          fi
+
+          # Copy the SPA out of /home/runner/... — nginx runs as www-data
+          # and can't traverse into the runner's home tree by default. /var/www
+          # is the canonical "nginx-readable" location.
+          SPA_ROOT=/var/www/familynido-e2e
+          sudo rm -rf "$SPA_ROOT"
+          sudo mkdir -p "$SPA_ROOT"
+          sudo cp -r "$BUILT"/. "$SPA_ROOT/"
+          sudo chown -R www-data:www-data "$SPA_ROOT"
+          sudo find "$SPA_ROOT" -type d -exec chmod 755 {} \;
+          sudo find "$SPA_ROOT" -type f -exec chmod 644 {} \;
+
+          echo "── /var/www/familynido-e2e tree ──"
+          ls -la "$SPA_ROOT"
+          ls -la "$SPA_ROOT/es" | head -n 5
+
+          sudo tee /etc/nginx/sites-available/familynido-e2e > /dev/null <<EOF
+          server {
+              listen 5173 default_server;
+              server_name _;
+              root $SPA_ROOT;
+              index index.html;
+              absolute_redirect off;
+
+              location /api/ {
+                  proxy_pass http://127.0.0.1:8080;
+                  proxy_http_version 1.1;
+                  proxy_set_header Host \$host;
+                  proxy_set_header X-Real-IP \$remote_addr;
+                  proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+                  proxy_set_header X-Forwarded-Proto \$scheme;
+                  proxy_read_timeout 60s;
+              }
+
+              location = / {
+                  if (\$http_accept_language ~* "^en") { return 302 /en/; }
+                  return 302 /es/;
+              }
+
+              location /es/ { try_files \$uri /es/index.html; }
+              location /en/ { try_files \$uri /en/index.html; }
+
+              # Anything else (e.g. /tasks, /calendar) is a Playwright spec
+              # navigating without the locale prefix. Redirect through to
+              # /es/<path> so the SPA loads with the right base href instead
+              # of nginx returning its default 404.
+              location / {
+                  return 302 /es\$request_uri;
+              }
+          }
+          EOF
+
+          sudo rm -f /etc/nginx/sites-enabled/default
+          sudo ln -sf /etc/nginx/sites-available/familynido-e2e /etc/nginx/sites-enabled/familynido-e2e
+          sudo nginx -t
+
+      - name: Start API + wait for ready (combined step)
+        env:
+          ASPNETCORE_ENVIRONMENT: Testing
+          # Bind to all interfaces so curl on 127.0.0.1 reaches Kestrel
+          # regardless of how the runner resolves localhost.
+          ASPNETCORE_URLS: http://+:8080
+          # Disable Serilog buffering — write to console with line-buffered
+          # output so we see startup messages in real time.
+          Serilog__MinimumLevel: Information
+          DOTNET_PRINT_TELEMETRY_MESSAGE: 'false'
+          DOTNET_NOLOGO: '1'
+          ConnectionStrings__Postgres: Host=localhost;Port=5432;Database=familynido;Username=familynido;Password=familynido
+          Family__AutoMigrate: 'true'
+          Seed__E2E__Enabled: 'true'
+          # Pin the seeded family's timezone to UTC so the date the browser
+          # computes via `new Date()` (UTC in CI) and the date the server
+          # resolves via `family.TimeZone` always agree. Otherwise a CI run
+          # crossing midnight UTC pushes a task into a day the server's
+          # "today" doesn't include yet, and `/api/household-tasks/today`
+          # returns an empty list.
+          Seed__E2E__TimeZone: 'UTC'
+          Seed__E2E__UserAEmail: ${{ env.E2E_USER_EMAIL }}
+          Seed__E2E__UserAPassword: ${{ env.E2E_USER_PASSWORD }}
+          Seed__E2E__UserBEmail: ${{ env.E2E_USER_B_EMAIL }}
+          Seed__E2E__UserBPassword: ${{ env.E2E_USER_B_PASSWORD }}
+          Seed__E2E__UserBDisplayName: ${{ env.E2E_USER_B_NAME }}
+          Email__Enabled: 'false'
+          Email__AppBaseUrl: http://localhost:5173
+          # Calendar sync is dormant in CI — the loop kicks off but never
+          # acts because no Google account is linked.
+          Calendar__SyncIntervalMinutes: '999999'
+        run: |
+          set -uxo pipefail
+          mkdir -p logs
+
+          echo "── dotnet --info ──"
+          dotnet --info | head -n 30
+
+          echo "── DLL stat ──"
+          ls -la "$GITHUB_WORKSPACE/publish/api/FamilyNido.Api.dll"
+
+          # `stdbuf -o0 -e0` forces unbuffered stdio so any framework or
+          # Serilog writes appear in api.log immediately, not after a 4 KB
+          # block fills. cd into the publish dir so config files next to
+          # the DLL (appsettings.json, etc.) are found.
+          cd "$GITHUB_WORKSPACE/publish/api"
+          stdbuf -o0 -e0 dotnet ./FamilyNido.Api.dll \
+            > "$GITHUB_WORKSPACE/logs/api.log" 2>&1 &
+          API_PID=$!
+          echo "$API_PID" > "$GITHUB_WORKSPACE/logs/api.pid"
+          cd "$GITHUB_WORKSPACE"
+          echo "API started with PID $API_PID"
+
+          # 5 s grace period for first writes / JIT warm-up.
+          sleep 5
+          echo "── after 5 s, api.log ──"
+          cat logs/api.log || true
+          echo "── ports listening ──"
+          ss -tlnp 2>/dev/null | head -n 30 || true
+
+          # Wait loop with periodic snapshots.
+          for i in $(seq 1 90); do
+            if curl -fsS http://127.0.0.1:8080/health/ready > /dev/null; then
+              echo "API ready after ${i}s"
+              exit 0
+            fi
+            if ! kill -0 "$API_PID" 2>/dev/null; then
+              echo "API process exited; dumping log:" >&2
+              cat logs/api.log >&2 || true
+              exit 1
+            fi
+            if [ $((i % 10)) -eq 0 ]; then
+              echo "── snapshot @ ${i}s ──" >&2
+              ss -tlnp 2>/dev/null | grep -E ':(8080|5432) ' >&2 || true
+              echo "── api.log tail ──" >&2
+              tail -n 40 logs/api.log >&2 || true
+            fi
+            sleep 1
+          done
+
+          echo "API never became ready" >&2
+          echo "── Final full api.log ──" >&2
+          cat logs/api.log >&2 || true
+          exit 1
+
+      - name: Start nginx
+        run: sudo systemctl restart nginx
+
+      - name: Wait for SPA root
+        run: |
+          set -uxo pipefail
+          for i in $(seq 1 30); do
+            if curl -fsS -o /dev/null -L http://127.0.0.1:5173/es/; then
+              echo "SPA ready after ${i}s"
+              exit 0
+            fi
+            sleep 1
+          done
+
+          echo "SPA never became reachable. Diagnostics:" >&2
+          echo "── curl -i (verbose response) ──" >&2
+          curl -i http://127.0.0.1:5173/es/ 2>&1 | head -n 30 >&2 || true
+          echo "── nginx error.log ──" >&2
+          sudo tail -n 50 /var/log/nginx/error.log >&2 || true
+          echo "── nginx access.log ──" >&2
+          sudo tail -n 20 /var/log/nginx/access.log >&2 || true
+          echo "── nginx process ──" >&2
+          ps aux | grep nginx | grep -v grep >&2 || true
+          exit 1
+
+      - name: Install Playwright browsers
+        working-directory: web/familynido-web
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Playwright
+        working-directory: web/familynido-web
+        run: npx playwright test
+
+      - name: Stop API
+        if: always()
+        run: |
+          if [ -f logs/api.pid ]; then
+            kill "$(cat logs/api.pid)" || true
+          fi
+
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: web/familynido-web/playwright-report
+          retention-days: 14
+
+      - name: Upload Playwright traces on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: web/familynido-web/test-results
+          retention-days: 14
+
+      - name: Upload API log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-log
+          path: logs/api.log
+          retention-days: 14

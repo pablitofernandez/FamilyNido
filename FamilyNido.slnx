@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/FamilyNido.Api/FamilyNido.Api.csproj" />
+    <Project Path="src/FamilyNido.Domain/FamilyNido.Domain.csproj" />
+    <Project Path="src/FamilyNido.Persistence/FamilyNido.Persistence.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/FamilyNido.Tests/FamilyNido.Tests.csproj" />
+  </Folder>
+</Solution>

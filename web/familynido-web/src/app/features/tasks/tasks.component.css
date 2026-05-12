@@ -1,0 +1,19 @@
+/* Floating "+N 🏆" hint shown over the checkbox after completing a task. */
+@keyframes pointsPop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 0) scale(0.6);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(-50%, -8px) scale(1.15);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -38px) scale(1);
+  }
+}
+
+.points-pop {
+  animation: pointsPop 1.2s ease-out forwards;
+}

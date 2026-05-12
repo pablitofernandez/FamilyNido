@@ -1,0 +1,114 @@
+<section class="min-h-screen paper flex items-center justify-center px-6 py-12">
+  <div class="w-full max-w-md">
+    @if (loading()) {
+      <p i18n="@@invitation.loading" class="text-center text-[color:var(--color-ink-3)]">Cargando…</p>
+    } @else if (fatal()) {
+      <div class="text-center">
+        <div class="text-5xl mb-4" aria-hidden="true">🪺</div>
+        <h1 i18n="@@invitation.fatal.title" class="font-serif text-3xl font-medium mb-3">Invitación no válida</h1>
+        <p class="text-[color:var(--color-ink-2)]">{{ fatalMessage() }}</p>
+      </div>
+    } @else if (preview()) {
+      <div class="text-center mb-8">
+        <div class="text-5xl mb-4" aria-hidden="true">🪺</div>
+        <h1 i18n="@@invitation.title" class="font-serif text-3xl lg:text-4xl font-medium tracking-tight">
+          Te han invitado al nido
+        </h1>
+        <p class="text-[color:var(--color-ink-2)] mt-3 font-serif">
+          @if (preview()!.inviterDisplayName) {
+            <ng-container i18n="@@invitation.preview.with-inviter">
+              <strong>{{ preview()!.inviterDisplayName }}</strong> te invita a unirte a la familia
+              <strong>{{ preview()!.familyName }}</strong> como <em>{{ preview()!.memberDisplayName }}</em>.
+            </ng-container>
+          } @else {
+            <ng-container i18n="@@invitation.preview.without-inviter">
+              Te invitan a unirte a la familia <strong>{{ preview()!.familyName }}</strong>
+              como <em>{{ preview()!.memberDisplayName }}</em>.
+            </ng-container>
+          }
+        </p>
+      </div>
+
+      @if (!isPending()) {
+        <p class="text-center text-[color:var(--color-error)]">{{ statusMessage() }}</p>
+      } @else if (auth.status() === 'authenticated') {
+        <div class="text-center">
+          <p i18n="@@invitation.already-in-family" class="text-[color:var(--color-ink-2)] mb-4">
+            Ya estás dentro de una familia. Para aceptar esta invitación, primero pide al
+            administrador que te desvincule.
+          </p>
+          <a
+            routerLink="/home"
+            i18n="@@invitation.back-to-home"
+            class="inline-block px-6 py-3 rounded-full bg-[color:var(--color-terra)] text-white font-bold tracking-wide"
+          >Volver a mi nido</a>
+        </div>
+      } @else if (auth.status() === 'not-linked') {
+        <p i18n="@@invitation.linking" class="text-center text-[color:var(--color-ink-3)]">Vinculando tu cuenta…</p>
+      } @else {
+        <button
+          type="button"
+          (click)="loginWithOidc()"
+          i18n="@@invitation.accept-oidc"
+          class="w-full px-6 py-3 rounded-full bg-[color:var(--color-terra)] text-white font-bold tracking-wide cursor-pointer border-0"
+        >
+          Aceptar con PocketID
+        </button>
+
+        <div class="flex items-center gap-3 my-6">
+          <div class="flex-1 h-px bg-[color:var(--color-line)]"></div>
+          <span i18n="@@invitation.separator" class="text-xs uppercase tracking-wider text-[color:var(--color-ink-3)]">o crea una contraseña</span>
+          <div class="flex-1 h-px bg-[color:var(--color-line)]"></div>
+        </div>
+
+        <form (submit)="$event.preventDefault(); acceptViaLocal()" class="flex flex-col gap-3">
+          <label i18n="@@invitation.password-label" class="block text-xs uppercase tracking-wide text-[color:var(--color-ink-3)] mb-1">
+            Contraseña nueva
+          </label>
+          <input
+            type="password"
+            class="w-full px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white -mt-2"
+            autocomplete="new-password"
+            minlength="8"
+            [value]="password()"
+            (input)="readPassword($event)"
+            required
+          />
+
+          <label i18n="@@invitation.password-confirm-label" class="block text-xs uppercase tracking-wide text-[color:var(--color-ink-3)] mb-1 mt-2">
+            Repite la contraseña
+          </label>
+          <input
+            type="password"
+            class="w-full px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white -mt-2"
+            autocomplete="new-password"
+            minlength="8"
+            [value]="passwordConfirm()"
+            (input)="readPasswordConfirm($event)"
+            required
+          />
+
+          @if (formError()) {
+            <p class="text-sm text-[color:var(--color-error)] mt-1">{{ formError() }}</p>
+          }
+
+          <p i18n="@@invitation.password-help" class="text-xs text-[color:var(--color-ink-3)]">
+            Mínimo 8 caracteres con al menos una letra y un número.
+          </p>
+
+          <button
+            type="submit"
+            [disabled]="submitting()"
+            class="mt-3 px-6 py-3 rounded-full bg-white border border-[color:var(--color-ink-2)] text-[color:var(--color-ink-1)] font-bold tracking-wide cursor-pointer disabled:opacity-50"
+          >
+            @if (submitting()) {
+              <ng-container i18n="@@invitation.creating">Creando cuenta…</ng-container>
+            } @else {
+              <ng-container i18n="@@invitation.submit">Crear contraseña y entrar</ng-container>
+            }
+          </button>
+        </form>
+      }
+    }
+  </div>
+</section>

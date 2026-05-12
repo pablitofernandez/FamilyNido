@@ -1,0 +1,31 @@
+# FamilyNido — development compose stack.
+# Brings up PostgreSQL so you can develop the Angular app (ng serve on :4200)
+# and the .NET backend (dotnet watch on :5080) against a real database.
+#
+# Auth in dev is handled by local credentials only (POST /api/auth/local/login)
+# — the OIDC code path is for production with PocketID and is hidden in the
+# login UI when /api/auth/providers reports oidcEnabled=false.
+#
+#   docker compose -f deploy/docker-compose.dev.yml up -d
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: familynido-db-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: familynido
+      POSTGRES_USER: familynido
+      POSTGRES_PASSWORD: familynido
+    ports:
+      - "5435:5432"
+    volumes:
+      - familynido-db-dev-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U familynido -d familynido"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  familynido-db-dev-data:

@@ -1,0 +1,19 @@
+{
+  "/api": {
+    "target": "http://localhost:5080",
+    "secure": false
+  },
+  "/hubs": {
+    "target": "http://localhost:5080",
+    "secure": false,
+    "ws": true
+  },
+  "/signin-oidc": {
+    "target": "http://localhost:5080",
+    "secure": false
+  },
+  "/signout-callback-oidc": {
+    "target": "http://localhost:5080",
+    "secure": false
+  }
+}

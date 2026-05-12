@@ -1,0 +1,348 @@
+<section class="max-w-3xl mx-auto px-5 pt-6 lg:pt-8 pb-6">
+  <a
+    routerLink="/nido"
+    class="inline-flex items-center gap-2 text-sm text-[color:var(--color-ink-3)] no-underline mb-4 hover:text-[color:var(--color-terra)]"
+  >
+    <fn-icon name="chevronL" [size]="16" />
+    <ng-container i18n="@@member-detail.back">Volver al nido</ng-container>
+  </a>
+
+  @if (loading()) {
+    <p i18n="@@member-detail.loading" class="text-center text-[color:var(--color-ink-3)] py-12">Cargando…</p>
+  } @else if (notFound()) {
+    <div class="text-center py-12">
+      <p i18n="@@member-detail.not-found.title" class="font-serif text-2xl mb-2">No encontramos a este miembro</p>
+      <p i18n="@@member-detail.not-found.body" class="text-sm text-[color:var(--color-ink-3)]">
+        Quizá fue eliminado. Vuelve al nido para ver la lista actualizada.
+      </p>
+    </div>
+  } @else if (member(); as m) {
+    <header class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl p-5 mb-4 flex items-center gap-4">
+      <div class="relative shrink-0">
+        <fn-avatar
+          [name]="m.displayName"
+          [colorHex]="m.colorHex"
+          [size]="72"
+          [ring]="true"
+          [photoUrl]="memberPhotoUrl()"
+        />
+        @if (canEditPhoto()) {
+          <label
+            class="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-[color:var(--color-terra)] text-white flex items-center justify-center cursor-pointer text-xs shadow-md"
+            [class.opacity-50]="photoUploading()"
+            [attr.title]="photoUploading() ? photoUploadingTitle : changePhotoTitle"
+          >
+            <fn-icon name="plus" [size]="14" [strokeWidth]="2.4" />
+            <input
+              type="file"
+              accept="image/*"
+              class="hidden"
+              [disabled]="photoUploading()"
+              (change)="onPhotoSelected($event)"
+            />
+          </label>
+        }
+      </div>
+      <div class="flex-1 min-w-0">
+        <h1 class="font-serif text-2xl lg:text-3xl font-medium tracking-tight leading-tight">
+          {{ m.displayName }}
+        </h1>
+        <p class="text-sm text-[color:var(--color-ink-3)] mt-1">{{ subtitle() }}</p>
+        <div class="flex gap-2 mt-2 flex-wrap">
+          @if (m.role === 'Admin') {
+            <span i18n="@@nido.badge.admin" class="text-[10px] font-bold tracking-wide uppercase text-[color:var(--color-terra)] bg-[color:var(--color-terra-bg)] px-2 py-0.5 rounded-md">
+              Admin
+            </span>
+          }
+          @if (m.hasAccount) {
+            <span i18n="@@nido.badge.account" class="text-[10px] font-bold tracking-wide uppercase text-[color:var(--color-ink-3)] bg-[color:var(--color-bg-2)] px-2 py-0.5 rounded-md">
+              Cuenta
+            </span>
+          }
+          @if (m.pendingInvitation) {
+            <span i18n="@@nido.badge.invited" class="text-[10px] font-bold tracking-wide uppercase text-white bg-[color:var(--color-terra)] px-2 py-0.5 rounded-md">
+              Invitado
+            </span>
+          }
+          @if (!m.isActive) {
+            <span i18n="@@nido.badge.archived" class="text-[10px] font-bold tracking-wide uppercase text-white bg-[color:var(--color-ink-3)] px-2 py-0.5 rounded-md">
+              Archivado
+            </span>
+          }
+        </div>
+        @if (m.contactEmail) {
+          <p class="text-xs text-[color:var(--color-ink-3)] mt-2 truncate">
+            {{ m.contactEmail }}
+          </p>
+        }
+        @if (canEditPhoto() && m.photoPath) {
+          <button
+            type="button"
+            class="text-xs text-[color:var(--color-error)] underline cursor-pointer mt-2"
+            [disabled]="photoUploading()"
+            (click)="removePhoto()"
+            i18n="@@member-detail.remove-photo"
+          >Quitar foto</button>
+        }
+        @if (photoError()) {
+          <p class="text-xs text-[color:var(--color-error)] mt-1">{{ photoError() }}</p>
+        }
+      </div>
+    </header>
+
+    @if (actionError()) {
+      <p class="text-sm text-[color:var(--color-error)] mb-3">{{ actionError() }}</p>
+    }
+
+    @if (score(); as s) {
+      <article class="bg-gradient-to-br from-[color:var(--color-terra-bg)] to-[color:var(--color-ochre-bg)] border border-[color:var(--color-line)] rounded-2xl p-5 mb-4">
+        <h2 class="text-xs font-bold uppercase tracking-wider text-[color:var(--color-ink-2)] mb-3 flex items-center gap-2">
+          🏆
+          <ng-container i18n="@@member-detail.scores.heading">Puntos</ng-container>
+        </h2>
+        <div class="grid grid-cols-3 gap-3">
+          <div class="bg-white/60 rounded-xl px-3 py-3 text-center">
+            <p i18n="@@member-detail.scores.this-week" class="text-[10px] font-bold tracking-wide uppercase text-[color:var(--color-ink-3)]">Esta semana</p>
+            <p class="font-serif text-3xl font-semibold text-[color:var(--color-terra)] mt-0.5">{{ s.thisWeek }}</p>
+          </div>
+          <div class="bg-white/60 rounded-xl px-3 py-3 text-center">
+            <p i18n="@@member-detail.scores.this-month" class="text-[10px] font-bold tracking-wide uppercase text-[color:var(--color-ink-3)]">Este mes</p>
+            <p class="font-serif text-3xl font-semibold text-[color:var(--color-terra)] mt-0.5">{{ s.thisMonth }}</p>
+          </div>
+          <div class="bg-white/60 rounded-xl px-3 py-3 text-center">
+            <p i18n="@@member-detail.scores.all-time" class="text-[10px] font-bold tracking-wide uppercase text-[color:var(--color-ink-3)]">Total</p>
+            <p class="font-serif text-3xl font-semibold text-[color:var(--color-terra)] mt-0.5">{{ s.allTime }}</p>
+          </div>
+        </div>
+      </article>
+    }
+
+    <article class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl p-5 mb-4">
+      <header class="flex items-baseline justify-between mb-3">
+        <h2 i18n="@@member-detail.history.heading" class="text-xs font-bold uppercase tracking-wider text-[color:var(--color-ink-3)]">
+          Historial de tareas hechas
+        </h2>
+        @if (history().length > 0) {
+          <span class="text-xs text-[color:var(--color-ink-3)]">
+            {{ historySummary() }}
+          </span>
+        }
+      </header>
+
+      @if (history().length === 0) {
+        <p i18n="@@member-detail.history.empty" class="text-sm text-[color:var(--color-ink-3)] italic">
+          Aún no ha completado ninguna tarea.
+        </p>
+      } @else {
+        <ul class="flex flex-col gap-3">
+          @for (day of historyByDay(); track day.date) {
+            <li>
+              <p class="text-[11px] font-bold uppercase tracking-wider text-[color:var(--color-ink-2)] mb-1">
+                {{ day.label }}
+              </p>
+              <ul class="flex flex-col gap-1">
+                @for (row of day.rows; track row.completedAt) {
+                  <li class="flex items-center gap-2 text-sm bg-[color:var(--color-bg-2)] rounded-lg px-3 py-2">
+                    <span class="flex-1 min-w-0 truncate">{{ row.taskTitle }}</span>
+                    <span
+                      class="text-[11px] font-bold tracking-wide text-[color:var(--color-terra)] bg-[color:var(--color-terra-bg)] px-2 py-0.5 rounded-md shrink-0"
+                    >🏆 {{ row.points }}</span>
+                  </li>
+                }
+              </ul>
+            </li>
+          }
+        </ul>
+      }
+    </article>
+
+    <article class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl p-5 mb-4">
+      <h2 i18n="@@member-detail.tasks.heading" class="text-xs font-bold uppercase tracking-wider text-[color:var(--color-ink-3)] mb-3">
+        Sus tareas
+      </h2>
+      @if (orderedTasks().length === 0) {
+        <p class="text-sm text-[color:var(--color-ink-3)]">
+          <ng-container i18n="@@member-detail.tasks.empty">No tiene tareas asignadas.</ng-container>
+          @if (isAdmin()) {
+            <a routerLink="/tasks" class="underline text-[color:var(--color-terra)]" i18n="@@member-detail.tasks.assign">Asígnale una</a>.
+          }
+        </p>
+      } @else {
+        <ul class="flex flex-col gap-2">
+          @for (task of orderedTasks(); track task.id) {
+            <li class="flex items-center gap-3">
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium truncate">{{ task.title }}</p>
+                <p class="text-xs text-[color:var(--color-ink-3)] truncate">
+                  {{ task.category }} · {{ recurrenceLabel(task) }}
+                </p>
+              </div>
+              @if (task.responsibleMemberId === m.id) {
+                <span i18n="@@member-detail.tasks.responsible" class="text-[10px] font-bold tracking-wide uppercase text-[color:var(--color-terra)] bg-[color:var(--color-terra-bg)] px-2 py-0.5 rounded-md shrink-0">
+                  Responsable
+                </span>
+              } @else {
+                <span i18n="@@member-detail.tasks.related" class="text-[10px] font-bold tracking-wide uppercase text-[color:var(--color-ink-3)] bg-[color:var(--color-bg-2)] px-2 py-0.5 rounded-md shrink-0">
+                  Relacionado
+                </span>
+              }
+              <a
+                routerLink="/tasks"
+                class="text-xs font-medium text-[color:var(--color-terra)] underline cursor-pointer shrink-0"
+                i18n="@@member-detail.tasks.open"
+              >Abrir</a>
+            </li>
+          }
+        </ul>
+      }
+    </article>
+
+    <fn-member-agenda-section
+      [memberId]="m.id"
+      [canEdit]="isAdmin() || isSelf()"
+    />
+
+    <article class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl p-5 mb-4">
+      <h2 i18n="@@member-detail.agenda.heading" class="text-xs font-bold uppercase tracking-wider text-[color:var(--color-ink-3)] mb-3">
+        Su agenda · próximos 30 días
+      </h2>
+      @if (agenda().length === 0) {
+        <p class="text-sm text-[color:var(--color-ink-3)]">
+          <ng-container i18n="@@member-detail.agenda.empty">No hay eventos en este miembro.</ng-container>
+          @if (isAdmin()) {
+            <a routerLink="/calendar/accounts" class="underline text-[color:var(--color-terra)]" i18n="@@member-detail.agenda.link-calendar">Vincula un calendario</a>.
+          }
+        </p>
+      } @else {
+        <ul class="flex flex-col gap-3">
+          @for (day of agenda(); track day.date) {
+            <li>
+              <p class="text-[11px] font-bold uppercase tracking-wider text-[color:var(--color-ink-2)] mb-1">
+                {{ day.label }}
+              </p>
+              <ul class="flex flex-col gap-1">
+                @for (ev of day.events; track ev.id) {
+                  <li class="flex gap-2 text-sm">
+                    <span class="text-[color:var(--color-ink-3)] text-xs shrink-0 w-20">
+                      {{ eventTime(ev) }}
+                    </span>
+                    <span class="truncate">{{ ev.title }}</span>
+                  </li>
+                }
+              </ul>
+            </li>
+          }
+        </ul>
+      }
+    </article>
+
+    @if (isAdmin()) {
+      <article class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl p-5">
+        <h2 i18n="@@member-detail.actions.heading" class="text-xs font-bold uppercase tracking-wider text-[color:var(--color-ink-3)] mb-3">
+          Acciones
+        </h2>
+
+        @if (editing()) {
+          <form (submit)="$event.preventDefault(); submitEdit()" class="flex flex-col gap-3">
+            <div>
+              <label i18n="@@member-detail.edit.name" class="block text-xs uppercase tracking-wide text-[color:var(--color-ink-3)] mb-1">Nombre</label>
+              <input
+                type="text"
+                class="w-full px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+                [value]="form().displayName"
+                (input)="readForm('displayName', $event)"
+                maxlength="120"
+                required
+              />
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label i18n="@@member-detail.edit.color" class="block text-xs uppercase tracking-wide text-[color:var(--color-ink-3)] mb-1">Color</label>
+                <input
+                  type="color"
+                  class="w-full h-10 px-1 py-1 rounded-lg border border-[color:var(--color-line)] bg-white cursor-pointer"
+                  [value]="form().colorHex"
+                  (input)="readForm('colorHex', $event)"
+                />
+              </div>
+              <div>
+                <label i18n="@@member-detail.edit.birthday" class="block text-xs uppercase tracking-wide text-[color:var(--color-ink-3)] mb-1">Cumpleaños</label>
+                <input
+                  type="date"
+                  class="w-full px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+                  [value]="form().birthDate"
+                  (input)="readForm('birthDate', $event)"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label i18n="@@member-detail.edit.email" class="block text-xs uppercase tracking-wide text-[color:var(--color-ink-3)] mb-1">Email</label>
+              <input
+                type="email"
+                class="w-full px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+                [value]="form().contactEmail"
+                (input)="readForm('contactEmail', $event)"
+                maxlength="254"
+              />
+            </div>
+
+            @if (formError()) {
+              <p class="text-sm text-[color:var(--color-error)]">{{ formError() }}</p>
+            }
+
+            <div class="flex gap-2">
+              <button
+                type="submit"
+                [disabled]="submitting()"
+                class="px-5 py-2 rounded-full bg-[color:var(--color-terra)] text-white font-bold tracking-wide cursor-pointer border-0 disabled:opacity-50"
+              >
+                @if (submitting()) {
+                  <ng-container i18n="@@member-detail.edit.saving">Guardando…</ng-container>
+                } @else {
+                  <ng-container i18n="@@member-detail.edit.save">Guardar</ng-container>
+                }
+              </button>
+              <button
+                type="button"
+                (click)="cancelEdit()"
+                class="px-5 py-2 rounded-full bg-white border border-[color:var(--color-line)] text-[color:var(--color-ink-2)] cursor-pointer"
+                i18n="@@member-detail.edit.cancel"
+              >Cancelar</button>
+            </div>
+          </form>
+        } @else {
+          <div class="flex gap-2 flex-wrap">
+            <button
+              type="button"
+              (click)="openEdit()"
+              class="px-4 py-2 rounded-full bg-[color:var(--color-terra)] text-white font-bold tracking-wide cursor-pointer border-0 text-sm"
+              i18n="@@member-detail.actions.edit"
+            >Editar</button>
+            <button
+              type="button"
+              (click)="toggleActive()"
+              class="px-4 py-2 rounded-full bg-white border border-[color:var(--color-line)] text-[color:var(--color-ink-2)] cursor-pointer text-sm"
+            >
+              @if (m.isActive) {
+                <ng-container i18n="@@member-detail.actions.archive">Archivar</ng-container>
+              } @else {
+                <ng-container i18n="@@member-detail.actions.restore">Restaurar</ng-container>
+              }
+            </button>
+            <button
+              type="button"
+              (click)="deleteMember()"
+              class="px-4 py-2 rounded-full bg-white border border-[color:var(--color-error)] text-[color:var(--color-error)] cursor-pointer text-sm ml-auto"
+              i18n="@@member-detail.actions.delete"
+            >Eliminar</button>
+          </div>
+          <p i18n="@@member-detail.actions.help" class="text-xs text-[color:var(--color-ink-3)] mt-2">
+            "Archivar" oculta al miembro en los selectores; "Eliminar" lo borra permanentemente.
+          </p>
+        }
+      </article>
+    }
+  }
+</section>

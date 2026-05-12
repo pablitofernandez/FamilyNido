@@ -1,0 +1,11 @@
+# NOTE: update the URLs below to match the actual <owner>/<repo> slug of the
+# public repository after you create it on GitHub. They are templated against
+# pablitofernandez/FamilyNido as a starting point.
+blank_issues_enabled: false
+contact_links:
+  - name: 🔒 Security vulnerability
+    url: https://github.com/pablitofernandez/FamilyNido/security/advisories/new
+    about: Do NOT open a public issue. Report privately through GitHub's security advisories — see SECURITY.md.
+  - name: 💬 Question or discussion
+    url: https://github.com/pablitofernandez/FamilyNido/discussions
+    about: For open-ended questions, setup help and ideas, prefer Discussions over Issues.

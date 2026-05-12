@@ -1,0 +1,47 @@
+name: ✨ Feature request
+description: Propose a new feature or an improvement to an existing one.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for thinking about FamilyNido's roadmap. Before filling this in,
+        please read [CONTRIBUTING.md](../blob/main/CONTRIBUTING.md) — the
+        project is scoped to **a single household per instance**, and features
+        that primarily serve someone else's customers (multi-tenant SaaS,
+        commercial hosting, white-labelling) are out of scope.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: Describe the situation in your family that this would help with. The *why* matters much more than the *what*.
+      placeholder: Every morning we forget who is picking up the kids from school because…
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution (optional)
+      description: If you already have an idea of how this could work, jot it here. Otherwise leave blank — the design discussion can happen on the issue.
+    validations:
+      required: false
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Existing workarounds you've tried (in FamilyNido or other tools) and why they fall short.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope check
+      options:
+        - label: This is useful for a typical family running its own instance, not just my edge case.
+          required: true
+        - label: This does not require multi-tenant features, billing, white-labelling or hosting it as a service for other families.
+          required: true

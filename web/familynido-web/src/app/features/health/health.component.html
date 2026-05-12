@@ -1,0 +1,362 @@
+<section class="max-w-3xl mx-auto px-5 pt-6 lg:pt-8 pb-6">
+  <header class="mb-6">
+    <h1 class="font-serif text-3xl lg:text-5xl font-medium tracking-tight">
+      <ng-container i18n="@@health.title-prefix">La</ng-container>
+      <em class="text-[color:var(--color-terra)] italic font-normal" i18n="@@health.title-emph">salud</em>
+    </h1>
+    <p i18n="@@health.subtitle" class="text-sm text-[color:var(--color-ink-3)] mt-1">
+      Ficha médica ligera, vacunas y medicación por miembro.
+    </p>
+  </header>
+
+  @if (error()) {
+    <p class="text-sm text-[color:var(--color-error)] mb-3">{{ error() }}</p>
+  }
+
+  <div class="flex gap-2 overflow-x-auto pb-2 mb-4 -mx-5 px-5">
+    @for (m of members(); track m.id) {
+      <button
+        type="button"
+        (click)="pickMember(m.id)"
+        class="flex flex-col items-center gap-1 px-2 py-2 rounded-xl border min-w-[68px] cursor-pointer transition-colors"
+        [class.bg-white]="selectedMemberId() !== m.id"
+        [class.border-[color:var(--color-line)]]="selectedMemberId() !== m.id"
+        [class.bg-[color:var(--color-terra-bg)]]="selectedMemberId() === m.id"
+        [class.border-[color:var(--color-terra)]]="selectedMemberId() === m.id"
+      >
+        <fn-avatar [name]="m.displayName" [colorHex]="m.colorHex" [size]="40" [photoUrl]="memberPhotoUrl(m)" />
+        <span class="text-xs font-medium">{{ m.displayName }}</span>
+      </button>
+    }
+  </div>
+
+  @if (loading()) {
+    <p i18n="@@health.loading" class="text-sm text-[color:var(--color-ink-3)]">Cargando…</p>
+  } @else if (selectedMember(); as m) {
+    <nav class="flex gap-2 mb-4">
+      <button
+        type="button"
+        class="px-4 py-2 rounded-full text-sm font-bold cursor-pointer transition-colors"
+        [class.bg-[color:var(--color-terra)]]="tab() === 'profile'"
+        [class.text-white]="tab() === 'profile'"
+        [class.bg-white]="tab() !== 'profile'"
+        [class.border]="tab() !== 'profile'"
+        [class.border-[color:var(--color-line)]]="tab() !== 'profile'"
+        (click)="switchTab('profile')"
+        i18n="@@health.tab.profile"
+      >Ficha</button>
+      <button
+        type="button"
+        class="px-4 py-2 rounded-full text-sm font-bold cursor-pointer transition-colors"
+        [class.bg-[color:var(--color-terra)]]="tab() === 'vaccinations'"
+        [class.text-white]="tab() === 'vaccinations'"
+        [class.bg-white]="tab() !== 'vaccinations'"
+        [class.border]="tab() !== 'vaccinations'"
+        [class.border-[color:var(--color-line)]]="tab() !== 'vaccinations'"
+        (click)="switchTab('vaccinations')"
+        i18n="@@health.tab.vaccinations"
+      >Vacunas</button>
+      <button
+        type="button"
+        class="px-4 py-2 rounded-full text-sm font-bold cursor-pointer transition-colors"
+        [class.bg-[color:var(--color-terra)]]="tab() === 'medications'"
+        [class.text-white]="tab() === 'medications'"
+        [class.bg-white]="tab() !== 'medications'"
+        [class.border]="tab() !== 'medications'"
+        [class.border-[color:var(--color-line)]]="tab() !== 'medications'"
+        (click)="switchTab('medications')"
+        i18n="@@health.tab.medications"
+      >Medicación</button>
+    </nav>
+
+    @if (tab() === 'profile') {
+      <article class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl p-5">
+        @if (profileEditing()) {
+          <form (submit)="$event.preventDefault(); saveProfile()" class="flex flex-col gap-3">
+            <label class="flex flex-col gap-1">
+              <span i18n="@@health.profile.blood-type" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Grupo sanguíneo</span>
+              <input type="text" maxlength="8" class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+                [value]="profileBloodType()" (input)="onProfileBlood($event)" />
+            </label>
+            <label class="flex flex-col gap-1">
+              <span i18n="@@health.profile.allergies" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Alergias</span>
+              <textarea rows="3" maxlength="2000" class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+                [value]="profileAllergies()" (input)="onProfileAllergies($event)"></textarea>
+            </label>
+            <label class="flex flex-col gap-1">
+              <span i18n="@@health.profile.conditions" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Condiciones crónicas</span>
+              <textarea rows="3" maxlength="2000" class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+                [value]="profileConditions()" (input)="onProfileConditions($event)"></textarea>
+            </label>
+            <label class="flex flex-col gap-1">
+              <span i18n="@@health.profile.notes" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Notas generales</span>
+              <textarea rows="3" maxlength="4000" class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+                [value]="profileNotes()" (input)="onProfileNotes($event)"></textarea>
+            </label>
+            <div class="flex gap-2 justify-end">
+              <button type="button" (click)="cancelProfileForm()"
+                class="px-4 py-2 rounded-lg border border-[color:var(--color-line)] bg-white cursor-pointer"
+                i18n="@@health.cancel"
+              >Cancelar</button>
+              <button type="submit" [disabled]="profileSaving()"
+                class="px-5 py-2 rounded-full bg-[color:var(--color-terra)] text-white font-bold cursor-pointer border-0 disabled:opacity-50">
+                @if (profileSaving()) {
+                  <ng-container i18n="@@health.saving">Guardando…</ng-container>
+                } @else {
+                  <ng-container i18n="@@health.save">Guardar</ng-container>
+                }
+              </button>
+            </div>
+          </form>
+        } @else {
+          @if (health()?.profile; as p) {
+            <dl class="flex flex-col gap-3">
+              <div>
+                <dt i18n="@@health.profile.blood-type" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Grupo sanguíneo</dt>
+                <dd class="text-sm">{{ p.bloodType || '—' }}</dd>
+              </div>
+              <div>
+                <dt i18n="@@health.profile.allergies" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Alergias</dt>
+                <dd class="text-sm whitespace-pre-line">{{ p.allergies || '—' }}</dd>
+              </div>
+              <div>
+                <dt i18n="@@health.profile.conditions" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Condiciones crónicas</dt>
+                <dd class="text-sm whitespace-pre-line">{{ p.chronicConditions || '—' }}</dd>
+              </div>
+              <div>
+                <dt i18n="@@health.profile.notes-short" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Notas</dt>
+                <dd class="text-sm whitespace-pre-line">{{ p.notes || '—' }}</dd>
+              </div>
+            </dl>
+          } @else {
+            <p i18n="@@health.profile.empty" class="text-sm text-[color:var(--color-ink-3)]">Aún no hay ficha. Crea una para tener los datos básicos a mano.</p>
+          }
+          <div class="flex justify-end mt-4">
+            <button type="button" (click)="openProfileForm()"
+              class="px-4 py-2 rounded-full bg-[color:var(--color-terra)] text-white font-bold cursor-pointer border-0">
+              @if (health()?.profile) {
+                <ng-container i18n="@@health.profile.edit">Editar ficha</ng-container>
+              } @else {
+                <ng-container i18n="@@health.profile.create">Crear ficha</ng-container>
+              }
+            </button>
+          </div>
+        }
+      </article>
+    }
+
+    @if (tab() === 'vaccinations') {
+      <div class="flex justify-end mb-3">
+        <button type="button" (click)="openVaccinationEditor(null)"
+          class="px-4 py-2 rounded-full bg-[color:var(--color-terra)] text-white font-bold cursor-pointer border-0 flex items-center gap-1">
+          <fn-icon name="plus" [size]="16" />
+          <ng-container i18n="@@health.vaccinations.add">Vacuna</ng-container>
+        </button>
+      </div>
+
+      @if (vaccinationEditorOpen()) {
+        <article class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl p-5 mb-4">
+          <h3 class="font-serif text-xl font-semibold mb-3">
+            @if (vaccinationEditingId()) {
+              <ng-container i18n="@@health.vaccinations.edit-title">Editar vacuna</ng-container>
+            } @else {
+              <ng-container i18n="@@health.vaccinations.new-title">Nueva vacuna</ng-container>
+            }
+          </h3>
+          <form (submit)="$event.preventDefault(); saveVaccination()" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <label class="flex flex-col gap-1 sm:col-span-2">
+              <span i18n="@@health.vaccinations.name" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Nombre</span>
+              <input type="text" maxlength="120" class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+                [value]="vaccName()" (input)="onVaccName($event)" />
+            </label>
+            <label class="flex flex-col gap-1">
+              <span i18n="@@health.vaccinations.date" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Fecha</span>
+              <input type="date" class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+                [value]="vaccDate()" (input)="onVaccDate($event)" />
+            </label>
+            <label class="flex flex-col gap-1">
+              <span i18n="@@health.vaccinations.next-date" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Próxima dosis</span>
+              <input type="date" class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+                [value]="vaccNextDate()" (input)="onVaccNextDate($event)" />
+            </label>
+            <label class="flex flex-col gap-1 sm:col-span-2">
+              <span i18n="@@health.vaccinations.notes" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Notas</span>
+              <textarea rows="2" maxlength="2000" class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+                [value]="vaccNotes()" (input)="onVaccNotes($event)"></textarea>
+            </label>
+            <div class="sm:col-span-2 flex gap-2 justify-end">
+              <button type="button" (click)="closeVaccinationEditor()"
+                class="px-4 py-2 rounded-lg border border-[color:var(--color-line)] bg-white cursor-pointer"
+                i18n="@@health.cancel"
+              >Cancelar</button>
+              <button type="submit" [disabled]="vaccSaving()"
+                class="px-5 py-2 rounded-full bg-[color:var(--color-terra)] text-white font-bold cursor-pointer border-0 disabled:opacity-50">
+                @if (vaccSaving()) {
+                  <ng-container i18n="@@health.saving">Guardando…</ng-container>
+                } @else {
+                  <ng-container i18n="@@health.save">Guardar</ng-container>
+                }
+              </button>
+            </div>
+          </form>
+        </article>
+      }
+
+      <ul class="flex flex-col gap-3">
+        @for (v of health()?.vaccinations ?? []; track v.id) {
+          <li class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl p-4 flex items-start gap-3">
+            <div class="flex-1 min-w-0">
+              <p class="font-serif text-base font-semibold leading-tight">{{ v.name }}</p>
+              <p class="text-xs text-[color:var(--color-ink-3)] mt-0.5">
+                {{ v.date | date: 'longDate' }}
+                @if (v.nextDueDate) {
+                  <ng-container i18n="@@health.vaccinations.next-dose">· próxima dosis</ng-container> {{ v.nextDueDate | date: 'longDate' }}
+                }
+              </p>
+              @if (v.notes) {
+                <p class="text-sm mt-2 whitespace-pre-line">{{ v.notes }}</p>
+              }
+            </div>
+            <div class="flex gap-1 shrink-0">
+              <button type="button" (click)="openVaccinationEditor(v)"
+                class="w-8 h-8 flex items-center justify-center rounded-md hover:bg-[color:var(--color-bg-2)] cursor-pointer"
+                i18n-aria-label="@@health.edit-aria"
+                aria-label="Editar"
+              ><fn-icon name="settings" [size]="16" /></button>
+              <button type="button" (click)="deleteVaccination(v)"
+                class="w-8 h-8 flex items-center justify-center rounded-md hover:bg-[color:var(--color-bg-2)] cursor-pointer"
+                i18n-aria-label="@@health.delete-aria"
+                aria-label="Borrar"
+              ><fn-icon name="trash-2" [size]="16" /></button>
+            </div>
+          </li>
+        } @empty {
+          <li i18n="@@health.vaccinations.empty" class="text-sm text-[color:var(--color-ink-3)] text-center py-6">
+            Sin vacunas registradas todavía.
+          </li>
+        }
+      </ul>
+    }
+
+    @if (tab() === 'medications') {
+      <div class="flex justify-end mb-3">
+        <button type="button" (click)="openMedicationEditor(null)"
+          class="px-4 py-2 rounded-full bg-[color:var(--color-terra)] text-white font-bold cursor-pointer border-0 flex items-center gap-1">
+          <fn-icon name="plus" [size]="16" />
+          <ng-container i18n="@@health.medications.add">Medicación</ng-container>
+        </button>
+      </div>
+
+      @if (medicationEditorOpen()) {
+        <article class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl p-5 mb-4">
+          <h3 class="font-serif text-xl font-semibold mb-3">
+            @if (medicationEditingId()) {
+              <ng-container i18n="@@health.medications.edit-title">Editar medicación</ng-container>
+            } @else {
+              <ng-container i18n="@@health.medications.new-title">Nueva medicación</ng-container>
+            }
+          </h3>
+          <form (submit)="$event.preventDefault(); saveMedication()" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <label class="flex flex-col gap-1 sm:col-span-2">
+              <span i18n="@@health.medications.name" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Nombre</span>
+              <input type="text" maxlength="120" class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+                [value]="medName()" (input)="onMedName($event)" />
+            </label>
+            <label class="flex flex-col gap-1">
+              <span i18n="@@health.medications.dose" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Dosis</span>
+              <input type="text" maxlength="80"
+                i18n-placeholder="@@health.medications.dose-placeholder"
+                placeholder="5 ml, 1 comprimido…"
+                class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+                [value]="medDose()" (input)="onMedDose($event)" />
+            </label>
+            <label class="flex flex-col gap-1">
+              <span i18n="@@health.medications.frequency" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Frecuencia</span>
+              <input type="text" maxlength="120"
+                i18n-placeholder="@@health.medications.frequency-placeholder"
+                placeholder="cada 8 h, una vez al día…"
+                class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+                [value]="medFreq()" (input)="onMedFreq($event)" />
+            </label>
+            <label class="flex flex-col gap-1">
+              <span i18n="@@health.medications.start" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Inicio</span>
+              <input type="date" class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+                [value]="medStart()" (input)="onMedStart($event)" />
+            </label>
+            <label class="flex flex-col gap-1">
+              <span i18n="@@health.medications.end" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Fin (opcional)</span>
+              <input type="date" class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+                [value]="medEnd()" (input)="onMedEnd($event)" />
+            </label>
+            <label class="flex flex-col gap-1 sm:col-span-2">
+              <span i18n="@@health.medications.instructions" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Instrucciones</span>
+              <textarea rows="2" maxlength="2000"
+                class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
+                [value]="medInstructions()" (input)="onMedInstructions($event)"></textarea>
+            </label>
+            <div class="sm:col-span-2 flex gap-2 justify-end">
+              <button type="button" (click)="closeMedicationEditor()"
+                class="px-4 py-2 rounded-lg border border-[color:var(--color-line)] bg-white cursor-pointer"
+                i18n="@@health.cancel"
+              >Cancelar</button>
+              <button type="submit" [disabled]="medSaving()"
+                class="px-5 py-2 rounded-full bg-[color:var(--color-terra)] text-white font-bold cursor-pointer border-0 disabled:opacity-50">
+                @if (medSaving()) {
+                  <ng-container i18n="@@health.saving">Guardando…</ng-container>
+                } @else {
+                  <ng-container i18n="@@health.save">Guardar</ng-container>
+                }
+              </button>
+            </div>
+          </form>
+        </article>
+      }
+
+      <ul class="flex flex-col gap-3">
+        @for (m of health()?.medications ?? []; track m.id) {
+          <li class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl p-4 flex items-start gap-3">
+            <div class="flex-1 min-w-0">
+              <p class="font-serif text-base font-semibold leading-tight flex items-center gap-2">
+                {{ m.name }}
+                @if (m.isActive) {
+                  <span i18n="@@health.medications.active-badge" class="text-[10px] font-bold tracking-wide uppercase text-[color:var(--color-terra)] bg-[color:var(--color-terra-bg)] px-2 py-0.5 rounded-md">
+                    Activa
+                  </span>
+                }
+              </p>
+              <p class="text-xs text-[color:var(--color-ink-3)] mt-0.5">
+                @if (m.dose) { {{ m.dose }} · }
+                @if (m.frequency) { {{ m.frequency }} · }
+                <ng-container i18n="@@health.medications.from">desde</ng-container> {{ m.startDate | date: 'longDate' }}
+                @if (m.endDate) {
+                  <ng-container i18n="@@health.medications.until">· hasta</ng-container> {{ m.endDate | date: 'longDate' }}
+                }
+              </p>
+              @if (m.instructions) {
+                <p class="text-sm mt-2 whitespace-pre-line">{{ m.instructions }}</p>
+              }
+            </div>
+            <div class="flex gap-1 shrink-0">
+              <button type="button" (click)="openMedicationEditor(m)"
+                class="w-8 h-8 flex items-center justify-center rounded-md hover:bg-[color:var(--color-bg-2)] cursor-pointer"
+                i18n-aria-label="@@health.edit-aria"
+                aria-label="Editar"
+              ><fn-icon name="settings" [size]="16" /></button>
+              <button type="button" (click)="deleteMedication(m)"
+                class="w-8 h-8 flex items-center justify-center rounded-md hover:bg-[color:var(--color-bg-2)] cursor-pointer"
+                i18n-aria-label="@@health.delete-aria"
+                aria-label="Borrar"
+              ><fn-icon name="trash-2" [size]="16" /></button>
+            </div>
+          </li>
+        } @empty {
+          <li i18n="@@health.medications.empty" class="text-sm text-[color:var(--color-ink-3)] text-center py-6">
+            Sin medicaciones registradas.
+          </li>
+        }
+      </ul>
+    }
+  } @else {
+    <p i18n="@@health.no-member" class="text-sm text-[color:var(--color-ink-3)]">Selecciona un miembro arriba para ver su historial.</p>
+  }
+</section>

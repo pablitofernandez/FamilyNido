@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="FamilyNido">
+  <!-- Rounded square in the brand terracotta. -->
+  <rect width="32" height="32" rx="7" ry="7" fill="#C96442"/>
+  <!-- Italic serif "F" in the warm cream that the rest of the app uses for
+       page backgrounds. The choice mirrors the editorial display headings
+       seen across FamilyNido (e.g. "El <em>muro</em>"). -->
+  <text x="16" y="23"
+        text-anchor="middle"
+        font-family="Georgia, 'Times New Roman', serif"
+        font-size="22"
+        font-style="italic"
+        font-weight="500"
+        fill="#FBF7F0">F</text>
+</svg>

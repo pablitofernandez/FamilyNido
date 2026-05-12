@@ -1,0 +1,108 @@
+# FamilyNido — production compose stack for the home Ubuntu server.
+# Pulls pre-built images from GHCR (published by .github/workflows/build-and-push.yml)
+# instead of building on the host. Run from /opt/familynido/ (or wherever this
+# file lives alongside its .env) with:
+#
+#   docker compose -f docker-compose.prod.yml pull
+#   docker compose -f docker-compose.prod.yml up -d
+#
+# Assumes an external Traefik instance terminates TLS via the configured
+# cert resolver on the ${TRAEFIK_NETWORK} network.
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: familynido-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      TZ: ${FAMILYNIDO_TIMEZONE}
+    volumes:
+      - familynido-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - internal
+
+  api:
+    image: ghcr.io/${GHCR_OWNER}/familynido-api:latest
+    container_name: familynido-api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # PUID/PGID let the entrypoint align the in-container `familynido` user
+      # with the host owner of any bind-mounted directory. Leave the .env
+      # values empty to keep the default (system UID 100). Set them to a
+      # specific UID/GID (e.g. 1000:1000) when the files volume is a bind
+      # mount and you want the writes to appear under that host user.
+      PUID: ${PUID:-}
+      PGID: ${PGID:-}
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_HTTP_PORTS: "8080"
+      ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+      ConnectionStrings__Postgres: Host=db;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+      Oidc__Authority: ${OIDC_AUTHORITY}
+      Oidc__ClientId: ${OIDC_CLIENT_ID}
+      Oidc__ClientSecret: ${OIDC_CLIENT_SECRET}
+      Oidc__RequireHttpsMetadata: ${OIDC_REQUIRE_HTTPS}
+      Family__DefaultTimeZone: ${FAMILYNIDO_TIMEZONE}
+      Cors__AllowedOrigins__0: ${FAMILYNIDO_BASE_URL}
+      Calendar__GoogleClientId: ${GOOGLE_CLIENT_ID}
+      Calendar__GoogleClientSecret: ${GOOGLE_CLIENT_SECRET}
+      Calendar__OAuthRedirectUri: ${GOOGLE_OAUTH_REDIRECT_URI}
+      Email__Enabled: ${EMAIL__ENABLED:-false}
+      Email__SmtpHost: ${EMAIL__SMTPHOST:-}
+      Email__SmtpPort: ${EMAIL__SMTPPORT:-587}
+      Email__SmtpUsername: ${EMAIL__SMTPUSERNAME:-}
+      Email__SmtpPassword: ${EMAIL__SMTPPASSWORD:-}
+      Email__SmtpUseStartTls: ${EMAIL__SMTPUSESTARTTLS:-true}
+      Email__From: ${EMAIL__FROM:-FamilyNido <noreply@familynido.example.com>}
+      Email__AppBaseUrl: ${EMAIL__APPBASEURL:-${FAMILYNIDO_BASE_URL}}
+      Email__InvitationLifetime: ${EMAIL__INVITATIONLIFETIME:-7.00:00:00}
+      TZ: ${FAMILYNIDO_TIMEZONE}
+    volumes:
+      - familynido-files:/app/data/files
+      # Persist ASP.NET Core Data Protection keys across container recreations.
+      # Without this, every `docker compose up -d` rotates the keys and all
+      # active OIDC cookies (session + nonce/correlation) become unreadable.
+      - familynido-keys:/home/familynido/.aspnet/DataProtection-Keys
+    networks:
+      - internal
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+
+  web:
+    image: ghcr.io/${GHCR_OWNER}/familynido-web:latest
+    container_name: familynido-web
+    restart: unless-stopped
+    depends_on:
+      - api
+    networks:
+      - internal
+      - traefik
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+      - traefik.docker.network=${TRAEFIK_NETWORK}
+      - traefik.http.routers.${TRAEFIK_ROUTER_NAME}.rule=Host(`${TRAEFIK_HOST}`)
+      - traefik.http.routers.${TRAEFIK_ROUTER_NAME}.tls=true
+      - traefik.http.routers.${TRAEFIK_ROUTER_NAME}.tls.certresolver=${TRAEFIK_TLS_RESOLVER}
+      - traefik.http.services.${TRAEFIK_ROUTER_NAME}.loadbalancer.server.port=8080
+
+volumes:
+  familynido-db-data:
+  familynido-files:
+  familynido-keys:
+
+networks:
+  internal:
+    driver: bridge
+  traefik:
+    name: ${TRAEFIK_NETWORK}
+    external: true

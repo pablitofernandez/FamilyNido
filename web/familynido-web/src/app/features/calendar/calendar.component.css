@@ -1,0 +1,3 @@
+/* Component-scoped styles. Layout primitives come from Tailwind utility classes
+   in the template; this file is reserved for the few rules where utilities
+   are not enough (e.g. native pseudo-element overrides). */
