@@ -7,13 +7,20 @@ Two compose files live here, for two distinct scenarios:
 | `docker-compose.prod.yml` | Pulls pre-built images from GHCR. This is what runs on the home server. |
 | `docker-compose.dev.yml` | Dev stack with Postgres only — auth runs on local credentials. |
 
-Images are built by `.github/workflows/build-and-push.yml` on every push to
-`main` and published to:
+Images are built by `.github/workflows/build-and-push.yml` and published to:
 
-- `ghcr.io/<GHCR_OWNER>/familynido-api:latest`
-- `ghcr.io/<GHCR_OWNER>/familynido-web:latest`
+- `ghcr.io/<GHCR_OWNER>/familynido-api:<tag>`
+- `ghcr.io/<GHCR_OWNER>/familynido-web:<tag>`
 
-Each push also produces an immutable `sha-<shortsha>` tag for rollbacks.
+Tags produced:
+
+| Trigger | Tag(s) |
+|---|---|
+| Push to `main` | `latest` + immutable `sha-<shortsha>` |
+| Pull request | `pr-<number>` (overwritten on each push to the PR) |
+
+The compose stack picks the tag via the `IMAGE_TAG` env var (default
+`latest`). See *Trying a PR build* and *Rolling back* below.
 
 ## First-time server setup
 
@@ -99,16 +106,47 @@ docker compose -f docker-compose.prod.yml pull
 docker compose -f docker-compose.prod.yml up -d
 ```
 
-## Rolling back
+## Trying a PR build before merging
 
-Each build tags the images with `sha-<shortsha>`. To roll back to a previous
-build without reverting the main branch:
+Every pull request also publishes a build to GHCR under the tag
+`pr-<number>` (overwritten on each push to the PR branch, so it always
+reflects the latest commit). To run that build on this server:
 
 ```bash
-# 1. Pin the images to a known-good SHA in docker-compose.prod.yml,
-#    e.g. ghcr.io/.../familynido-api:sha-a57d52e
-# 2. docker compose -f docker-compose.prod.yml up -d
+cd /opt/familynido
+IMAGE_TAG=pr-14 docker compose -f docker-compose.prod.yml pull
+IMAGE_TAG=pr-14 docker compose -f docker-compose.prod.yml up -d
 ```
+
+Set `IMAGE_TAG` persistently by uncommenting it in `.env` if you want to
+sit on a PR build for a while; otherwise the inline form is enough — when
+you're done testing, run the regular `pull` + `up -d` without `IMAGE_TAG`
+to snap back to `latest`.
+
+> **Cleanup is automatic.** When the PR closes (merged or not), the
+> `Clean up PR images` workflow drops the `pr-N` tag from both packages.
+> If you need to remove a tag while the PR is still open (e.g. to free
+> the name for a force-push), delete it manually from
+> `https://github.com/<owner>?tab=packages` → *familynido-api* / *-web*
+> → Versions → *pr-N* → Delete.
+>
+> The auto-cleanup relies on the `GHCR_DELETE_TOKEN` repo secret — a
+> classic PAT with `read:packages` + `delete:packages` scope. The
+> default `GITHUB_TOKEN` cannot delete container versions on its own.
+
+## Rolling back
+
+Each push to `main` tags the images with `sha-<shortsha>` (immutable).
+To roll back without reverting the branch:
+
+```bash
+cd /opt/familynido
+IMAGE_TAG=sha-a57d52e docker compose -f docker-compose.prod.yml pull
+IMAGE_TAG=sha-a57d52e docker compose -f docker-compose.prod.yml up -d
+```
+
+When you're ready to come back to the head of `main`, drop `IMAGE_TAG`
+and re-run the pull + up.
 
 ## Database migrations
 
