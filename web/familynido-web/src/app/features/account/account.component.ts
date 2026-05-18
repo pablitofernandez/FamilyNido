@@ -77,20 +77,22 @@ export class AccountComponent implements OnInit {
   /** Currently persisted language — driven by the me() signal. */
   protected readonly currentLanguage = computed(() => this.auth.me()?.preferredLanguage ?? 'es-ES');
 
-  /** Time-format picker state. Empty string represents "auto" (inherit from the language bundle). */
+  /** Display-prefs picker state. Empty string represents "auto" for each field. */
   protected readonly timeFormatDraft = signal<TimeFormatDraft>('');
-  protected readonly savingTimeFormat = signal(false);
-  protected readonly timeFormatError = signal<string | null>(null);
+  protected readonly temperatureUnitDraft = signal<TemperatureUnitDraft>('');
+  /** Combined saving + error state — both prefs share the single "Guardar" button. */
+  protected readonly savingDisplayPrefs = signal(false);
+  protected readonly displayPrefsError = signal<string | null>(null);
   protected readonly currentTimeFormat = computed<TimeFormatDraft>(
     () => this.auth.me()?.timeFormat ?? '',
   );
-
-  /** Temperature-unit picker state. Empty string represents "auto". */
-  protected readonly temperatureUnitDraft = signal<TemperatureUnitDraft>('');
-  protected readonly savingTemperatureUnit = signal(false);
-  protected readonly temperatureUnitError = signal<string | null>(null);
   protected readonly currentTemperatureUnit = computed<TemperatureUnitDraft>(
     () => this.auth.me()?.temperatureUnit ?? '',
+  );
+  /** True when either draft differs from the persisted value — enables the save button. */
+  protected readonly displayPrefsDirty = computed(() =>
+    this.timeFormatDraft() !== this.currentTimeFormat()
+    || this.temperatureUnitDraft() !== this.currentTemperatureUnit(),
   );
 
   /** Integration API keys — admin-only section. */
@@ -163,29 +165,11 @@ export class AccountComponent implements OnInit {
     }
   }
 
-  // ─── Time format picker (12H / 24H / auto) ────────────────────────────────
+  // ─── Display preferences (time format + temperature unit, single save) ───
 
   protected onTimeFormatDraftChange(event: Event): void {
     this.timeFormatDraft.set((event.target as HTMLSelectElement).value as TimeFormatDraft);
   }
-
-  protected async saveTimeFormat(): Promise<void> {
-    if (this.savingTimeFormat()) return;
-    if (this.timeFormatDraft() === this.currentTimeFormat()) return;
-
-    this.savingTimeFormat.set(true);
-    this.timeFormatError.set(null);
-    try {
-      const draft = this.timeFormatDraft();
-      await this.auth.setTimeFormat(draft === '' ? null : draft);
-    } catch {
-      this.timeFormatError.set($localize`:@@account.time-format.error:No se pudo guardar el formato de hora.`);
-    } finally {
-      this.savingTimeFormat.set(false);
-    }
-  }
-
-  // ─── Temperature unit picker (Celsius / Fahrenheit / auto) ────────────────
 
   protected onTemperatureUnitDraftChange(event: Event): void {
     this.temperatureUnitDraft.set(
@@ -193,19 +177,33 @@ export class AccountComponent implements OnInit {
     );
   }
 
-  protected async saveTemperatureUnit(): Promise<void> {
-    if (this.savingTemperatureUnit()) return;
-    if (this.temperatureUnitDraft() === this.currentTemperatureUnit()) return;
+  /**
+   * Save whichever of the two prefs has changed since load (or since the
+   * last save). PATCHes run in parallel — the backend has separate
+   * endpoints, but the user sees one button, one spinner.
+   */
+  protected async saveDisplayPrefs(): Promise<void> {
+    if (this.savingDisplayPrefs() || !this.displayPrefsDirty()) return;
 
-    this.savingTemperatureUnit.set(true);
-    this.temperatureUnitError.set(null);
-    try {
+    this.savingDisplayPrefs.set(true);
+    this.displayPrefsError.set(null);
+
+    const updates: Promise<unknown>[] = [];
+    if (this.timeFormatDraft() !== this.currentTimeFormat()) {
+      const draft = this.timeFormatDraft();
+      updates.push(this.auth.setTimeFormat(draft === '' ? null : draft));
+    }
+    if (this.temperatureUnitDraft() !== this.currentTemperatureUnit()) {
       const draft = this.temperatureUnitDraft();
-      await this.auth.setTemperatureUnit(draft === '' ? null : draft);
+      updates.push(this.auth.setTemperatureUnit(draft === '' ? null : draft));
+    }
+
+    try {
+      await Promise.all(updates);
     } catch {
-      this.temperatureUnitError.set($localize`:@@account.temperature-unit.error:No se pudo guardar la unidad de temperatura.`);
+      this.displayPrefsError.set($localize`:@@account.display.error:No se pudieron guardar las preferencias.`);
     } finally {
-      this.savingTemperatureUnit.set(false);
+      this.savingDisplayPrefs.set(false);
     }
   }
 

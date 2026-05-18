@@ -323,7 +323,7 @@
                 {{ recurrenceLabel(row.task) }}
               }
               @if (row.task.timeOfDay) {
-                · {{ row.task.timeOfDay.slice(0, 5) }}
+                · {{ formatTimeOfDay(row.task.timeOfDay) }}
               }
               @if (row.occurrence.isCompleted && row.occurrence.completedByMemberId) {
                 · {{ completedByLabel(row.occurrence.completedByMemberId) }}

@@ -515,7 +515,7 @@ export class DashboardComponent implements OnInit {
   }
 
   protected formatSchoolTime(value: string): string {
-    return value.length >= 5 ? value.slice(0, 5) : value;
+    return reformatHourMinute(value, this.timeFormatter);
   }
 
   /** Single emoji that represents the member's transport mode in the agenda widget. */
@@ -533,7 +533,7 @@ export class DashboardComponent implements OnInit {
 
   /** Compact "HH:mm – HH:mm" or "HH:mm →" / "→ HH:mm" / "Todo el día" for the agenda widget. */
   protected agendaTimeLabel(entry: ResolvedAgendaEntry): string {
-    const fmt = (t: string | null) => t ? t.slice(0, 5) : '';
+    const fmt = (t: string | null) => reformatHourMinute(t, this.timeFormatter);
     if (!entry.startTime && !entry.endTime) return 'Todo el día';
     if (entry.startTime && !entry.endTime) return `${fmt(entry.startTime)} →`;
     if (!entry.startTime && entry.endTime) return `→ ${fmt(entry.endTime)}`;

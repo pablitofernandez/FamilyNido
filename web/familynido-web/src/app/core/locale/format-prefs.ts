@@ -84,13 +84,36 @@ export function projectWeather(
 }
 
 /**
- * Reparse a backend "HH:mm" string through the supplied formatter. Returns
- * the input unchanged when it doesn't match — keeps the call safe for
- * legacy or malformed inputs.
+ * Build an `Intl.DateTimeFormat` for hour:minute display that honours both
+ * the active locale and an explicit `User.TimeFormat` override. Use this
+ * over hand-rolling the constructor so every component picks the same
+ * combination of options.
  */
-export function reformatHourMinute(hhmm: string, formatter: Intl.DateTimeFormat): string {
-  const match = /^(\d{1,2}):(\d{2})/.exec(hhmm);
-  if (!match) return hhmm;
+export function buildTimeFormatter(
+  locale: string,
+  override: TimeFormatPreference | null | undefined,
+): Intl.DateTimeFormat {
+  return new Intl.DateTimeFormat(locale, {
+    hour: 'numeric',
+    minute: '2-digit',
+    hourCycle: resolveHourCycle(override),
+  });
+}
+
+/**
+ * Reparse a backend "HH:mm" (or "HH:mm:ss") string through the supplied
+ * formatter. Returns an empty string for null/undefined and the input
+ * unchanged when it can't be parsed — keeps the call safe for legacy or
+ * malformed inputs and lets callers swap `.slice(0, 5)` for this without
+ * adding null checks at the call site.
+ */
+export function reformatHourMinute(
+  value: string | null | undefined,
+  formatter: Intl.DateTimeFormat,
+): string {
+  if (!value) return '';
+  const match = /^(\d{1,2}):(\d{2})/.exec(value);
+  if (!match) return value;
   const d = new Date();
   d.setHours(Number(match[1]), Number(match[2]), 0, 0);
   return formatter.format(d);

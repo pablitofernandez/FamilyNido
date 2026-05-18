@@ -584,73 +584,56 @@
       </p>
     </header>
 
-    @if (timeFormatError()) {
-      <p class="text-xs text-[color:var(--color-error)] mb-2">{{ timeFormatError() }}</p>
+    @if (displayPrefsError()) {
+      <p class="text-xs text-[color:var(--color-error)] mb-2">{{ displayPrefsError() }}</p>
     }
 
-    <div class="flex flex-wrap items-end gap-3 mb-4">
+    <div class="flex flex-wrap gap-3 mb-4">
       <label class="flex flex-col gap-1 flex-1 min-w-[180px]">
         <span i18n="@@account.time-format.label" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Formato de hora</span>
         <select
           class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
           [value]="timeFormatDraft()"
           (change)="onTimeFormatDraftChange($event)"
-          [disabled]="savingTimeFormat()"
+          [disabled]="savingDisplayPrefs()"
         >
           <option value="" i18n="@@account.time-format.option.auto">Automático (según idioma)</option>
           <option value="H12" i18n="@@account.time-format.option.h12">12 horas (AM/PM)</option>
           <option value="H24" i18n="@@account.time-format.option.h24">24 horas</option>
         </select>
       </label>
-      <button
-        type="button"
-        (click)="saveTimeFormat()"
-        [disabled]="savingTimeFormat() || timeFormatDraft() === currentTimeFormat()"
-        class="px-5 py-2 rounded-full bg-[color:var(--color-terra)] text-white font-bold tracking-wide cursor-pointer border-0 disabled:opacity-50"
-      >
-        @if (savingTimeFormat()) {
-          <ng-container i18n="@@account.time-format.saving">Guardando…</ng-container>
-        } @else {
-          <ng-container i18n="@@account.time-format.save">Guardar</ng-container>
-        }
-      </button>
-    </div>
-
-    @if (temperatureUnitError()) {
-      <p class="text-xs text-[color:var(--color-error)] mb-2">{{ temperatureUnitError() }}</p>
-    }
-
-    <div class="flex flex-wrap items-end gap-3">
       <label class="flex flex-col gap-1 flex-1 min-w-[180px]">
         <span i18n="@@account.temperature-unit.label" class="text-xs uppercase tracking-wide text-[color:var(--color-ink-3)]">Unidad de temperatura</span>
         <select
           class="px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white"
           [value]="temperatureUnitDraft()"
           (change)="onTemperatureUnitDraftChange($event)"
-          [disabled]="savingTemperatureUnit()"
+          [disabled]="savingDisplayPrefs()"
         >
           <option value="" i18n="@@account.temperature-unit.option.auto">Automático (según idioma)</option>
           <option value="Celsius" i18n="@@account.temperature-unit.option.c">Celsius (°C)</option>
           <option value="Fahrenheit" i18n="@@account.temperature-unit.option.f">Fahrenheit (°F)</option>
         </select>
       </label>
+    </div>
+
+    <div class="flex items-center justify-between gap-3">
+      <p i18n="@@account.display.note" class="text-xs text-[color:var(--color-ink-3)]">
+        Los cambios aparecen al navegar a otra pantalla (o al recargar).
+      </p>
       <button
         type="button"
-        (click)="saveTemperatureUnit()"
-        [disabled]="savingTemperatureUnit() || temperatureUnitDraft() === currentTemperatureUnit()"
+        (click)="saveDisplayPrefs()"
+        [disabled]="savingDisplayPrefs() || !displayPrefsDirty()"
         class="px-5 py-2 rounded-full bg-[color:var(--color-terra)] text-white font-bold tracking-wide cursor-pointer border-0 disabled:opacity-50"
       >
-        @if (savingTemperatureUnit()) {
-          <ng-container i18n="@@account.temperature-unit.saving">Guardando…</ng-container>
+        @if (savingDisplayPrefs()) {
+          <ng-container i18n="@@account.display.saving">Guardando…</ng-container>
         } @else {
-          <ng-container i18n="@@account.temperature-unit.save">Guardar</ng-container>
+          <ng-container i18n="@@account.display.save">Guardar</ng-container>
         }
       </button>
     </div>
-
-    <p i18n="@@account.display.note" class="text-xs text-[color:var(--color-ink-3)] mt-3">
-      Los cambios aparecen al navegar a otra pantalla (o al recargar).
-    </p>
   </article>
 
   <article class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl p-5">

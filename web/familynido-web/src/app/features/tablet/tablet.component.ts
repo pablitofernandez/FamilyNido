@@ -250,13 +250,24 @@ export class TabletComponent implements OnInit, OnDestroy {
   }
 
   protected formatTime(value: string): string {
-    return value.length >= 5 ? value.slice(0, 5) : value;
+    return reformatHourMinute(value, this.clockFormatter);
   }
 
   protected eventTimeLabel(event: CalendarEvent): string {
     if (event.isAllDay) return $localize`:@@tablet.event.all-day:Todo el día`;
-    const start = new Date(event.startAt);
-    return `${pad(start.getHours())}:${pad(start.getMinutes())}`;
+    return this.clockFormatter.format(new Date(event.startAt));
+  }
+
+  /**
+   * Wall-message timestamp on the recent-messages page. Builds "5 may · 14:30"
+   * (or "May 5 · 2:30 PM" in the en-US bundle with H12) by hand-composing
+   * the date part with Intl + the time part with the locale-aware clock
+   * formatter, so the result honours the user's time-format preference.
+   */
+  protected messageTimestamp(iso: string): string {
+    const d = new Date(iso);
+    const datePart = d.toLocaleDateString(this.locale, { day: 'numeric', month: 'short' });
+    return `${datePart} · ${this.clockFormatter.format(d)}`;
   }
 
   protected eventDayLabel(event: CalendarEvent): string {

@@ -4,6 +4,8 @@ import { firstValueFrom } from 'rxjs';
 
 import { FamilyMembersService } from '../../core/api/family-members.service';
 import { SchoolService } from '../../core/api/school.service';
+import { AuthService } from '../../core/auth/auth.service';
+import { buildTimeFormatter, reformatHourMinute } from '../../core/locale/format-prefs';
 import { FamilyMember } from '../../core/models/family-member';
 import {
   Extracurricular,
@@ -238,6 +240,9 @@ export class SchoolComponent implements OnInit {
   }
 
   private readonly locale = inject(LOCALE_ID);
+  private readonly auth = inject(AuthService);
+  /** Display formatter for "HH:MM" → "9:00 AM" / "09:00" honouring user pref. Issue #12. */
+  private readonly timeFormatter = buildTimeFormatter(this.locale, this.auth.me()?.timeFormat);
 
   protected dayLabel(iso: string): string {
     return new Date(iso + 'T00:00:00').toLocaleDateString(this.locale, { weekday: 'long', day: 'numeric', month: 'short' });
@@ -263,7 +268,7 @@ export class SchoolComponent implements OnInit {
   }
 
   protected formatTime(value: string): string {
-    return value.length >= 5 ? value.slice(0, 5) : value;
+    return reformatHourMinute(value, this.timeFormatter);
   }
 
   protected weekdayShort(d: number): string {

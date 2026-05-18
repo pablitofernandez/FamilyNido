@@ -2,6 +2,8 @@ import { ChangeDetectionStrategy, Component, LOCALE_ID, OnInit, computed, inject
 import { firstValueFrom } from 'rxjs';
 
 import { MemberAgendaService } from '../../../core/api/member-agenda.service';
+import { AuthService } from '../../../core/auth/auth.service';
+import { buildTimeFormatter, reformatHourMinute } from '../../../core/locale/format-prefs';
 import {
   AgendaDayOfWeek,
   AgendaTransportMode,
@@ -179,7 +181,7 @@ export class MemberAgendaSectionComponent implements OnInit {
   }
 
   protected timeLabel(start: string | null, end: string | null): string {
-    const fmt = (t: string | null) => t ? t.slice(0, 5) : '';
+    const fmt = (t: string | null) => reformatHourMinute(t, this.timeFormatter);
     if (!start && !end) return $localize`:@@member-agenda.all-day:Todo el día`;
     if (start && !end) return `${fmt(start)} →`;
     if (!start && end) return `→ ${fmt(end)}`;
@@ -187,6 +189,9 @@ export class MemberAgendaSectionComponent implements OnInit {
   }
 
   private readonly locale = inject(LOCALE_ID);
+  private readonly auth = inject(AuthService);
+  /** Display formatter that honours the user's `timeFormat` override. Issue #12. */
+  private readonly timeFormatter = buildTimeFormatter(this.locale, this.auth.me()?.timeFormat);
 
   protected dateLabel(iso: string): string {
     const d = new Date(iso + 'T00:00:00');
