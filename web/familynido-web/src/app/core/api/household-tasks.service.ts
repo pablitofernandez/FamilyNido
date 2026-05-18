@@ -13,6 +13,14 @@ import {
   UpdateHouseholdTaskRequest,
 } from '../models/household-task';
 
+/** Envelope returned by the paginated GET /api/household-tasks. */
+export interface HouseholdTaskListPage {
+  items: HouseholdTask[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
 /** HTTP client for the /api/household-tasks endpoints. Thin passthrough. */
 @Injectable({ providedIn: 'root' })
 export class HouseholdTasksService {
@@ -20,12 +28,19 @@ export class HouseholdTasksService {
   private readonly baseUrl = '/api/household-tasks';
 
   /**
-   * GET /api/household-tasks. The `memberId` filter returns tasks where the
-   * member is either the responsible (singular) or one of the related
-   * members (N:M) — both surfaces collapse into a single list, which is what
-   * the per-member dashboard wants.
+   * GET /api/household-tasks. Returns a paginated envelope; the `memberId`
+   * filter returns tasks where the member is either the responsible
+   * (singular) or one of the related members (N:M) — both surfaces collapse
+   * into a single list, which is what the per-member dashboard wants.
+   * `search` is a free-text filter against title, description and category.
    */
-  list(options?: { includeArchived?: boolean; memberId?: string }): Observable<HouseholdTask[]> {
+  list(options?: {
+    includeArchived?: boolean;
+    memberId?: string;
+    search?: string;
+    page?: number;
+    pageSize?: number;
+  }): Observable<HouseholdTaskListPage> {
     let params = new HttpParams();
     if (options?.includeArchived) {
       params = params.set('includeArchived', 'true');
@@ -33,7 +48,16 @@ export class HouseholdTasksService {
     if (options?.memberId) {
       params = params.set('memberId', options.memberId);
     }
-    return this.http.get<HouseholdTask[]>(this.baseUrl, { params });
+    if (options?.search && options.search.trim().length > 0) {
+      params = params.set('search', options.search.trim());
+    }
+    if (options?.page) {
+      params = params.set('page', String(options.page));
+    }
+    if (options?.pageSize) {
+      params = params.set('pageSize', String(options.pageSize));
+    }
+    return this.http.get<HouseholdTaskListPage>(this.baseUrl, { params });
   }
 
   /** GET /api/household-tasks/today */

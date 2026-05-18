@@ -159,7 +159,11 @@ export class MemberDetailComponent implements OnInit {
         firstValueFrom(this.calendarApi.listEvents({ from: now, to: horizon, memberIds: [id] })),
       ]);
       this.member.set(member);
-      this.tasks.set(tasks.filter((t) => !t.isArchived));
+      // `list()` now paginates — the per-member dashboard shows a compact
+      // view, so the default page (25 newest) is plenty. If a member ever
+      // has more than 25 non-archived tasks we'll need to bump pageSize
+      // here or add a "ver todas" link.
+      this.tasks.set(tasks.items.filter((t) => !t.isArchived));
       this.agenda.set(this.groupByDay(events));
       // Score totals are best-effort; if the call fails we just hide the block.
       try {

@@ -1,0 +1,45 @@
+<nav class="flex items-center justify-center gap-1 mt-4" role="navigation" [attr.aria-label]="previousAriaLabel">
+  <button
+    type="button"
+    class="w-9 h-9 flex items-center justify-center rounded-md border border-[color:var(--color-line)] bg-white cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[color:var(--color-bg-2)]"
+    [disabled]="!canGoPrevious()"
+    [attr.aria-label]="previousAriaLabel"
+    (click)="previous()"
+  >
+    <fn-icon name="chevronL" [size]="16" />
+  </button>
+
+  @for (item of pageItems(); track $index) {
+    @if (isNumber(item)) {
+      <button
+        type="button"
+        class="min-w-9 h-9 px-2 flex items-center justify-center rounded-md border text-sm cursor-pointer"
+        [class.bg-[color:var(--color-terra)]]="item === currentPage()"
+        [class.text-white]="item === currentPage()"
+        [class.border-[color:var(--color-terra)]]="item === currentPage()"
+        [class.bg-white]="item !== currentPage()"
+        [class.border-[color:var(--color-line)]]="item !== currentPage()"
+        [class.hover:bg-[color:var(--color-bg-2)]]="item !== currentPage()"
+        [attr.aria-current]="item === currentPage() ? 'page' : null"
+        [attr.aria-label]="pageAriaLabel(item)"
+        (click)="goTo(item)"
+      >
+        {{ item }}
+      </button>
+    } @else {
+      <span class="w-6 h-9 flex items-center justify-center text-[color:var(--color-ink-3)] text-sm" aria-hidden="true">
+        …
+      </span>
+    }
+  }
+
+  <button
+    type="button"
+    class="w-9 h-9 flex items-center justify-center rounded-md border border-[color:var(--color-line)] bg-white cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[color:var(--color-bg-2)]"
+    [disabled]="!canGoNext()"
+    [attr.aria-label]="nextAriaLabel"
+    (click)="next()"
+  >
+    <fn-icon name="chevron" [size]="16" />
+  </button>
+</nav>

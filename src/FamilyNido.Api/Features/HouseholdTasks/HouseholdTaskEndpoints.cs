@@ -37,6 +37,9 @@ public static class HouseholdTaskEndpoints
         bool? includeArchived,
         Guid? memberId,
         Guid? assigneeId,
+        string? search,
+        int? page,
+        int? pageSize,
         IMediator mediator,
         CancellationToken ct)
     {
@@ -45,7 +48,13 @@ public static class HouseholdTaskEndpoints
         // is fully migrated.
         var effectiveMemberId = memberId ?? assigneeId;
         var result = await mediator.SendAsync(
-            new ListHouseholdTasks.Query(includeArchived ?? false, effectiveMemberId), ct);
+            new ListHouseholdTasks.Query(
+                includeArchived ?? false,
+                effectiveMemberId,
+                search,
+                page ?? 1,
+                pageSize ?? ListHouseholdTasks.DefaultPageSize),
+            ct);
         return result.IsSuccess ? Results.Ok(result.Value) : result.Error.ToHttpResult();
     }
 
