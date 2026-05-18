@@ -28,13 +28,15 @@ public sealed class HouseholdTaskTests : IntegrationTestBase
         DateOnly? startDate = null,
         DateOnly? dueDate = null,
         bool isFloating = false,
-        int points = 5)
+        int points = 5,
+        string? description = null,
+        string category = "General")
     {
         return new
         {
             title,
-            description = (string?)null,
-            category = (string?)"General",
+            description,
+            category,
             recurrence,
             weeklyDays = (string?)null,
             monthlyDay = (int?)null,
@@ -87,12 +89,153 @@ public sealed class HouseholdTaskTests : IntegrationTestBase
         await Client.PostAsync($"/api/household-tasks/{archivedId}/archive", content: null);
 
         var defaultResp = await Client.GetAsync("/api/household-tasks/");
-        var defaultList = await ReadAsync<List<TaskRow>>(defaultResp);
-        defaultList!.Select(t => t.Title).Should().BeEquivalentTo(["Tarea viva"]);
+        var defaultPage = await ReadAsync<ListPage>(defaultResp);
+        defaultPage!.Items.Select(t => t.Title).Should().BeEquivalentTo(["Tarea viva"]);
 
         var allResp = await Client.GetAsync("/api/household-tasks/?includeArchived=true");
-        var allList = await ReadAsync<List<TaskRow>>(allResp);
-        allList!.Select(t => t.Title).Should().BeEquivalentTo(["Tarea viva", "Tarea archivada"]);
+        var allPage = await ReadAsync<ListPage>(allResp);
+        allPage!.Items.Select(t => t.Title).Should().BeEquivalentTo(["Tarea viva", "Tarea archivada"]);
+    }
+
+    [Fact]
+    public async Task ListTasks_returns_first_page_with_default_size()
+    {
+        await SeedAdminAsync();
+        await SeedManyTasksAsync(30);
+
+        var resp = await Client.GetAsync("/api/household-tasks/");
+        var page = await ReadAsync<ListPage>(resp);
+
+        page!.Items.Should().HaveCount(25);
+        page.Total.Should().Be(30);
+        page.Page.Should().Be(1);
+        page.PageSize.Should().Be(25);
+    }
+
+    [Fact]
+    public async Task ListTasks_returns_second_page_with_remaining_items()
+    {
+        await SeedAdminAsync();
+        await SeedManyTasksAsync(30);
+
+        var resp = await Client.GetAsync("/api/household-tasks/?page=2");
+        var page = await ReadAsync<ListPage>(resp);
+
+        page!.Items.Should().HaveCount(5);
+        page.Total.Should().Be(30);
+        page.Page.Should().Be(2);
+    }
+
+    [Fact]
+    public async Task ListTasks_search_matches_title()
+    {
+        await SeedAdminAsync();
+        await Client.PostAsJsonAsync("/api/household-tasks/", NewTaskBody("Lavavajillas"));
+        await Client.PostAsJsonAsync("/api/household-tasks/", NewTaskBody("Aspirar"));
+
+        var resp = await Client.GetAsync("/api/household-tasks/?search=lava");
+        var page = await ReadAsync<ListPage>(resp);
+
+        page!.Items.Select(t => t.Title).Should().BeEquivalentTo(["Lavavajillas"]);
+        page.Total.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task ListTasks_search_matches_description()
+    {
+        await SeedAdminAsync();
+        await Client.PostAsJsonAsync("/api/household-tasks/", NewTaskBody(
+            "Limpiar campana", description: "Acordarse de cambiar el filtro de carbón."));
+        await Client.PostAsJsonAsync("/api/household-tasks/", NewTaskBody("Otra cosa"));
+
+        var resp = await Client.GetAsync("/api/household-tasks/?search=filtro");
+        var page = await ReadAsync<ListPage>(resp);
+
+        page!.Items.Select(t => t.Title).Should().BeEquivalentTo(["Limpiar campana"]);
+    }
+
+    [Fact]
+    public async Task ListTasks_search_matches_category()
+    {
+        await SeedAdminAsync();
+        await Client.PostAsJsonAsync(
+            "/api/household-tasks/", NewTaskBody("Sacar la basura", category: "Hogar"));
+        await Client.PostAsJsonAsync(
+            "/api/household-tasks/", NewTaskBody("Estudiar", category: "Cole"));
+
+        var resp = await Client.GetAsync("/api/household-tasks/?search=hogar");
+        var page = await ReadAsync<ListPage>(resp);
+
+        page!.Items.Select(t => t.Title).Should().BeEquivalentTo(["Sacar la basura"]);
+    }
+
+    [Fact]
+    public async Task ListTasks_search_is_case_insensitive()
+    {
+        await SeedAdminAsync();
+        await Client.PostAsJsonAsync("/api/household-tasks/", NewTaskBody("Lavavajillas"));
+
+        var lower = await ReadAsync<ListPage>(await Client.GetAsync("/api/household-tasks/?search=lava"));
+        var upper = await ReadAsync<ListPage>(await Client.GetAsync("/api/household-tasks/?search=LAVA"));
+
+        upper!.Items.Should().HaveCount(lower!.Items.Count);
+        upper.Items.Select(t => t.Title).Should().BeEquivalentTo(lower.Items.Select(t => t.Title));
+    }
+
+    [Fact]
+    public async Task ListTasks_search_combines_with_pagination()
+    {
+        await SeedAdminAsync();
+        // 10 tasks that match "limpia*", 5 that do not.
+        await SeedManyTasksAsync(10, titlePrefix: "Limpiar");
+        await SeedManyTasksAsync(5, titlePrefix: "Otra");
+
+        var resp = await Client.GetAsync("/api/household-tasks/?search=limpia&page=1&pageSize=5");
+        var page = await ReadAsync<ListPage>(resp);
+
+        page!.Items.Should().HaveCount(5);
+        page.Total.Should().Be(10);
+        page.Items.Should().OnlyContain(t => t.Title.StartsWith("Limpiar"));
+    }
+
+    [Fact]
+    public async Task ListTasks_pagesize_is_clamped_to_max()
+    {
+        await SeedAdminAsync();
+        await Client.PostAsJsonAsync("/api/household-tasks/", NewTaskBody("Una"));
+
+        var resp = await Client.GetAsync("/api/household-tasks/?pageSize=500");
+        var page = await ReadAsync<ListPage>(resp);
+
+        page!.PageSize.Should().Be(100);
+    }
+
+    [Fact]
+    public async Task ListTasks_invalid_page_falls_back_to_first()
+    {
+        await SeedAdminAsync();
+        await Client.PostAsJsonAsync("/api/household-tasks/", NewTaskBody("Una"));
+
+        var resp = await Client.GetAsync("/api/household-tasks/?page=-3");
+        var page = await ReadAsync<ListPage>(resp);
+
+        page!.Page.Should().Be(1);
+        page.Items.Should().HaveCount(1);
+    }
+
+    /// <summary>
+    /// Seed <paramref name="count"/> tasks via the public API. Sequential POSTs
+    /// give a stable monotonic <c>CreatedAt</c> ordering so paginated assertions
+    /// don't flicker on tied timestamps.
+    /// </summary>
+    private async Task SeedManyTasksAsync(int count, string titlePrefix = "Tarea")
+    {
+        for (var i = 1; i <= count; i++)
+        {
+            var resp = await Client.PostAsJsonAsync(
+                "/api/household-tasks/", NewTaskBody($"{titlePrefix} {i:D3}"));
+            resp.StatusCode.Should().Be(HttpStatusCode.Created);
+        }
     }
 
     [Fact]
@@ -325,6 +468,9 @@ public sealed class HouseholdTaskTests : IntegrationTestBase
 
     /// <summary>Compact projection for deserialising task DTOs returned by the API.</summary>
     private sealed record TaskRow(Guid Id, string Title, int Points);
+
+    /// <summary>Envelope returned by GET /api/household-tasks since pagination was added.</summary>
+    private sealed record ListPage(List<TaskRow> Items, int Total, int Page, int PageSize);
 
     /// <summary>"Today" view shape returned by /api/household-tasks/today.</summary>
     private sealed record DayTasks(string Date, List<TaskOnDate> Tasks);

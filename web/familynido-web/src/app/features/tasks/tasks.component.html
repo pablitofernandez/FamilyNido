@@ -43,7 +43,7 @@
             ? 'bg-white shadow-sm text-[color:var(--color-ink)]'
             : 'bg-transparent text-[color:var(--color-ink-3)]'
         "
-        (click)="view.set(tab.id)"
+        (click)="setView(tab.id)"
       >
         {{ tab.label }}
       </button>
@@ -72,7 +72,26 @@
         }
       }
       @case ('all') {
-        @if (allTasks().length > 0) {
+        <div class="mb-3">
+          <label class="relative block">
+            <span class="sr-only">{{ searchAriaLabel }}</span>
+            <fn-icon
+              name="search"
+              [size]="16"
+              class="absolute left-3 top-1/2 -translate-y-1/2 text-[color:var(--color-ink-3)] pointer-events-none"
+            />
+            <input
+              type="search"
+              [ngModel]="searchInput()"
+              (ngModelChange)="searchInput.set($event)"
+              [placeholder]="searchPlaceholder"
+              [attr.aria-label]="searchAriaLabel"
+              class="w-full pl-9 pr-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white text-sm"
+            />
+          </label>
+        </div>
+
+        @if (totalTasks() > 0 || hideCompleted()) {
           <div class="flex items-center justify-between mb-3 px-1">
             <p class="text-xs text-[color:var(--color-ink-3)]">
               {{ visibleCountLabel() }}
@@ -84,7 +103,7 @@
               <button
                 type="button"
                 class="text-xs font-medium underline cursor-pointer text-[color:var(--color-terra)]"
-                (click)="hideCompleted.set(!hideCompleted())"
+                (click)="toggleHideCompleted()"
               >
                 @if (hideCompleted()) {
                   <ng-container i18n="@@tasks.show-completed">Mostrar completadas</ng-container>
@@ -209,11 +228,31 @@
               </div>
             </li>
           } @empty {
-            <li i18n="@@tasks.all-empty" class="text-center text-[color:var(--color-ink-3)] py-12">
-              Aún no hay tareas. Crea la primera con el botón <b>+</b>.
-            </li>
+            @if (searchQuery()) {
+              <li i18n="@@tasks.search-empty" class="text-center text-[color:var(--color-ink-3)] py-12">
+                Ningún resultado para esta búsqueda.
+              </li>
+            } @else if (hideCompleted() && hiddenCompletedCount() > 0) {
+              <li i18n="@@tasks.all-completed-on-page" class="text-center text-[color:var(--color-ink-3)] py-12">
+                Todas las tareas de esta página están completadas.
+              </li>
+            } @else {
+              <li i18n="@@tasks.all-empty" class="text-center text-[color:var(--color-ink-3)] py-12">
+                Aún no hay tareas. Crea la primera con el botón <b>+</b>.
+              </li>
+            }
           }
         </ul>
+
+        @if (totalPages() > 1) {
+          <div id="tasks-pagination-anchor" class="scroll-mb-4">
+            <fn-pagination
+              [currentPage]="currentPage()"
+              [totalPages]="totalPages()"
+              (pageChange)="goToPage($event)"
+            />
+          </div>
+        }
       }
     }
   }

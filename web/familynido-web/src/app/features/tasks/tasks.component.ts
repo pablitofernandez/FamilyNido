@@ -1,6 +1,7 @@
 import { NgClass, NgTemplateOutlet } from '@angular/common';
-import { ChangeDetectionStrategy, Component, LOCALE_ID, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, LOCALE_ID, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { FamilyMembersService } from '../../core/api/family-members.service';
@@ -10,6 +11,7 @@ import { FamilyMember } from '../../core/models/family-member';
 import { DayTasks, HouseholdTask, TaskOccurrence } from '../../core/models/household-task';
 import { AvatarComponent } from '../../shared/ui/avatar/avatar.component';
 import { IconComponent } from '../../shared/ui/icon/icon.component';
+import { PaginationComponent } from '../../shared/ui/pagination/pagination.component';
 import { TaskFormComponent, TaskFormResult } from './task-form.component';
 
 /** Tabs offered at the top of the screen. */
@@ -33,7 +35,7 @@ interface TaskRow {
   selector: 'fn-tasks',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, NgClass, NgTemplateOutlet, AvatarComponent, IconComponent, TaskFormComponent],
+  imports: [FormsModule, NgClass, NgTemplateOutlet, AvatarComponent, IconComponent, PaginationComponent, TaskFormComponent],
   templateUrl: './tasks.component.html',
   styleUrl: './tasks.component.css',
 })
@@ -42,6 +44,9 @@ export class TasksComponent implements OnInit {
   private readonly membersApi = inject(FamilyMembersService);
   private readonly auth = inject(AuthService);
   private readonly locale = inject(LOCALE_ID);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
 
   /** Caller is an admin — surfaces the completion section in the task form. */
   protected readonly isAdmin = computed(() => this.auth.me()?.role === 'Admin');
@@ -60,6 +65,42 @@ export class TasksComponent implements OnInit {
 
   /** "Todas" tab: hide tasks that have at least one completion in their history. */
   protected readonly hideCompleted = signal(false);
+
+  /** "Todas" tab: paginated state. Server-driven so the page size cap holds. */
+  protected readonly searchInput = signal('');
+  protected readonly searchQuery = signal('');
+  protected readonly currentPage = signal(1);
+  // 10 strikes a good balance for household-scale data: enough to scan in
+  // one screenful, small enough that next/prev jumps aren't disorienting.
+  // The URL still accepts ?pageSize=N for power-users / tests up to 100.
+  protected readonly pageSize = signal(10);
+  protected readonly totalTasks = signal(0);
+  protected readonly totalPages = computed(() =>
+    Math.max(1, Math.ceil(this.totalTasks() / this.pageSize())),
+  );
+
+  /** Suppresses the debounced reload while we hydrate state from the URL. */
+  private hydrating = false;
+  private searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+  /**
+   * Debounce keystrokes in the search box: copy `searchInput` into the
+   * applied `searchQuery` 300 ms after typing settles, reset to page 1
+   * and trigger a reload. Bypassed while `hydrating` so the first
+   * render after URL hydration doesn't double-fire.
+   */
+  private readonly _searchDebounceEffect = effect(() => {
+    const input = this.searchInput();
+    if (this.hydrating) return;
+    if (this.searchDebounceTimer) clearTimeout(this.searchDebounceTimer);
+    this.searchDebounceTimer = setTimeout(() => {
+      if (input === this.searchQuery()) return;
+      this.searchQuery.set(input);
+      this.currentPage.set(1);
+      this.pushUrlState();
+      void this.loadAll();
+    }, 300);
+  });
 
   /**
    * Transient "+N points" hint shown over the checkbox when a task is just
@@ -81,6 +122,9 @@ export class TasksComponent implements OnInit {
   protected readonly closeEditorAriaLabel = $localize`:@@tasks.close-editor-aria:Cerrar editor`;
   protected readonly undoAriaLabel = $localize`:@@tasks.undo-aria:Deshacer`;
   protected readonly completeAriaLabel = $localize`:@@tasks.complete-aria:Completar`;
+  protected readonly searchPlaceholder = $localize`:@@tasks.search-placeholder:Buscar tareas…`;
+  protected readonly searchAriaLabel = $localize`:@@tasks.search-aria:Buscar tareas`;
+  protected readonly noResultsLabel = $localize`:@@tasks.no-results:Ningún resultado para esta búsqueda.`;
 
   protected editAriaLabel(title: string): string {
     return $localize`:@@tasks.edit-aria:Editar ${title}:TITLE:`;
@@ -99,7 +143,12 @@ export class TasksComponent implements OnInit {
     return $localize`:@@tasks.hidden-count:${n}:N: oculta(s)`;
   }
   protected visibleCountLabel(): string {
-    const n = this.visibleAllTasks().length;
+    const n = this.totalTasks();
+    if (this.searchQuery()) {
+      return n === 1
+        ? $localize`:@@tasks.results-one:${n}:N: resultado`
+        : $localize`:@@tasks.results-many:${n}:N: resultados`;
+    }
     return n === 1
       ? $localize`:@@tasks.count-one:${n}:N: tarea`
       : $localize`:@@tasks.count-many:${n}:N: tareas`;
@@ -133,7 +182,102 @@ export class TasksComponent implements OnInit {
   );
 
   ngOnInit(): void {
+    this.hydrateFromUrl();
     this.load();
+
+    // The debounce timer would otherwise outlive a route change if the
+    // user types and navigates away within the same 300 ms window.
+    this.destroyRef.onDestroy(() => {
+      if (this.searchDebounceTimer) clearTimeout(this.searchDebounceTimer);
+    });
+  }
+
+  /**
+   * Read tab / page / search / hideCompleted from the URL. Wraps the writes
+   * with the `hydrating` flag so the debounce effect doesn't bounce them
+   * back at the URL on first paint.
+   */
+  private hydrateFromUrl(): void {
+    this.hydrating = true;
+    try {
+      const params = this.route.snapshot.queryParamMap;
+      const tab = params.get('tab');
+      if (tab === 'today' || tab === 'week' || tab === 'all') {
+        this.view.set(tab);
+      }
+      const q = params.get('q');
+      if (q) {
+        this.searchInput.set(q);
+        this.searchQuery.set(q);
+      }
+      const page = Number(params.get('page'));
+      if (Number.isFinite(page) && page >= 1) {
+        this.currentPage.set(page);
+      }
+      // pageSize via URL is mostly a testing / power-user affordance — the
+      // regular UI never changes it. Clamp to the server's [1, 100] range
+      // so a stray big number doesn't blow up the request.
+      const rawPageSize = Number(params.get('pageSize'));
+      if (Number.isFinite(rawPageSize) && rawPageSize >= 1) {
+        this.pageSize.set(Math.min(100, Math.trunc(rawPageSize)));
+      }
+      if (params.get('hideCompleted') === 'true') {
+        this.hideCompleted.set(true);
+      }
+    } finally {
+      this.hydrating = false;
+    }
+  }
+
+  /**
+   * Mirror the current view / page / search / hide-completed state back into
+   * the URL. Defaults are stripped (e.g. `page=1`, `tab=today`) so the URL
+   * stays clean for the common case.
+   */
+  private pushUrlState(): void {
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        tab: this.view() === 'today' ? null : this.view(),
+        q: this.searchQuery() || null,
+        page: this.currentPage() === 1 ? null : this.currentPage(),
+        hideCompleted: this.hideCompleted() ? 'true' : null,
+      },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+  }
+
+  /** Switch the active tab and reflect the change in the URL. */
+  protected setView(view: View): void {
+    if (view === this.view()) return;
+    this.view.set(view);
+    this.pushUrlState();
+  }
+
+  /** Toggle the hide-completed filter (only meaningful on the "Todas" tab). */
+  protected toggleHideCompleted(): void {
+    this.hideCompleted.update((v) => !v);
+    this.pushUrlState();
+  }
+
+  /** Pagination control handler — bound to <fn-pagination> (pageChange). */
+  protected goToPage(page: number): void {
+    if (page === this.currentPage()) return;
+    this.currentPage.set(page);
+    this.pushUrlState();
+    void this.loadAll().then(() => {
+      // After the new page is rendered, re-anchor the pagination control
+      // at the bottom of the viewport. Without this, pages of different
+      // heights make the buttons jump up or down relative to where the
+      // user's cursor / thumb was — so repeated next/prev clicks miss.
+      // 50 ms is enough for Angular's signal update + reflow to commit.
+      setTimeout(() => {
+        document
+          .getElementById('tasks-pagination-anchor')
+          ?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      }, 50);
+    });
   }
 
   protected toRows(day: DayTasks): TaskRow[] {
@@ -371,18 +515,47 @@ export class TasksComponent implements OnInit {
       firstValueFrom(this.membersApi.list()),
       firstValueFrom(this.api.today()),
       firstValueFrom(this.api.week()),
-      firstValueFrom(this.api.list({ includeArchived: true })),
     ])
-      .then(([members, today, week, all]) => {
+      .then(async ([members, today, week]) => {
         this.members.set(members);
         this.today.set(today);
         this.weekTasks.set(week);
-        this.allTasks.set(all);
+        // Fold the "all" tab slice in once today/week are settled so the
+        // first paint of the Todas tab has actual data instead of empty.
+        await this.loadAll();
         this.loading.set(false);
       })
       .catch(() => {
         this.error.set('load');
         this.loading.set(false);
       });
+  }
+
+  /**
+   * Reload just the "Todas" tab slice — used after a search edit, a page
+   * change, or any CRUD that doesn't trigger a full {@link load}. Reads
+   * search / page / pageSize from the current signals so callers don't
+   * have to pass anything.
+   */
+  private async loadAll(): Promise<void> {
+    try {
+      const response = await firstValueFrom(
+        this.api.list({
+          includeArchived: true,
+          search: this.searchQuery() || undefined,
+          page: this.currentPage(),
+          pageSize: this.pageSize(),
+        }),
+      );
+      this.allTasks.set(response.items);
+      this.totalTasks.set(response.total);
+      // The server may have clamped the page (e.g. invalid URL). Sync back
+      // so the pagination control reflects the actual page that came back.
+      if (response.page !== this.currentPage()) {
+        this.currentPage.set(response.page);
+      }
+    } catch {
+      this.error.set('load-all');
+    }
   }
 }
