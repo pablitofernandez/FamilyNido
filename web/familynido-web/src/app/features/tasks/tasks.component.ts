@@ -211,6 +211,13 @@ export class TasksComponent implements OnInit {
       if (Number.isFinite(page) && page >= 1) {
         this.currentPage.set(page);
       }
+      // pageSize via URL is mostly a testing / power-user affordance — the
+      // regular UI never changes it. Clamp to the server's [1, 100] range
+      // so a stray big number doesn't blow up the request.
+      const rawPageSize = Number(params.get('pageSize'));
+      if (Number.isFinite(rawPageSize) && rawPageSize >= 1) {
+        this.pageSize.set(Math.min(100, Math.trunc(rawPageSize)));
+      }
       if (params.get('hideCompleted') === 'true') {
         this.hideCompleted.set(true);
       }
