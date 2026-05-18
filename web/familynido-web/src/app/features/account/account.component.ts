@@ -1,8 +1,10 @@
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, LOCALE_ID, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
+
+import { buildShortDateTimeFormatter } from '../../core/locale/format-prefs';
 
 import { CredentialsService } from '../../core/api/credentials.service';
 import { DashboardService } from '../../core/api/dashboard.service';
@@ -47,6 +49,18 @@ export class AccountComponent implements OnInit {
   private readonly dashboardApi = inject(DashboardService);
   private readonly integrationsApi = inject(IntegrationApiKeysService);
   protected readonly auth = inject(AuthService);
+  private readonly locale = inject(LOCALE_ID);
+
+  /** "5/18/26, 2:30 PM" formatter for the API-key `lastUsedAt` label. Issue #12. */
+  private readonly dateTimeFormatter = buildShortDateTimeFormatter(
+    this.locale,
+    this.auth.me()?.timeFormat,
+  );
+
+  /** Template helper — replaces `| date: 'short'`. Null-safe for optional timestamps. */
+  protected formatTimestamp(iso: string | null): string {
+    return iso ? this.dateTimeFormatter.format(new Date(iso)) : '';
+  }
 
   protected readonly isAdmin = computed(() => this.auth.me()?.role === 'Admin');
 

@@ -435,7 +435,7 @@
                   <code class="font-mono">{{ key.prefix }}…</code>
                   <ng-container i18n="@@account.api-keys.created">· creada</ng-container> {{ key.createdAt | date:'shortDate' }}
                   @if (key.lastUsedAt) {
-                    <ng-container i18n="@@account.api-keys.used">· usada</ng-container> {{ key.lastUsedAt | date:'short' }}
+                    <ng-container i18n="@@account.api-keys.used">· usada</ng-container> {{ formatTimestamp(key.lastUsedAt) }}
                   } @else {
                     <ng-container i18n="@@account.api-keys.unused">· sin usar</ng-container>
                   }

@@ -101,6 +101,25 @@ export function buildTimeFormatter(
 }
 
 /**
+ * Build a compact "date + time" formatter (Angular's `| date: 'short'`
+ * equivalent) that honours the time-format override. Use for wall message
+ * timestamps, audit-log entries and similar "when did this happen" labels
+ * where both the day and the hour matter. The hour cycle from
+ * `resolveHourCycle` flows through so US users get "5/18/26, 2:30 PM"
+ * even if they're on the es-ES bundle but picked 12H on /account.
+ */
+export function buildShortDateTimeFormatter(
+  locale: string,
+  override: TimeFormatPreference | null | undefined,
+): Intl.DateTimeFormat {
+  return new Intl.DateTimeFormat(locale, {
+    dateStyle: 'short',
+    timeStyle: 'short',
+    hourCycle: resolveHourCycle(override),
+  });
+}
+
+/**
  * Reparse a backend "HH:mm" (or "HH:mm:ss") string through the supplied
  * formatter. Returns an empty string for null/undefined and the input
  * unchanged when it can't be parsed — keeps the call safe for legacy or
