@@ -123,13 +123,16 @@ sit on a PR build for a while; otherwise the inline form is enough — when
 you're done testing, run the regular `pull` + `up -d` without `IMAGE_TAG`
 to snap back to `latest`.
 
-> **Cleanup.** GitHub does **not** auto-prune the `pr-N` tag after the PR
-> is closed (it would need a personal access token the workflow doesn't
-> have). When a PR is merged or abandoned, delete the matching version
-> manually from
-> `https://github.com/<owner>?tab=packages` → familynido-api → Versions →
-> *pr-N* → Delete, and repeat for familynido-web. Both images per PR
-> are typically <200 MB so accumulation is cosmetic, not a quota issue.
+> **Cleanup is automatic.** When the PR closes (merged or not), the
+> `Clean up PR images` workflow drops the `pr-N` tag from both packages.
+> If you need to remove a tag while the PR is still open (e.g. to free
+> the name for a force-push), delete it manually from
+> `https://github.com/<owner>?tab=packages` → *familynido-api* / *-web*
+> → Versions → *pr-N* → Delete.
+>
+> The auto-cleanup relies on the `GHCR_DELETE_TOKEN` repo secret — a
+> classic PAT with `read:packages` + `delete:packages` scope. The
+> default `GITHUB_TOKEN` cannot delete container versions on its own.
 
 ## Rolling back
 

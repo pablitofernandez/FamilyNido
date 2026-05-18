@@ -1,0 +1,70 @@
+name: Clean up PR images
+
+# Deletes the `pr-<number>` GHCR tag(s) when a pull request closes (merged
+# or not). The default GITHUB_TOKEN cannot delete container versions even
+# when granted `packages: write`, so this workflow requires a classic
+# personal-access token with `read:packages` + `delete:packages` scope,
+# stored as the `GHCR_DELETE_TOKEN` repo secret.
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  # No write permissions are needed here — we delete via the PAT, not the
+  # default token. Declared explicitly so the workflow's intent is obvious.
+  contents: read
+
+# Cancel parallel cleanups on the same PR. Closing/reopening fast would
+# otherwise race two delete loops against each other.
+concurrency:
+  group: pr-image-cleanup-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  delete-pr-tag:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [familynido-api, familynido-web]
+
+    steps:
+      - name: Delete pr-${{ github.event.pull_request.number }} from ${{ matrix.package }}
+        env:
+          GH_TOKEN: ${{ secrets.GHCR_DELETE_TOKEN }}
+          OWNER: ${{ github.repository_owner }}
+          PR: ${{ github.event.pull_request.number }}
+          PKG: ${{ matrix.package }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${GH_TOKEN:-}" ]; then
+            echo "::error::GHCR_DELETE_TOKEN secret is not set. " \
+                 "Auto-cleanup of PR images requires a classic PAT with " \
+                 "read:packages + delete:packages scope." >&2
+            exit 1
+          fi
+
+          # 1. Find every version of $PKG currently tagged pr-$PR. In
+          #    practice there's just one (each push to the PR re-tags),
+          #    but the loop handles the defensive multi-version case
+          #    without surprises.
+          ids=$(gh api --paginate \
+            "users/$OWNER/packages/container/$PKG/versions" \
+            --jq ".[] | select(.metadata.container.tags[]? == \"pr-$PR\") | .id")
+
+          if [ -z "${ids}" ]; then
+            echo "No version of $PKG tagged pr-$PR — nothing to delete."
+            exit 0
+          fi
+
+          # 2. Delete each matching version. The DELETE is effectively
+          #    idempotent: re-running after a successful delete returns
+          #    404, which would fail the step — but the lookup above
+          #    won't surface that id again, so we never re-enter the loop.
+          for id in $ids; do
+            echo "Deleting $PKG version $id (tag pr-$PR)"
+            gh api --method DELETE \
+              "users/$OWNER/packages/container/$PKG/versions/$id"
+          done
