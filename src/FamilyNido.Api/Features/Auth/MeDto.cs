@@ -1,4 +1,5 @@
 using FamilyNido.Domain.Families;
+using FamilyNido.Domain.Identity;
 
 namespace FamilyNido.Api.Features.Auth;
 
@@ -14,6 +15,8 @@ namespace FamilyNido.Api.Features.Auth;
 /// <param name="ColorHex">Linked family member color code.</param>
 /// <param name="PhotoPath">Relative path to the member's avatar image, if any. Used by the shell to load the photo via <c>/api/family-members/{id}/photo</c>.</param>
 /// <param name="PreferredLanguage">BCP-47 tag (e.g. <c>es-ES</c>, <c>en-US</c>) the user picked for the UI. Drives email + integration content.</param>
+/// <param name="TimeFormat">Explicit 12H/24H override; <c>null</c> means "auto" — the SPA infers from the active bundle.</param>
+/// <param name="TemperatureUnit">Explicit Celsius/Fahrenheit override; <c>null</c> means "auto".</param>
 public sealed record MeDto(
     Guid UserId,
     string Email,
@@ -25,4 +28,6 @@ public sealed record MeDto(
     string? MemberDisplayName,
     string? ColorHex,
     string? PhotoPath,
-    string PreferredLanguage);
+    string PreferredLanguage,
+    TimeFormatPreference? TimeFormat,
+    TemperatureUnitPreference? TemperatureUnit);

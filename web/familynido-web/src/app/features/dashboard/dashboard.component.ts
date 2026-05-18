@@ -24,6 +24,7 @@ import { MealPlanSlotEntry } from '../../core/models/meal';
 import { ResolvedExtracurricular, ResolvedSchoolDay, SchoolHoliday, TransportMode } from '../../core/models/school';
 import { WeatherToday } from '../../core/models/weather';
 import { WallMessage } from '../../core/models/wall';
+import { projectWeather, reformatHourMinute, resolveHourCycle, resolveTemperatureUnit } from '../../core/locale/format-prefs';
 import { refreshOnFocus } from '../../core/realtime/refresh-on-focus';
 import { AvatarComponent } from '../../shared/ui/avatar/avatar.component';
 import { IconComponent } from '../../shared/ui/icon/icon.component';
@@ -97,9 +98,14 @@ export class DashboardComponent implements OnInit {
     month: 'short',
   });
 
+  // `hour: 'numeric'` lets the locale's native hour cycle win — en-US shows
+  // "2:30 PM", es-ES shows "14:30" — and an explicit user override (set on
+  // /account, exposed by /me as `timeFormat`) takes precedence over that
+  // inference via `hourCycle`. Both branches are issue #12.
   private readonly timeFormatter = new Intl.DateTimeFormat(this.locale, {
-    hour: '2-digit',
+    hour: 'numeric',
     minute: '2-digit',
+    hourCycle: resolveHourCycle(this.auth.me()?.timeFormat),
   });
 
   protected readonly todayLabel = computed(() => this.dateFormatter.format(new Date()));
@@ -130,6 +136,28 @@ export class DashboardComponent implements OnInit {
   protected readonly tomorrowLunch = signal<MealPlanSlotEntry | null>(null);
   protected readonly tomorrowDinner = signal<MealPlanSlotEntry | null>(null);
   protected readonly weather = signal<WeatherToday | null>(null);
+  /**
+   * `C` or `F` suffix to render alongside temperatures (issue #12).
+   * Picks the user's explicit override when set; falls back to the active
+   * bundle's default (en-US → F, anything else → C).
+   */
+  protected readonly temperatureUnit = resolveTemperatureUnit(this.auth.me()?.temperatureUnit, this.locale);
+  /**
+   * Weather payload projected into the user's preferred unit. The backend
+   * always sends Celsius (Open-Meteo's default); we convert here so the
+   * widget can render Fahrenheit for en-US without changing the contract.
+   * Sunrise / sunset arrive as plain "HH:mm" 24H strings — reparsed through
+   * the locale-aware timeFormatter so US users see "6:32 AM" not "06:32".
+   */
+  protected readonly displayWeather = computed<WeatherToday | null>(() => {
+    const w = this.weather();
+    if (!w) return null;
+    return projectWeather(
+      w,
+      this.temperatureUnit,
+      (hhmm) => reformatHourMinute(hhmm, this.timeFormatter),
+    );
+  });
   protected readonly todaySchoolDays = signal<ResolvedSchoolDay[]>([]);
   protected readonly todayExtras = signal<ResolvedExtracurricular[]>([]);
   protected readonly todayHoliday = signal<SchoolHoliday | null>(null);
@@ -487,7 +515,7 @@ export class DashboardComponent implements OnInit {
   }
 
   protected formatSchoolTime(value: string): string {
-    return value.length >= 5 ? value.slice(0, 5) : value;
+    return reformatHourMinute(value, this.timeFormatter);
   }
 
   /** Single emoji that represents the member's transport mode in the agenda widget. */
@@ -505,7 +533,7 @@ export class DashboardComponent implements OnInit {
 
   /** Compact "HH:mm – HH:mm" or "HH:mm →" / "→ HH:mm" / "Todo el día" for the agenda widget. */
   protected agendaTimeLabel(entry: ResolvedAgendaEntry): string {
-    const fmt = (t: string | null) => t ? t.slice(0, 5) : '';
+    const fmt = (t: string | null) => reformatHourMinute(t, this.timeFormatter);
     if (!entry.startTime && !entry.endTime) return 'Todo el día';
     if (entry.startTime && !entry.endTime) return `${fmt(entry.startTime)} →`;
     if (!entry.startTime && entry.endTime) return `→ ${fmt(entry.endTime)}`;

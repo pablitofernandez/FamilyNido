@@ -11,6 +11,7 @@ import { SchoolService } from '../../core/api/school.service';
 import { WallService } from '../../core/api/wall.service';
 import { WeatherService } from '../../core/api/weather.service';
 import { AuthService } from '../../core/auth/auth.service';
+import { projectWeather, reformatHourMinute, resolveHourCycle, resolveTemperatureUnit } from '../../core/locale/format-prefs';
 import { CalendarEvent } from '../../core/models/calendar';
 import { FamilyMember } from '../../core/models/family-member';
 import { DayTasks, HouseholdTask, TaskOccurrence } from '../../core/models/household-task';
@@ -81,14 +82,27 @@ export class TabletComponent implements OnInit, OnDestroy {
   protected readonly currentPage = computed(() => this.pages[this.pageIndex()].id);
 
   protected readonly now = signal(new Date());
-  protected readonly clockTime = computed(() => {
-    const d = this.now();
-    return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
-  });
   private readonly locale = inject(LOCALE_ID);
+
+  // The big tablet clock goes through the locale-aware formatter so US
+  // tablets show "9:42 PM" instead of "21:42". An explicit user override
+  // (from /account) wins over the locale's native cycle via `hourCycle`.
+  // Issue #12.
+  private readonly clockFormatter = new Intl.DateTimeFormat(this.locale, {
+    hour: 'numeric',
+    minute: '2-digit',
+    hourCycle: resolveHourCycle(this.auth.me()?.timeFormat),
+  });
+  protected readonly clockTime = computed(() => this.clockFormatter.format(this.now()));
 
   protected readonly dateLabel = computed(() =>
     this.now().toLocaleDateString(this.locale, { weekday: 'long', day: 'numeric', month: 'long' }),
+  );
+
+  /** `C` or `F` suffix; user override (if any) takes precedence over locale inference. */
+  protected readonly temperatureUnit = resolveTemperatureUnit(
+    this.auth.me()?.temperatureUnit,
+    this.locale,
   );
 
   protected readonly familyName = computed(() => this.auth.me()?.familyName ?? 'FamilyNido');
@@ -97,6 +111,16 @@ export class TabletComponent implements OnInit, OnDestroy {
   protected readonly loading = signal(true);
   protected readonly members = signal<FamilyMember[]>([]);
   protected readonly weather = signal<WeatherToday | null>(null);
+  /** Weather payload projected into the user's preferred unit (issue #12). */
+  protected readonly displayWeather = computed<WeatherToday | null>(() => {
+    const w = this.weather();
+    if (!w) return null;
+    return projectWeather(
+      w,
+      this.temperatureUnit,
+      (hhmm) => reformatHourMinute(hhmm, this.clockFormatter),
+    );
+  });
   protected readonly today = signal<DayTasks | null>(null);
   protected readonly events = signal<CalendarEvent[]>([]);
   protected readonly pinned = signal<WallMessage[]>([]);
@@ -226,13 +250,24 @@ export class TabletComponent implements OnInit, OnDestroy {
   }
 
   protected formatTime(value: string): string {
-    return value.length >= 5 ? value.slice(0, 5) : value;
+    return reformatHourMinute(value, this.clockFormatter);
   }
 
   protected eventTimeLabel(event: CalendarEvent): string {
     if (event.isAllDay) return $localize`:@@tablet.event.all-day:Todo el día`;
-    const start = new Date(event.startAt);
-    return `${pad(start.getHours())}:${pad(start.getMinutes())}`;
+    return this.clockFormatter.format(new Date(event.startAt));
+  }
+
+  /**
+   * Wall-message timestamp on the recent-messages page. Builds "5 may · 14:30"
+   * (or "May 5 · 2:30 PM" in the en-US bundle with H12) by hand-composing
+   * the date part with Intl + the time part with the locale-aware clock
+   * formatter, so the result honours the user's time-format preference.
+   */
+  protected messageTimestamp(iso: string): string {
+    const d = new Date(iso);
+    const datePart = d.toLocaleDateString(this.locale, { day: 'numeric', month: 'short' });
+    return `${datePart} · ${this.clockFormatter.format(d)}`;
   }
 
   protected eventDayLabel(event: CalendarEvent): string {

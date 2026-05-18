@@ -7,6 +7,7 @@ import { firstValueFrom } from 'rxjs';
 import { FamilyMembersService } from '../../core/api/family-members.service';
 import { HouseholdTasksService } from '../../core/api/household-tasks.service';
 import { AuthService } from '../../core/auth/auth.service';
+import { buildTimeFormatter, reformatHourMinute } from '../../core/locale/format-prefs';
 import { FamilyMember } from '../../core/models/family-member';
 import { DayTasks, HouseholdTask, TaskOccurrence } from '../../core/models/household-task';
 import { AvatarComponent } from '../../shared/ui/avatar/avatar.component';
@@ -47,6 +48,18 @@ export class TasksComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+
+  /**
+   * Locale + user-pref-aware "HH:MM" formatter for the `timeOfDay` chips on
+   * each task row. Built once at construction; the user's override (set on
+   * /account) is picked up the next time this component mounts. Issue #12.
+   */
+  private readonly timeFormatter = buildTimeFormatter(this.locale, this.auth.me()?.timeFormat);
+
+  /** Display helper bound from the template — see `timeFormatter`. */
+  protected formatTimeOfDay(value: string | null): string {
+    return reformatHourMinute(value, this.timeFormatter);
+  }
 
   /** Caller is an admin — surfaces the completion section in the task form. */
   protected readonly isAdmin = computed(() => this.auth.me()?.role === 'Admin');

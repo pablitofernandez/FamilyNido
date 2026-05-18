@@ -205,7 +205,7 @@
             }
           </p>
           <p class="text-xs text-[color:var(--color-ink-3)]">
-            {{ message.createdAt | date: 'short' }}
+            {{ formatTimestamp(message.createdAt) }}
           </p>
         </div>
         <div class="flex gap-1 shrink-0">
@@ -331,7 +331,7 @@
                 <p class="text-xs font-semibold">{{ memberName(comment.authorMemberId) }}</p>
                 <div class="wall-markdown text-sm" [innerHTML]="comment.textHtml"></div>
                 <p class="text-[10px] text-[color:var(--color-ink-3)] mt-0.5">
-                  {{ comment.createdAt | date: 'short' }}
+                  {{ formatTimestamp(comment.createdAt) }}
                 </p>
               </div>
               @if (canDeleteComment(comment)) {

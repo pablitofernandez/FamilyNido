@@ -1,5 +1,5 @@
-import { DatePipe, NgClass, NgTemplateOutlet } from '@angular/common';
-import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, effect, inject, signal } from '@angular/core';
+import { NgClass, NgTemplateOutlet } from '@angular/common';
+import { ChangeDetectionStrategy, Component, DestroyRef, LOCALE_ID, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
@@ -7,6 +7,7 @@ import { FamilyMembersService } from '../../core/api/family-members.service';
 import { FilesService } from '../../core/api/files.service';
 import { WallService } from '../../core/api/wall.service';
 import { AuthService } from '../../core/auth/auth.service';
+import { buildShortDateTimeFormatter } from '../../core/locale/format-prefs';
 import { FamilyMember } from '../../core/models/family-member';
 import { ToggleReactionResult, WallComment, WallMessage } from '../../core/models/wall';
 import { refreshOnFocus } from '../../core/realtime/refresh-on-focus';
@@ -27,7 +28,7 @@ const REACTION_PALETTE = ['❤️', '👍', '🎉', '🙏', '😂', '😢', '�
   selector: 'fn-wall',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [AvatarComponent, DatePipe, IconComponent, MentionTextareaComponent, NgClass, NgTemplateOutlet],
+  imports: [AvatarComponent, IconComponent, MentionTextareaComponent, NgClass, NgTemplateOutlet],
   templateUrl: './wall.component.html',
   styleUrl: './wall.component.css',
 })
@@ -39,6 +40,22 @@ export class WallComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly locale = inject(LOCALE_ID);
+
+  /**
+   * Combined "5/18/26, 2:30 PM" formatter for message and comment timestamps.
+   * Honours the user's `timeFormat` override (issue #12) so a US user on the
+   * `/en/` bundle who picked 24H sees "5/18/26, 14:30" — and vice-versa.
+   */
+  private readonly dateTimeFormatter = buildShortDateTimeFormatter(
+    this.locale,
+    this.auth.me()?.timeFormat,
+  );
+
+  /** Helper for templates — replaces the `| date: 'short'` pipe. */
+  protected formatTimestamp(iso: string): string {
+    return this.dateTimeFormatter.format(new Date(iso));
+  }
 
   protected readonly reactionPalette = REACTION_PALETTE;
 

@@ -20,6 +20,11 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
         // BCP-47 tag, e.g. "es-ES" or "en-US". Stored as a string so adding a
         // new locale never needs a schema change.
         builder.Property(u => u.PreferredLanguage).HasMaxLength(16).IsRequired().HasDefaultValue("es-ES");
+        // Both nullable on purpose: NULL = "auto / let the SPA pick from the
+        // active bundle". Stored as text so adding values stays a one-liner
+        // (same pattern as Role above).
+        builder.Property(u => u.TimeFormat).HasConversion<string>().HasMaxLength(16);
+        builder.Property(u => u.TemperatureUnit).HasConversion<string>().HasMaxLength(16);
 
         builder.Property(u => u.CreatedAt).IsRequired();
         builder.Property(u => u.CreatedBy).HasMaxLength(200);

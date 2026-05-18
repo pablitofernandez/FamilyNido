@@ -1,8 +1,10 @@
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, LOCALE_ID, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
+
+import { buildShortDateTimeFormatter } from '../../core/locale/format-prefs';
 
 import { CredentialsService } from '../../core/api/credentials.service';
 import { DashboardService } from '../../core/api/dashboard.service';
@@ -14,7 +16,14 @@ import { Credential } from '../../core/models/credential';
 import { DashboardWidget, DashboardWidgetId } from '../../core/models/dashboard';
 import { Family } from '../../core/models/family';
 import { IntegrationApiKey } from '../../core/models/integration-api-key';
+import { TemperatureUnitPreference, TimeFormatPreference } from '../../core/models/me';
 import { NotificationPreferences } from '../../core/models/notification-preferences';
+
+/** Form value for the time-format select. Empty string represents "auto". */
+type TimeFormatDraft = '' | TimeFormatPreference;
+
+/** Form value for the temperature-unit select. Empty string represents "auto". */
+type TemperatureUnitDraft = '' | TemperatureUnitPreference;
 
 // Widget catalogue labels live inside `widgetLabel()` so each branch goes
 // through $localize and shows up in the extraction with a stable id.
@@ -40,6 +49,18 @@ export class AccountComponent implements OnInit {
   private readonly dashboardApi = inject(DashboardService);
   private readonly integrationsApi = inject(IntegrationApiKeysService);
   protected readonly auth = inject(AuthService);
+  private readonly locale = inject(LOCALE_ID);
+
+  /** "5/18/26, 2:30 PM" formatter for the API-key `lastUsedAt` label. Issue #12. */
+  private readonly dateTimeFormatter = buildShortDateTimeFormatter(
+    this.locale,
+    this.auth.me()?.timeFormat,
+  );
+
+  /** Template helper — replaces `| date: 'short'`. Null-safe for optional timestamps. */
+  protected formatTimestamp(iso: string | null): string {
+    return iso ? this.dateTimeFormatter.format(new Date(iso)) : '';
+  }
 
   protected readonly isAdmin = computed(() => this.auth.me()?.role === 'Admin');
 
@@ -69,6 +90,24 @@ export class AccountComponent implements OnInit {
 
   /** Currently persisted language — driven by the me() signal. */
   protected readonly currentLanguage = computed(() => this.auth.me()?.preferredLanguage ?? 'es-ES');
+
+  /** Display-prefs picker state. Empty string represents "auto" for each field. */
+  protected readonly timeFormatDraft = signal<TimeFormatDraft>('');
+  protected readonly temperatureUnitDraft = signal<TemperatureUnitDraft>('');
+  /** Combined saving + error state — both prefs share the single "Guardar" button. */
+  protected readonly savingDisplayPrefs = signal(false);
+  protected readonly displayPrefsError = signal<string | null>(null);
+  protected readonly currentTimeFormat = computed<TimeFormatDraft>(
+    () => this.auth.me()?.timeFormat ?? '',
+  );
+  protected readonly currentTemperatureUnit = computed<TemperatureUnitDraft>(
+    () => this.auth.me()?.temperatureUnit ?? '',
+  );
+  /** True when either draft differs from the persisted value — enables the save button. */
+  protected readonly displayPrefsDirty = computed(() =>
+    this.timeFormatDraft() !== this.currentTimeFormat()
+    || this.temperatureUnitDraft() !== this.currentTemperatureUnit(),
+  );
 
   /** Integration API keys — admin-only section. */
   protected readonly apiKeys = signal<IntegrationApiKey[]>([]);
@@ -109,6 +148,8 @@ export class AccountComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     this.languageDraft.set(this.currentLanguage());
+    this.timeFormatDraft.set(this.currentTimeFormat());
+    this.temperatureUnitDraft.set(this.currentTemperatureUnit());
     const tasks: Promise<void>[] = [this.refresh(), this.loadPreferences(), this.loadWidgets()];
     if (this.isAdmin()) {
       tasks.push(this.loadFamily());
@@ -135,6 +176,48 @@ export class AccountComponent implements OnInit {
     } catch {
       this.languageError.set($localize`:@@account.language.error:No se pudo cambiar el idioma. Inténtalo de nuevo.`);
       this.savingLanguage.set(false);
+    }
+  }
+
+  // ─── Display preferences (time format + temperature unit, single save) ───
+
+  protected onTimeFormatDraftChange(event: Event): void {
+    this.timeFormatDraft.set((event.target as HTMLSelectElement).value as TimeFormatDraft);
+  }
+
+  protected onTemperatureUnitDraftChange(event: Event): void {
+    this.temperatureUnitDraft.set(
+      (event.target as HTMLSelectElement).value as TemperatureUnitDraft,
+    );
+  }
+
+  /**
+   * Save whichever of the two prefs has changed since load (or since the
+   * last save). PATCHes run in parallel — the backend has separate
+   * endpoints, but the user sees one button, one spinner.
+   */
+  protected async saveDisplayPrefs(): Promise<void> {
+    if (this.savingDisplayPrefs() || !this.displayPrefsDirty()) return;
+
+    this.savingDisplayPrefs.set(true);
+    this.displayPrefsError.set(null);
+
+    const updates: Promise<unknown>[] = [];
+    if (this.timeFormatDraft() !== this.currentTimeFormat()) {
+      const draft = this.timeFormatDraft();
+      updates.push(this.auth.setTimeFormat(draft === '' ? null : draft));
+    }
+    if (this.temperatureUnitDraft() !== this.currentTemperatureUnit()) {
+      const draft = this.temperatureUnitDraft();
+      updates.push(this.auth.setTemperatureUnit(draft === '' ? null : draft));
+    }
+
+    try {
+      await Promise.all(updates);
+    } catch {
+      this.displayPrefsError.set($localize`:@@account.display.error:No se pudieron guardar las preferencias.`);
+    } finally {
+      this.savingDisplayPrefs.set(false);
     }
   }
 

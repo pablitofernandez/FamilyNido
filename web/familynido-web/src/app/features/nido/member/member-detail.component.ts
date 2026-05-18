@@ -8,6 +8,7 @@ import { FamilyMembersService } from '../../../core/api/family-members.service';
 import { HouseholdTasksService } from '../../../core/api/household-tasks.service';
 import { ScoresService } from '../../../core/api/scores.service';
 import { AuthService } from '../../../core/auth/auth.service';
+import { resolveHourCycle } from '../../../core/locale/format-prefs';
 import { CalendarEvent } from '../../../core/models/calendar';
 import { FamilyMember } from '../../../core/models/family-member';
 import { HouseholdTask } from '../../../core/models/household-task';
@@ -369,7 +370,10 @@ export class MemberDetailComponent implements OnInit {
   protected eventTime(ev: CalendarEvent): string {
     if (ev.isAllDay) return $localize`:@@member-detail.event.all-day:todo el día`;
     const d = new Date(ev.startAt);
-    return d.toLocaleTimeString(this.locale, { hour: '2-digit', minute: '2-digit' });
+    // `numeric` defers to the locale's hour cycle by default; the user's
+    // explicit /account override wins via `hourCycle` (issue #12).
+    const hourCycle = resolveHourCycle(this.auth.me()?.timeFormat);
+    return d.toLocaleTimeString(this.locale, { hour: 'numeric', minute: '2-digit', hourCycle });
   }
 
   protected recurrenceLabel(task: HouseholdTask): string {
