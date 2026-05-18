@@ -30,7 +30,7 @@ services:
       - internal
 
   api:
-    image: ghcr.io/${GHCR_OWNER}/familynido-api:latest
+    image: ghcr.io/${GHCR_OWNER}/familynido-api:${IMAGE_TAG:-latest}
     container_name: familynido-api
     restart: unless-stopped
     depends_on:
@@ -79,7 +79,7 @@ services:
       - com.centurylinklabs.watchtower.enable=true
 
   web:
-    image: ghcr.io/${GHCR_OWNER}/familynido-web:latest
+    image: ghcr.io/${GHCR_OWNER}/familynido-web:${IMAGE_TAG:-latest}
     container_name: familynido-web
     restart: unless-stopped
     depends_on:
