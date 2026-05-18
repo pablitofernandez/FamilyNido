@@ -24,7 +24,7 @@ import { MealPlanSlotEntry } from '../../core/models/meal';
 import { ResolvedExtracurricular, ResolvedSchoolDay, SchoolHoliday, TransportMode } from '../../core/models/school';
 import { WeatherToday } from '../../core/models/weather';
 import { WallMessage } from '../../core/models/wall';
-import { projectWeather, reformatHourMinute, temperatureUnit } from '../../core/locale/format-prefs';
+import { projectWeather, reformatHourMinute, resolveHourCycle, resolveTemperatureUnit } from '../../core/locale/format-prefs';
 import { refreshOnFocus } from '../../core/realtime/refresh-on-focus';
 import { AvatarComponent } from '../../shared/ui/avatar/avatar.component';
 import { IconComponent } from '../../shared/ui/icon/icon.component';
@@ -99,11 +99,13 @@ export class DashboardComponent implements OnInit {
   });
 
   // `hour: 'numeric'` lets the locale's native hour cycle win — en-US shows
-  // "2:30 PM", es-ES shows "14:30" — without forcing `hourCycle` per locale.
-  // Switching from '2-digit' was issue #12: US users were getting "02:30 PM".
+  // "2:30 PM", es-ES shows "14:30" — and an explicit user override (set on
+  // /account, exposed by /me as `timeFormat`) takes precedence over that
+  // inference via `hourCycle`. Both branches are issue #12.
   private readonly timeFormatter = new Intl.DateTimeFormat(this.locale, {
     hour: 'numeric',
     minute: '2-digit',
+    hourCycle: resolveHourCycle(this.auth.me()?.timeFormat),
   });
 
   protected readonly todayLabel = computed(() => this.dateFormatter.format(new Date()));
@@ -134,8 +136,12 @@ export class DashboardComponent implements OnInit {
   protected readonly tomorrowLunch = signal<MealPlanSlotEntry | null>(null);
   protected readonly tomorrowDinner = signal<MealPlanSlotEntry | null>(null);
   protected readonly weather = signal<WeatherToday | null>(null);
-  /** `C` or `F` suffix to render alongside temperatures (issue #12). */
-  protected readonly temperatureUnit = temperatureUnit(this.locale);
+  /**
+   * `C` or `F` suffix to render alongside temperatures (issue #12).
+   * Picks the user's explicit override when set; falls back to the active
+   * bundle's default (en-US → F, anything else → C).
+   */
+  protected readonly temperatureUnit = resolveTemperatureUnit(this.auth.me()?.temperatureUnit, this.locale);
   /**
    * Weather payload projected into the user's preferred unit. The backend
    * always sends Celsius (Open-Meteo's default); we convert here so the

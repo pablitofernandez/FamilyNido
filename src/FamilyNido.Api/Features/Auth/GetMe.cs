@@ -40,7 +40,9 @@ public static class GetMe
                 MemberDisplayName: current.Member.DisplayName,
                 ColorHex: current.Member.ColorHex,
                 PhotoPath: current.Member.PhotoPath,
-                PreferredLanguage: current.User.PreferredLanguage);
+                PreferredLanguage: current.User.PreferredLanguage,
+                TimeFormat: current.User.TimeFormat,
+                TemperatureUnit: current.User.TemperatureUnit);
         }
     }
 }

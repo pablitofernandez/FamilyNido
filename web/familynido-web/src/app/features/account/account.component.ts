@@ -14,7 +14,14 @@ import { Credential } from '../../core/models/credential';
 import { DashboardWidget, DashboardWidgetId } from '../../core/models/dashboard';
 import { Family } from '../../core/models/family';
 import { IntegrationApiKey } from '../../core/models/integration-api-key';
+import { TemperatureUnitPreference, TimeFormatPreference } from '../../core/models/me';
 import { NotificationPreferences } from '../../core/models/notification-preferences';
+
+/** Form value for the time-format select. Empty string represents "auto". */
+type TimeFormatDraft = '' | TimeFormatPreference;
+
+/** Form value for the temperature-unit select. Empty string represents "auto". */
+type TemperatureUnitDraft = '' | TemperatureUnitPreference;
 
 // Widget catalogue labels live inside `widgetLabel()` so each branch goes
 // through $localize and shows up in the extraction with a stable id.
@@ -70,6 +77,22 @@ export class AccountComponent implements OnInit {
   /** Currently persisted language — driven by the me() signal. */
   protected readonly currentLanguage = computed(() => this.auth.me()?.preferredLanguage ?? 'es-ES');
 
+  /** Time-format picker state. Empty string represents "auto" (inherit from the language bundle). */
+  protected readonly timeFormatDraft = signal<TimeFormatDraft>('');
+  protected readonly savingTimeFormat = signal(false);
+  protected readonly timeFormatError = signal<string | null>(null);
+  protected readonly currentTimeFormat = computed<TimeFormatDraft>(
+    () => this.auth.me()?.timeFormat ?? '',
+  );
+
+  /** Temperature-unit picker state. Empty string represents "auto". */
+  protected readonly temperatureUnitDraft = signal<TemperatureUnitDraft>('');
+  protected readonly savingTemperatureUnit = signal(false);
+  protected readonly temperatureUnitError = signal<string | null>(null);
+  protected readonly currentTemperatureUnit = computed<TemperatureUnitDraft>(
+    () => this.auth.me()?.temperatureUnit ?? '',
+  );
+
   /** Integration API keys — admin-only section. */
   protected readonly apiKeys = signal<IntegrationApiKey[]>([]);
   protected readonly apiKeysError = signal<string | null>(null);
@@ -109,6 +132,8 @@ export class AccountComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     this.languageDraft.set(this.currentLanguage());
+    this.timeFormatDraft.set(this.currentTimeFormat());
+    this.temperatureUnitDraft.set(this.currentTemperatureUnit());
     const tasks: Promise<void>[] = [this.refresh(), this.loadPreferences(), this.loadWidgets()];
     if (this.isAdmin()) {
       tasks.push(this.loadFamily());
@@ -135,6 +160,52 @@ export class AccountComponent implements OnInit {
     } catch {
       this.languageError.set($localize`:@@account.language.error:No se pudo cambiar el idioma. Inténtalo de nuevo.`);
       this.savingLanguage.set(false);
+    }
+  }
+
+  // ─── Time format picker (12H / 24H / auto) ────────────────────────────────
+
+  protected onTimeFormatDraftChange(event: Event): void {
+    this.timeFormatDraft.set((event.target as HTMLSelectElement).value as TimeFormatDraft);
+  }
+
+  protected async saveTimeFormat(): Promise<void> {
+    if (this.savingTimeFormat()) return;
+    if (this.timeFormatDraft() === this.currentTimeFormat()) return;
+
+    this.savingTimeFormat.set(true);
+    this.timeFormatError.set(null);
+    try {
+      const draft = this.timeFormatDraft();
+      await this.auth.setTimeFormat(draft === '' ? null : draft);
+    } catch {
+      this.timeFormatError.set($localize`:@@account.time-format.error:No se pudo guardar el formato de hora.`);
+    } finally {
+      this.savingTimeFormat.set(false);
+    }
+  }
+
+  // ─── Temperature unit picker (Celsius / Fahrenheit / auto) ────────────────
+
+  protected onTemperatureUnitDraftChange(event: Event): void {
+    this.temperatureUnitDraft.set(
+      (event.target as HTMLSelectElement).value as TemperatureUnitDraft,
+    );
+  }
+
+  protected async saveTemperatureUnit(): Promise<void> {
+    if (this.savingTemperatureUnit()) return;
+    if (this.temperatureUnitDraft() === this.currentTemperatureUnit()) return;
+
+    this.savingTemperatureUnit.set(true);
+    this.temperatureUnitError.set(null);
+    try {
+      const draft = this.temperatureUnitDraft();
+      await this.auth.setTemperatureUnit(draft === '' ? null : draft);
+    } catch {
+      this.temperatureUnitError.set($localize`:@@account.temperature-unit.error:No se pudo guardar la unidad de temperatura.`);
+    } finally {
+      this.savingTemperatureUnit.set(false);
     }
   }
 

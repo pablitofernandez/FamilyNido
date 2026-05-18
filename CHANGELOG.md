@@ -11,13 +11,18 @@ changes; patch releases (`0.x.Y`) stay backwards compatible.
 
 ### Added
 
-- US-style display formats follow the active i18n bundle: the `en-US`
-  bundle now shows 12-hour times ("9:42 PM") and Fahrenheit temperatures,
-  while `es-ES` continues to use 24-hour and Celsius. Affects every
-  hour-of-day label across the dashboard, calendar, account sync status,
-  member detail, tablet clock, and the weather widget (including sunrise
-  /sunset times). Bundle-driven by design — no new family setting; users
-  who want US formats serve the `/en/` bundle. (#12)
+- **Time format and temperature unit are now per-user preferences**, joining
+  the existing per-user language picker on `/account` → *Formato de hora y
+  temperatura*. Each user can independently force 12H / 24H or Celsius /
+  Fahrenheit regardless of the UI language. Defaults to `Automático` —
+  which honours the active i18n bundle's native conventions (en-US → 12H +
+  °F, es-ES → 24H + °C) — so existing users keep what they have without
+  any action. Backed by two new endpoints (`PUT /api/auth/me/time-format`,
+  `PUT /api/auth/me/temperature-unit`) and surfaced in `/api/auth/me`.
+- Hour formatting across the dashboard, calendar, account sync status,
+  member detail, tablet clock and the weather widget (including sunrise
+  /sunset times) now honours both the locale's native hour cycle and the
+  explicit override above. (#12)
 
 ### Fixed
 

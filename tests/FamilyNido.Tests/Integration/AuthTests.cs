@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using FamilyNido.Domain.Identity;
 using FluentAssertions;
 
 namespace FamilyNido.Tests.Integration;
@@ -113,6 +114,92 @@ public sealed class AuthTests : IntegrationTestBase
         var meAfter = await Client.GetAsync("/api/auth/me");
         meAfter.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
+
+    // ─── Display preferences (issue #12 v2) ───────────────────────────────────
+
+    [Fact]
+    public async Task Set_time_format_persists_and_surfaces_through_me()
+    {
+        await WithDbAsync(db => TestSeed.SeedFamilyAsync(db, Fixture.Factory.Services));
+        await TestSeed.LoginAsync(Client, "dan@example.com");
+
+        // Default is null (auto).
+        var meBefore = await ReadAsync<MeDto>(await Client.GetAsync("/api/auth/me"));
+        meBefore!.TimeFormat.Should().BeNull();
+
+        var set = await Client.PutAsJsonAsync(
+            "/api/auth/me/time-format",
+            new { timeFormat = "H12" });
+        set.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var meAfter = await ReadAsync<MeDto>(await Client.GetAsync("/api/auth/me"));
+        meAfter!.TimeFormat.Should().Be(TimeFormatPreference.H12);
+    }
+
+    [Fact]
+    public async Task Clearing_time_format_resets_to_null()
+    {
+        await WithDbAsync(db => TestSeed.SeedFamilyAsync(db, Fixture.Factory.Services));
+        await TestSeed.LoginAsync(Client, "dan@example.com");
+
+        await Client.PutAsJsonAsync("/api/auth/me/time-format", new { timeFormat = "H24" });
+        (await ReadAsync<MeDto>(await Client.GetAsync("/api/auth/me")))!
+            .TimeFormat.Should().Be(TimeFormatPreference.H24);
+
+        // Sending null clears the override.
+        var clear = await Client.PutAsJsonAsync(
+            "/api/auth/me/time-format",
+            new { timeFormat = (string?)null });
+        clear.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        (await ReadAsync<MeDto>(await Client.GetAsync("/api/auth/me")))!
+            .TimeFormat.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Set_temperature_unit_persists_and_surfaces_through_me()
+    {
+        await WithDbAsync(db => TestSeed.SeedFamilyAsync(db, Fixture.Factory.Services));
+        await TestSeed.LoginAsync(Client, "dan@example.com");
+
+        (await ReadAsync<MeDto>(await Client.GetAsync("/api/auth/me")))!
+            .TemperatureUnit.Should().BeNull();
+
+        var set = await Client.PutAsJsonAsync(
+            "/api/auth/me/temperature-unit",
+            new { temperatureUnit = "Fahrenheit" });
+        set.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        (await ReadAsync<MeDto>(await Client.GetAsync("/api/auth/me")))!
+            .TemperatureUnit.Should().Be(TemperatureUnitPreference.Fahrenheit);
+    }
+
+    [Fact]
+    public async Task Display_preference_endpoints_require_auth()
+    {
+        // No login → both PUTs should be 401, regardless of body.
+        var anonymous = Fixture.Factory.CreateClient(
+            new Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactoryClientOptions
+            {
+                HandleCookies = true,
+                AllowAutoRedirect = false,
+            });
+
+        var time = await anonymous.PutAsJsonAsync(
+            "/api/auth/me/time-format", new { timeFormat = "H12" });
+        time.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+
+        var temp = await anonymous.PutAsJsonAsync(
+            "/api/auth/me/temperature-unit", new { temperatureUnit = "Fahrenheit" });
+        temp.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    /// <summary>Minimal projection of MeDto with the fields these tests touch.</summary>
+    private sealed record MeDto(
+        Guid UserId,
+        string Email,
+        TimeFormatPreference? TimeFormat,
+        TemperatureUnitPreference? TemperatureUnit);
 
     private sealed record ProvidersDto(bool OidcEnabled);
 }

@@ -67,6 +67,12 @@ public static class AuthEndpoints
         group.MapPut("/me/preferred-language", UpdatePreferredLanguageAsync)
             .RequireAuthorization(Policies.AuthenticatedUser);
 
+        group.MapPut("/me/time-format", UpdateTimeFormatAsync)
+            .RequireAuthorization(Policies.AuthenticatedUser);
+
+        group.MapPut("/me/temperature-unit", UpdateTemperatureUnitAsync)
+            .RequireAuthorization(Policies.AuthenticatedUser);
+
         // Local credentials.
         group.MapPost("/local/login", LocalLoginAsync)
             .AllowAnonymous()
@@ -164,6 +170,42 @@ public static class AuthEndpoints
     private static async Task<IResult> UpdatePreferredLanguageAsync(
         UpdateMyPreferredLanguage.Command command,
         IValidator<UpdateMyPreferredLanguage.Command> validator,
+        IMediator mediator,
+        CancellationToken ct)
+    {
+        var validation = await validator.ValidateOrProblemAsync(command, ct);
+        if (validation is not null)
+        {
+            return validation;
+        }
+
+        var result = await mediator.SendAsync(command, ct);
+        return result.IsSuccess
+            ? Results.Ok(result.Value)
+            : result.Error.ToHttpResult();
+    }
+
+    private static async Task<IResult> UpdateTimeFormatAsync(
+        UpdateMyTimeFormat.Command command,
+        IValidator<UpdateMyTimeFormat.Command> validator,
+        IMediator mediator,
+        CancellationToken ct)
+    {
+        var validation = await validator.ValidateOrProblemAsync(command, ct);
+        if (validation is not null)
+        {
+            return validation;
+        }
+
+        var result = await mediator.SendAsync(command, ct);
+        return result.IsSuccess
+            ? Results.Ok(result.Value)
+            : result.Error.ToHttpResult();
+    }
+
+    private static async Task<IResult> UpdateTemperatureUnitAsync(
+        UpdateMyTemperatureUnit.Command command,
+        IValidator<UpdateMyTemperatureUnit.Command> validator,
         IMediator mediator,
         CancellationToken ct)
     {

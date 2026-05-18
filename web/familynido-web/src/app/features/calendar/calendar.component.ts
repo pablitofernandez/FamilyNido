@@ -5,6 +5,8 @@ import { firstValueFrom } from 'rxjs';
 
 import { CalendarService } from '../../core/api/calendar.service';
 import { FamilyMembersService } from '../../core/api/family-members.service';
+import { AuthService } from '../../core/auth/auth.service';
+import { resolveHourCycle } from '../../core/locale/format-prefs';
 import { CalendarEvent } from '../../core/models/calendar';
 import { FamilyMember } from '../../core/models/family-member';
 import { AvatarComponent } from '../../shared/ui/avatar/avatar.component';
@@ -85,6 +87,7 @@ export class CalendarComponent implements OnInit {
   protected readonly lookaheadDays = 35;
 
   private readonly locale = inject(LOCALE_ID);
+  private readonly auth = inject(AuthService);
 
   /** Static labels for the seven-column month grid header — same letters in es and en. */
   protected readonly weekdayInitials = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
@@ -226,10 +229,12 @@ export class CalendarComponent implements OnInit {
     }
     const start = new Date(event.startAt);
     const end = new Date(event.endAt);
-    // `hour: 'numeric'` honours the locale's native hour cycle (en-US → 12H,
-    // es-ES → 24H) without forcing `hourCycle` per locale. Issue #12.
+    // `hour: 'numeric'` honours the locale's native hour cycle by default
+    // (en-US → 12H, es-ES → 24H); an explicit user override from /account
+    // (exposed by /me as `timeFormat`) wins via `hourCycle`. Issue #12.
+    const hourCycle = resolveHourCycle(this.auth.me()?.timeFormat);
     const fmt = (d: Date) =>
-      d.toLocaleTimeString(this.locale, { hour: 'numeric', minute: '2-digit' });
+      d.toLocaleTimeString(this.locale, { hour: 'numeric', minute: '2-digit', hourCycle });
     return `${fmt(start)}–${fmt(end)}`;
   }
 

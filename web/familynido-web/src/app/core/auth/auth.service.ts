@@ -3,7 +3,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
-import { Me } from '../models/me';
+import { Me, TemperatureUnitPreference, TimeFormatPreference } from '../models/me';
 
 /**
  * Holds the authenticated session as a signal-driven state so components and
@@ -69,6 +69,35 @@ export class AuthService {
     const newPrefix = language.toLowerCase().startsWith('en') ? '/en' : '/es';
     const path = window.location.pathname.replace(/^\/(es|en)(?=\/|$)/, newPrefix);
     window.location.assign(path + window.location.search + window.location.hash);
+  }
+
+  /**
+   * Persist the caller's time-format override (or clear it). Patches the
+   * in-memory signal so any signal-driven view re-evaluates immediately;
+   * components that cached an `Intl.DateTimeFormat` instance at construction
+   * (e.g. dashboard / tablet) only pick the change up on the next mount.
+   */
+  async setTimeFormat(format: TimeFormatPreference | null): Promise<void> {
+    await firstValueFrom(this.http.put<{ timeFormat: TimeFormatPreference | null }>(
+      '/api/auth/me/time-format',
+      { timeFormat: format },
+    ));
+    const current = this._me();
+    if (current) {
+      this._me.set({ ...current, timeFormat: format });
+    }
+  }
+
+  /** Same shape as {@link setTimeFormat} but for the temperature unit. */
+  async setTemperatureUnit(unit: TemperatureUnitPreference | null): Promise<void> {
+    await firstValueFrom(this.http.put<{ temperatureUnit: TemperatureUnitPreference | null }>(
+      '/api/auth/me/temperature-unit',
+      { temperatureUnit: unit },
+    ));
+    const current = this._me();
+    if (current) {
+      this._me.set({ ...current, temperatureUnit: unit });
+    }
   }
 
   /**

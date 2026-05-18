@@ -11,7 +11,7 @@ import { SchoolService } from '../../core/api/school.service';
 import { WallService } from '../../core/api/wall.service';
 import { WeatherService } from '../../core/api/weather.service';
 import { AuthService } from '../../core/auth/auth.service';
-import { projectWeather, reformatHourMinute, temperatureUnit } from '../../core/locale/format-prefs';
+import { projectWeather, reformatHourMinute, resolveHourCycle, resolveTemperatureUnit } from '../../core/locale/format-prefs';
 import { CalendarEvent } from '../../core/models/calendar';
 import { FamilyMember } from '../../core/models/family-member';
 import { DayTasks, HouseholdTask, TaskOccurrence } from '../../core/models/household-task';
@@ -84,11 +84,14 @@ export class TabletComponent implements OnInit, OnDestroy {
   protected readonly now = signal(new Date());
   private readonly locale = inject(LOCALE_ID);
 
-  // The big clock at the top of the tablet view goes through the locale-aware
-  // formatter so US tablets show "9:42 PM" instead of "21:42". Issue #12.
+  // The big tablet clock goes through the locale-aware formatter so US
+  // tablets show "9:42 PM" instead of "21:42". An explicit user override
+  // (from /account) wins over the locale's native cycle via `hourCycle`.
+  // Issue #12.
   private readonly clockFormatter = new Intl.DateTimeFormat(this.locale, {
     hour: 'numeric',
     minute: '2-digit',
+    hourCycle: resolveHourCycle(this.auth.me()?.timeFormat),
   });
   protected readonly clockTime = computed(() => this.clockFormatter.format(this.now()));
 
@@ -96,8 +99,11 @@ export class TabletComponent implements OnInit, OnDestroy {
     this.now().toLocaleDateString(this.locale, { weekday: 'long', day: 'numeric', month: 'long' }),
   );
 
-  /** Same locale-aware formatter, reused to massage sunrise/sunset HH:mm strings. */
-  protected readonly temperatureUnit = temperatureUnit(this.locale);
+  /** `C` or `F` suffix; user override (if any) takes precedence over locale inference. */
+  protected readonly temperatureUnit = resolveTemperatureUnit(
+    this.auth.me()?.temperatureUnit,
+    this.locale,
+  );
 
   protected readonly familyName = computed(() => this.auth.me()?.familyName ?? 'FamilyNido');
 

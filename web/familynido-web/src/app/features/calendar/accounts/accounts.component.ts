@@ -4,6 +4,8 @@ import { firstValueFrom } from 'rxjs';
 
 import { CalendarService } from '../../../core/api/calendar.service';
 import { FamilyMembersService } from '../../../core/api/family-members.service';
+import { AuthService } from '../../../core/auth/auth.service';
+import { resolveHourCycle } from '../../../core/locale/format-prefs';
 import { GoogleAccount, LinkedCalendar } from '../../../core/models/calendar';
 import { FamilyMember } from '../../../core/models/family-member';
 import { IconComponent } from '../../../shared/ui/icon/icon.component';
@@ -124,6 +126,7 @@ export class AccountsComponent implements OnInit {
   }
 
   private readonly locale = inject(LOCALE_ID);
+  private readonly auth = inject(AuthService);
 
   protected memberName(memberId: string | null): string {
     if (!memberId) return $localize`:@@calendar.accounts.unassigned-fallback:Sin asignar`;
@@ -133,12 +136,15 @@ export class AccountsComponent implements OnInit {
   protected lastSyncLabel(calendar: LinkedCalendar): string {
     if (!calendar.lastSyncedAt) return $localize`:@@calendar.accounts.never-synced:Sin sincronizar`;
     const d = new Date(calendar.lastSyncedAt);
+    // `numeric` lets the locale pick 12H vs 24H by default; an explicit
+    // user override from /account wins via `hourCycle` (issue #12).
+    const hourCycle = resolveHourCycle(this.auth.me()?.timeFormat);
     const when = d.toLocaleString(this.locale, {
       day: 'numeric',
       month: 'short',
-      // `numeric` lets the locale pick 12H vs 24H itself (issue #12).
       hour: 'numeric',
       minute: '2-digit',
+      hourCycle,
     });
     return $localize`:@@calendar.accounts.last-sync:Última sync · ${when}:WHEN:`;
   }

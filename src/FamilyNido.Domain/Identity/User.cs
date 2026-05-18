@@ -43,6 +43,20 @@ public sealed class User : AuditableEntity
     /// </summary>
     public string PreferredLanguage { get; set; } = "es-ES";
 
+    /// <summary>
+    /// Optional explicit override for the time format the SPA renders for
+    /// this user. <c>null</c> means "auto" — let the frontend infer from the
+    /// active i18n bundle (en-US → 12H, es-ES → 24H).
+    /// </summary>
+    public TimeFormatPreference? TimeFormat { get; set; }
+
+    /// <summary>
+    /// Optional explicit override for the temperature unit shown to this user
+    /// in the weather widget. <c>null</c> means "auto" — derived from the
+    /// active i18n bundle (en-US → Fahrenheit, anything else → Celsius).
+    /// </summary>
+    public TemperatureUnitPreference? TemperatureUnit { get; set; }
+
     /// <summary>Navigation back to the linked family member, if any.</summary>
     public FamilyMember? FamilyMember { get; set; }
 
