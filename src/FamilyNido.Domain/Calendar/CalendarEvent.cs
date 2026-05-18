@@ -50,7 +50,14 @@ public sealed class CalendarEvent : AuditableEntity
     /// <summary>True when the event has no specific time-of-day (a "date" in Google's API instead of "dateTime").</summary>
     public bool IsAllDay { get; set; }
 
-    /// <summary>Original IANA timezone reported by Google (<c>"Europe/Madrid"</c> by default for our users).</summary>
+    /// <summary>
+    /// IANA timezone used to interpret the stored <see cref="StartAt"/> /
+    /// <see cref="EndAt"/> instants when rendering. For timed events this is
+    /// the timezone Google attached to the event (the author's calendar
+    /// timezone). For all-day events — which Google sends without a timezone
+    /// — the synchronizer persists the owning <c>Family.TimeZone</c> here so
+    /// the DTO can recover the original calendar date without shifting it.
+    /// </summary>
     public string? OriginalTimeZone { get; set; }
 
     /// <summary>Public link back to the event in Google Calendar (<c>htmlLink</c>).</summary>

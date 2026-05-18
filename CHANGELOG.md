@@ -9,6 +9,16 @@ changes; patch releases (`0.x.Y`) stay backwards compatible.
 
 ## [Unreleased]
 
+### Fixed
+
+- All-day Google Calendar events no longer display one day early for families
+  whose timezone is west of UTC (e.g. Christmas Day appearing on December 24
+  in `America/New_York`). All-day dates are now interpreted in the family's
+  timezone instead of falling back to UTC, and the API exposes a
+  `startDate` / `endDate` (`YYYY-MM-DD`) pair the SPA renders verbatim — no
+  more browser-side timezone shifting. Existing rows correct themselves on
+  the next Google Calendar sync; no manual action required. (#13)
+
 ## [0.1.0] - 2026-05-18
 
 First public release.

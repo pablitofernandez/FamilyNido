@@ -155,7 +155,7 @@ public sealed class CalendarSynchronizer
             return;
         }
 
-        var familyId = await ResolveFamilyIdAsync(calendar, cancellationToken);
+        var (familyId, familyTimeZone) = await ResolveFamilyContextAsync(calendar, cancellationToken);
 
         var existingByExternalId = await _db.CalendarEvents
             .Where(e => e.LinkedCalendarId == calendar.Id)
@@ -163,7 +163,7 @@ public sealed class CalendarSynchronizer
 
         foreach (var googleEvent in page.Events)
         {
-            ApplyEvent(googleEvent, calendar, familyId, existingByExternalId);
+            ApplyEvent(googleEvent, calendar, familyId, familyTimeZone, existingByExternalId);
         }
 
         if (!string.IsNullOrEmpty(page.NextSyncToken))
@@ -174,18 +174,17 @@ public sealed class CalendarSynchronizer
         calendar.LastSyncedAt = _clock.GetUtcNow();
     }
 
-    private async Task<Guid> ResolveFamilyIdAsync(LinkedCalendar calendar, CancellationToken cancellationToken)
+    private async Task<(Guid familyId, string familyTimeZone)> ResolveFamilyContextAsync(
+        LinkedCalendar calendar,
+        CancellationToken cancellationToken)
     {
-        // The calendar's owning account is the source of truth for FamilyId. Pull it
-        // explicitly: relying on calendar.GoogleAccount being attached requires Include.
-        if (calendar.GoogleAccount is { } loaded)
-        {
-            return loaded.FamilyId;
-        }
-
+        // FamilyId + TimeZone come together so the all-day fallback works (issue
+        // #13) — parsing date-only events as midnight UTC shifts them one day for
+        // any family west of UTC. One round trip on the GoogleAccount → Family
+        // join is cheap; per-calendar, not per-event.
         return await _db.GoogleAccounts
             .Where(a => a.Id == calendar.GoogleAccountId)
-            .Select(a => a.FamilyId)
+            .Select(a => new ValueTuple<Guid, string>(a.FamilyId, a.Family!.TimeZone))
             .FirstAsync(cancellationToken);
     }
 
@@ -193,6 +192,7 @@ public sealed class CalendarSynchronizer
         Event googleEvent,
         LinkedCalendar calendar,
         Guid familyId,
+        string familyTimeZone,
         Dictionary<string, CalendarEvent> existing)
     {
         if (string.IsNullOrEmpty(googleEvent.Id))
@@ -212,7 +212,7 @@ public sealed class CalendarSynchronizer
             return;
         }
 
-        if (!TryReadInstants(googleEvent, out var startAt, out var endAt, out var isAllDay, out var timeZone))
+        if (!TryReadInstants(googleEvent, familyTimeZone, out var startAt, out var endAt, out var isAllDay, out var timeZone))
         {
             // Events without start/end are valid in Google's data model (e.g. tasks),
             // but the calendar UI cannot render them. Skip silently.
@@ -253,6 +253,7 @@ public sealed class CalendarSynchronizer
 
     private static bool TryReadInstants(
         Event googleEvent,
+        string familyTimeZone,
         out DateTimeOffset startAt,
         out DateTimeOffset endAt,
         out bool isAllDay,
@@ -280,40 +281,27 @@ public sealed class CalendarSynchronizer
 
         if (!string.IsNullOrEmpty(googleEvent.Start.Date) && !string.IsNullOrEmpty(googleEvent.End.Date))
         {
-            // All-day events come as YYYY-MM-DD strings. Treat them as midnight in the
-            // event's original timezone, falling back to UTC. End is exclusive (Google convention).
+            // All-day events come as YYYY-MM-DD strings, almost always without
+            // a timezone (Google leaves Start.TimeZone null for date-only
+            // events). Falling back to UTC made Christmas land on Dec 24 for a
+            // family in America/New_York (issue #13); falling back to the
+            // family's timezone keeps the date stable for everyone in that
+            // household. End is exclusive — that's Google's convention, mirror
+            // it verbatim.
             isAllDay = true;
-            var tz = TryFindTimeZone(timeZone) ?? TimeZoneInfo.Utc;
-            startAt = ParseAllDay(googleEvent.Start.Date, tz).ToUniversalTime();
-            endAt = ParseAllDay(googleEvent.End.Date, tz).ToUniversalTime();
+            var (startUtc, endUtc, effectiveTz) = CalendarAllDayResolver.Resolve(
+                googleEvent.Start.Date,
+                googleEvent.End.Date,
+                timeZone,
+                familyTimeZone);
+            startAt = startUtc;
+            endAt = endUtc;
+            // Persist the timezone we actually used so the DTO projection can
+            // recover the original calendar date without guessing.
+            timeZone = effectiveTz;
             return true;
         }
 
         return false;
-    }
-
-    private static DateTimeOffset ParseAllDay(string yyyyMmDd, TimeZoneInfo tz)
-    {
-        var date = DateOnly.Parse(yyyyMmDd, System.Globalization.CultureInfo.InvariantCulture);
-        var local = date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Unspecified);
-        var offset = tz.GetUtcOffset(local);
-        return new DateTimeOffset(local, offset);
-    }
-
-    private static TimeZoneInfo? TryFindTimeZone(string? id)
-    {
-        if (string.IsNullOrEmpty(id))
-        {
-            return null;
-        }
-
-        try
-        {
-            return TimeZoneInfo.FindSystemTimeZoneById(id);
-        }
-        catch
-        {
-            return null;
-        }
     }
 }

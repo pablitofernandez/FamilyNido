@@ -117,7 +117,7 @@ export class CalendarComponent implements OnInit {
     // Bucket events by local date once so the grid loop stays cheap.
     const eventsByDay = new Map<string, CalendarEvent[]>();
     for (const ev of this.events()) {
-      const day = this.toLocalDate(ev.startAt);
+      const day = this.eventLocalDate(ev);
       const arr = eventsByDay.get(day);
       if (arr) arr.push(ev); else eventsByDay.set(day, [ev]);
     }
@@ -170,7 +170,7 @@ export class CalendarComponent implements OnInit {
 
     const grouped = new Map<string, CalendarEvent[]>();
     for (const ev of events) {
-      const day = this.toLocalDate(ev.startAt);
+      const day = this.eventLocalDate(ev);
       const list = grouped.get(day);
       if (list) {
         list.push(ev);
@@ -184,7 +184,7 @@ export class CalendarComponent implements OnInit {
       buckets.push({
         date,
         label: this.dayLabel(date),
-        events: dayEvents.sort((a, b) => a.startAt.localeCompare(b.startAt)),
+        events: dayEvents.sort((a, b) => this.eventSortKey(a).localeCompare(this.eventSortKey(b))),
       });
     }
 
@@ -309,6 +309,29 @@ export class CalendarComponent implements OnInit {
     const month = `${d.getMonth() + 1}`.padStart(2, '0');
     const day = `${d.getDate()}`.padStart(2, '0');
     return `${year}-${month}-${day}`;
+  }
+
+  /**
+   * Local YYYY-MM-DD for grouping. For all-day events the server already
+   * computed the date in the family's timezone and shipped it as
+   * `startDate` — using it verbatim avoids the UTC-vs-local shift that
+   * caused Christmas to land on Dec 24 in America/New_York (issue #13).
+   * Timed events fall through to the browser's local conversion, which
+   * matches the time the user expects to see them at.
+   */
+  private eventLocalDate(event: CalendarEvent): string {
+    if (event.isAllDay && event.startDate) {
+      return event.startDate;
+    }
+    return this.toLocalDate(event.startAt);
+  }
+
+  /** Stable sort key: all-day events use their date string, timed events use the ISO instant. */
+  private eventSortKey(event: CalendarEvent): string {
+    if (event.isAllDay && event.startDate) {
+      return event.startDate;
+    }
+    return event.startAt;
   }
 
   private dayLabel(date: string): string {
