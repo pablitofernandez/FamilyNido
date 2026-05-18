@@ -1,5 +1,6 @@
 import { DatePipe, NgClass, NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, effect, inject, signal } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { FamilyMembersService } from '../../core/api/family-members.service';
@@ -36,6 +37,8 @@ export class WallComponent implements OnInit {
   private readonly membersApi = inject(FamilyMembersService);
   private readonly auth = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
   protected readonly reactionPalette = REACTION_PALETTE;
 
@@ -44,6 +47,7 @@ export class WallComponent implements OnInit {
   protected readonly closeAriaLabel = $localize`:@@wall.close-aria:Cerrar`;
   protected readonly pinAriaLabel = $localize`:@@wall.pin-aria:Fijar`;
   protected readonly unpinAriaLabel = $localize`:@@wall.unpin-aria:Despinchar`;
+  protected readonly shareAriaLabel = $localize`:@@wall.share-aria:Compartir enlace al mensaje`;
   protected readonly composerPlaceholder = $localize`:@@wall.composer.placeholder:Recuerda sacar al perro 🐕. Escribe @ para mencionar.`;
   protected readonly commentPlaceholder = $localize`:@@wall.comment.placeholder:Responder… (usa @ para mencionar)`;
 
@@ -110,6 +114,18 @@ export class WallComponent implements OnInit {
   /** When non-null, the URL of an image currently shown fullscreen in the lightbox. */
   protected readonly lightboxUrl = signal<string | null>(null);
 
+  /** Transient toast shown after copying a share link (or failing to). Auto-clears. */
+  protected readonly toast = signal<string | null>(null);
+  private toastTimer: ReturnType<typeof setTimeout> | null = null;
+
+  /**
+   * Message id currently highlighted because the user landed on it via a
+   * deep link (`/wall?messageId=…`). The card binds a transient background
+   * class against it; cleared by a timer after ~3 s.
+   */
+  protected readonly highlightedId = signal<string | null>(null);
+  private highlightTimer: ReturnType<typeof setTimeout> | null = null;
+
   protected readonly canPublish = computed(() => this.composerText().trim().length > 0);
 
   protected readonly myMemberId = computed(() => this.auth.me()?.memberId ?? null);
@@ -123,9 +139,111 @@ export class WallComponent implements OnInit {
   );
 
   ngOnInit(): void {
-    void this.load();
+    // Read the deep-link target (if any) BEFORE kicking off the initial load
+    // so we can resolve "is the requested message in the first page?" against
+    // a known target. Without a target this is just the regular wall flow.
+    const targetId = this.route.snapshot.queryParamMap.get('messageId');
+    void this.bootstrap(targetId);
     void this.wall.markRead().subscribe({ error: () => { /* silent */ } });
     refreshOnFocus(() => void this.load(), this.destroyRef);
+
+    // Clean up any pending timers when the component unmounts so navigating
+    // away mid-highlight doesn't leak a setTimeout into the next route.
+    this.destroyRef.onDestroy(() => {
+      if (this.toastTimer) clearTimeout(this.toastTimer);
+      if (this.highlightTimer) clearTimeout(this.highlightTimer);
+    });
+  }
+
+  /**
+   * Coordinated initial load. When the URL carries a `?messageId=…` deep
+   * link, fetch that specific message first (so we can fail fast on
+   * 404/403 with a clear toast) and then merge it into the feed for
+   * scroll + highlight. Without a deep link this just runs `load()`.
+   */
+  private async bootstrap(targetId: string | null): Promise<void> {
+    if (!targetId) {
+      await this.load();
+      return;
+    }
+
+    // Fire both calls in parallel: the single GET is cheap and lets us
+    // surface a clean error if the link is dead before the user sees an
+    // empty highlight.
+    const single$ = firstValueFrom(this.wall.get(targetId)).catch(() => null);
+    const feed$ = this.load();
+    const [single] = await Promise.all([single$, feed$]);
+
+    if (!single) {
+      this.showToast($localize`:@@wall.share.not-found:Este post ya no existe o no tienes acceso.`);
+      this.clearMessageIdFromUrl();
+      return;
+    }
+
+    // If the deep-link target is not in the first page (older message,
+    // off-cursor), prepend it so the user actually sees what they were
+    // sent. Otherwise the existing entry stays in place.
+    const alreadyVisible =
+      this.pinned().some((m) => m.id === single.id) ||
+      this.messages().some((m) => m.id === single.id);
+    if (!alreadyVisible) {
+      this.messages.update((list) => [single, ...list]);
+    }
+
+    this.highlight(single.id);
+    this.clearMessageIdFromUrl();
+  }
+
+  /**
+   * Copy a public-format link to the message to the clipboard. The link
+   * itself is NOT public: opening it requires a session cookie and the
+   * GET endpoint still enforces family-scoping. Failure (e.g. denied
+   * clipboard permission on insecure context) surfaces as a toast.
+   */
+  protected async share(message: WallMessage): Promise<void> {
+    const url = `${window.location.origin}/wall?messageId=${message.id}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      this.showToast($localize`:@@wall.share.copied:Enlace copiado al portapapeles`);
+    } catch {
+      this.showToast($localize`:@@wall.share.error:No se pudo copiar el enlace`);
+    }
+  }
+
+  /** Highlight a message card briefly, then clear the marker on a timer. */
+  private highlight(messageId: string): void {
+    this.highlightedId.set(messageId);
+    if (this.highlightTimer) clearTimeout(this.highlightTimer);
+    this.highlightTimer = setTimeout(() => this.highlightedId.set(null), 3000);
+
+    // Defer scroll until the card is in the DOM. The card list is rendered
+    // through a template outlet inside an @if/@else block; the element is
+    // not present until change detection has flushed.
+    requestAnimationFrame(() => {
+      document
+        .getElementById(`wall-message-${messageId}`)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  }
+
+  /** Show a transient toast at the bottom of the screen for ~2 s. */
+  private showToast(text: string): void {
+    this.toast.set(text);
+    if (this.toastTimer) clearTimeout(this.toastTimer);
+    this.toastTimer = setTimeout(() => this.toast.set(null), 2000);
+  }
+
+  /**
+   * Drop `messageId` from the URL once we've consumed it so a refresh
+   * doesn't re-trigger the highlight every time.
+   */
+  private clearMessageIdFromUrl(): void {
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { messageId: null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
   }
 
   // ─── composer ──────────────────────────────────────────────────────────────

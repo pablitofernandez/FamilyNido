@@ -185,6 +185,72 @@ public sealed class WallTests : IntegrationTestBase
         dto!.Html.Should().Contain("<strong>mundo</strong>");
     }
 
+    [Fact]
+    public async Task GetWallMessage_returns_200_for_own_family()
+    {
+        await SeedAdminAsync();
+        var created = await ReadAsync<MessageRow>(
+            await Client.PostAsJsonAsync("/api/wall/messages", new { text = "Mensaje propio" }));
+
+        var resp = await Client.GetAsync($"/api/wall/messages/{created!.Id}");
+
+        resp.StatusCode.Should().Be(HttpStatusCode.OK);
+        var dto = await ReadAsync<MessageRow>(resp);
+        dto!.Id.Should().Be(created.Id);
+        dto.Text.Should().Contain("Mensaje propio");
+    }
+
+    [Fact]
+    public async Task GetWallMessage_returns_404_for_other_family()
+    {
+        // Family A — Dan creates a message that should be invisible to family B.
+        await SeedAdminAsync();
+        var created = await ReadAsync<MessageRow>(
+            await Client.PostAsJsonAsync("/api/wall/messages", new { text = "Privado de la familia A" }));
+
+        // Family B — a fresh family with its own admin (Bob). SeedFamilyAsync
+        // always creates a new family per call, so this is genuinely independent.
+        await WithDbAsync(db => TestSeed.SeedFamilyAsync(
+            db, Fixture.Factory.Services,
+            email: "bob@example.com",
+            displayName: "Bob",
+            role: FamilyRole.Admin));
+
+        var bobClient = Fixture.Factory.CreateClient(
+            new Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactoryClientOptions
+            {
+                HandleCookies = true,
+                AllowAutoRedirect = false,
+            });
+        await TestSeed.LoginAsync(bobClient, "bob@example.com");
+
+        var resp = await bobClient.GetAsync($"/api/wall/messages/{created!.Id}");
+
+        // Handler returns NotFound (not Forbidden) on purpose to avoid leaking
+        // whether the id exists outside the caller's family.
+        resp.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task GetWallMessage_returns_401_without_cookie()
+    {
+        await SeedAdminAsync();
+        var created = await ReadAsync<MessageRow>(
+            await Client.PostAsJsonAsync("/api/wall/messages", new { text = "Cualquier mensaje" }));
+
+        // A second client without login → cookie scheme should challenge with 401.
+        var anonymous = Fixture.Factory.CreateClient(
+            new Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactoryClientOptions
+            {
+                HandleCookies = true,
+                AllowAutoRedirect = false,
+            });
+
+        var resp = await anonymous.GetAsync($"/api/wall/messages/{created!.Id}");
+
+        resp.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
     private sealed record MessageRow(Guid Id, string Text, string TextHtml, bool IsPinned);
     private sealed record CommentRow(Guid Id, Guid MessageId, string Text);
     private sealed record PreviewDto(string Html);

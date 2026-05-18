@@ -181,7 +181,13 @@
   }
 
   <ng-template #card let-message="message">
-    <li class="bg-[color:var(--color-card)] border border-[color:var(--color-line)] rounded-2xl p-4">
+    <li
+      [id]="'wall-message-' + message.id"
+      class="bg-[color:var(--color-card)] border rounded-2xl p-4 transition-shadow duration-700"
+      [ngClass]="highlightedId() === message.id
+        ? 'ring-2 ring-[color:var(--color-terra)] border-[color:var(--color-terra)] shadow-lg'
+        : 'border-[color:var(--color-line)]'"
+    >
       <div class="flex items-start gap-3">
         <fn-avatar
           [name]="memberName(message.authorMemberId)"
@@ -210,6 +216,15 @@
             (click)="togglePin(message)"
           >
             <fn-icon name="pin" [size]="16" />
+          </button>
+          <button
+            type="button"
+            class="w-8 h-8 flex items-center justify-center rounded-md hover:bg-[color:var(--color-bg-2)] cursor-pointer"
+            [attr.aria-label]="shareAriaLabel"
+            [title]="shareAriaLabel"
+            (click)="share(message)"
+          >
+            <fn-icon name="share" [size]="16" />
           </button>
           @if (canEdit(message)) {
             <button
@@ -362,6 +377,16 @@
       }
     </li>
   </ng-template>
+
+  @if (toast(); as t) {
+    <div
+      class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 px-4 py-2 rounded-full bg-[color:var(--color-ink)] text-white text-sm shadow-lg pointer-events-none"
+      role="status"
+      aria-live="polite"
+    >
+      {{ t }}
+    </div>
+  }
 
   @if (lightboxUrl(); as url) {
     <div
