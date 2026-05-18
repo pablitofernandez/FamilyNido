@@ -23,6 +23,14 @@ export const authGuard: CanActivateFn = (_route, state) => {
     return router.parseUrl('/not-linked');
   }
 
+  // Fresh instance, never bootstrapped → route everyone to the one-shot
+  // setup wizard until they create the first admin (issue #20). Lets a
+  // new self-hosted deployment surface its first screen without needing
+  // OIDC configured or a manual SQL insert to seed the admin.
+  if (status === 'setup-required') {
+    return router.parseUrl('/setup');
+  }
+
   // anonymous / idle / loading → kick off the chooser screen so the user
   // picks PocketID or local credentials. The OIDC flow does a server-side
   // redirect after the callback, so the returnUrl must include the locale

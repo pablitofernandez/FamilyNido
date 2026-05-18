@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 
 import { authGuard } from './core/auth/auth.guard';
+import { redirectIfSetupPendingGuard, requireSetupPendingGuard } from './core/auth/setup.guards';
 
 /**
  * Top-level route table.
@@ -96,8 +97,16 @@ export const routes: Routes = [
   {
     path: 'login',
     title: 'Iniciar sesión — FamilyNido',
+    canActivate: [redirectIfSetupPendingGuard],
     loadComponent: () =>
       import('./features/auth/login.component').then((m) => m.LoginComponent),
+  },
+  {
+    path: 'setup',
+    title: 'Configura tu nido — FamilyNido',
+    canActivate: [requireSetupPendingGuard],
+    loadComponent: () =>
+      import('./features/setup/setup.component').then((m) => m.SetupComponent),
   },
   {
     path: 'invite/:token',

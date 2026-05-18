@@ -51,7 +51,7 @@ Prerequisites on the server (Ubuntu, Docker, Traefik on the
 
    Copy `deploy/docker-compose.prod.yml` and `deploy/.env.example` from
    this repo into that folder, rename the example to `.env`, and fill it in
-   with the real PocketId/Postgres credentials.
+   with the Postgres credentials. **OIDC is optional** — see the box below.
 
 4. **Pull and start**:
 
@@ -62,6 +62,13 @@ Prerequisites on the server (Ubuntu, Docker, Traefik on the
 
 5. Traefik picks the service up via the labels and serves it at the
    `${TRAEFIK_HOST}` you configured once Let's Encrypt issues the cert.
+
+6. **Create the first admin.** The first time you load the site in a
+   browser you'll be routed to `/setup` — a one-page form that collects
+   the family name + timezone + your admin email + a password, creates
+   the family and your account in one shot, and logs you straight in.
+   No SQL, no OIDC needed. Once you're in, invite the rest of the family
+   from **Nido → Añadir miembro**.
 
 > **OIDC client id.** The default `OIDC_CLIENT_ID` is `familynido`. If you
 > use PocketID or another upstream IdP, create a client with that id (or
