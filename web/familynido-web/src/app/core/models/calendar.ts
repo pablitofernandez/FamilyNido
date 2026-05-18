@@ -42,6 +42,15 @@ export interface CalendarEvent {
   /** End instant (UTC). */
   endAt: string;
   isAllDay: boolean;
+  /**
+   * For all-day events, the inclusive start date (YYYY-MM-DD) as it appears
+   * in Google Calendar. Interpreted server-side in `originalTimeZone` so the
+   * value does NOT need any further conversion in the browser. Null for
+   * timed events — use `startAt` instead.
+   */
+  startDate: string | null;
+  /** Exclusive end date (YYYY-MM-DD) for all-day events; null for timed events. */
+  endDate: string | null;
   originalTimeZone: string | null;
   /** Public link back to the event in Google Calendar. */
   htmlLink: string | null;

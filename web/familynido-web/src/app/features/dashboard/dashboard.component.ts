@@ -475,6 +475,14 @@ export class DashboardComponent implements OnInit {
   }
 
   protected eventDayLabel(event: CalendarEvent): string {
+    // All-day events ship `startDate` (YYYY-MM-DD in the family's timezone)
+    // pre-computed by the server. Parsing it with the explicit local-midnight
+    // suffix sidesteps the UTC-shift gotcha that pushed Christmas to Dec 24
+    // for families east of UTC (issue #13). Timed events keep the original
+    // ISO-instant path so the label honours the actual viewing timezone.
+    if (event.isAllDay && event.startDate) {
+      return this.shortDateFormatter.format(new Date(event.startDate + 'T00:00:00'));
+    }
     return this.shortDateFormatter.format(new Date(event.startAt));
   }
 

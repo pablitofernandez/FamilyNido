@@ -33,4 +33,10 @@
     <ProjectReference Include="..\FamilyNido.Persistence\FamilyNido.Persistence.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Lets the test project poke at internal helpers (e.g. CalendarAllDayResolver)
+         without making them part of the public API surface. -->
+    <InternalsVisibleTo Include="FamilyNido.Tests" />
+  </ItemGroup>
+
 </Project>
