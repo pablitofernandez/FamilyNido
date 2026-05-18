@@ -245,11 +245,13 @@
         </ul>
 
         @if (totalPages() > 1) {
-          <fn-pagination
-            [currentPage]="currentPage()"
-            [totalPages]="totalPages()"
-            (pageChange)="goToPage($event)"
-          />
+          <div id="tasks-pagination-anchor" class="scroll-mb-4">
+            <fn-pagination
+              [currentPage]="currentPage()"
+              [totalPages]="totalPages()"
+              (pageChange)="goToPage($event)"
+            />
+          </div>
         }
       }
     }

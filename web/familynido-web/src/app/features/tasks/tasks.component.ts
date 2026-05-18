@@ -70,7 +70,10 @@ export class TasksComponent implements OnInit {
   protected readonly searchInput = signal('');
   protected readonly searchQuery = signal('');
   protected readonly currentPage = signal(1);
-  protected readonly pageSize = signal(25);
+  // 10 strikes a good balance for household-scale data: enough to scan in
+  // one screenful, small enough that next/prev jumps aren't disorienting.
+  // The URL still accepts ?pageSize=N for power-users / tests up to 100.
+  protected readonly pageSize = signal(10);
   protected readonly totalTasks = signal(0);
   protected readonly totalPages = computed(() =>
     Math.max(1, Math.ceil(this.totalTasks() / this.pageSize())),
@@ -263,7 +266,18 @@ export class TasksComponent implements OnInit {
     if (page === this.currentPage()) return;
     this.currentPage.set(page);
     this.pushUrlState();
-    void this.loadAll();
+    void this.loadAll().then(() => {
+      // After the new page is rendered, re-anchor the pagination control
+      // at the bottom of the viewport. Without this, pages of different
+      // heights make the buttons jump up or down relative to where the
+      // user's cursor / thumb was — so repeated next/prev clicks miss.
+      // 50 ms is enough for Angular's signal update + reflow to commit.
+      setTimeout(() => {
+        document
+          .getElementById('tasks-pagination-anchor')
+          ?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      }, 50);
+    });
   }
 
   protected toRows(day: DayTasks): TaskRow[] {

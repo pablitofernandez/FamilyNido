@@ -216,14 +216,20 @@ export class WallComponent implements OnInit {
     if (this.highlightTimer) clearTimeout(this.highlightTimer);
     this.highlightTimer = setTimeout(() => this.highlightedId.set(null), 3000);
 
-    // Defer scroll until the card is in the DOM. The card list is rendered
-    // through a template outlet inside an @if/@else block; the element is
-    // not present until change detection has flushed.
-    requestAnimationFrame(() => {
+    // Scroll twice on purpose:
+    //  - First soon after change detection flushes so the user gets
+    //    immediate feedback that something is happening.
+    //  - Again after a longer delay to correct for any layout shift that
+    //    happens while images in messages ABOVE the target finish loading.
+    //    Without the second pass, the post often ends up scrolled past
+    //    (above the viewport) because the document grew under it.
+    const scrollToCard = (): void => {
       document
         .getElementById(`wall-message-${messageId}`)
         ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    });
+    };
+    setTimeout(scrollToCard, 50);
+    setTimeout(scrollToCard, 600);
   }
 
   /** Show a transient toast at the bottom of the screen for ~2 s. */
