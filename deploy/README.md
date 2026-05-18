@@ -7,20 +7,24 @@ Two compose files live here, for two distinct scenarios:
 | `docker-compose.prod.yml` | Pulls pre-built images from GHCR. This is what runs on the home server. |
 | `docker-compose.dev.yml` | Dev stack with Postgres only — auth runs on local credentials. |
 
-Images are built by `.github/workflows/build-and-push.yml` and published to:
+Images are built by `.github/workflows/build-and-push.yml` and
+`release.yml`, and published to:
 
 - `ghcr.io/<GHCR_OWNER>/familynido-api:<tag>`
 - `ghcr.io/<GHCR_OWNER>/familynido-web:<tag>`
 
 Tags produced:
 
-| Trigger | Tag(s) |
-|---|---|
-| Push to `main` | `latest` + immutable `sha-<shortsha>` |
-| Pull request | `pr-<number>` (overwritten on each push to the PR) |
+| Trigger | Tag(s) | Meaning |
+|---|---|---|
+| SemVer tag (`v0.1.0`) pushed | `0.1.0` + `0.1` + `latest` | Stable, released. **Use these in prod.** |
+| Push to `main` | `main` + immutable `sha-<shortsha>` | Bleeding-edge dev build |
+| Pull request | `pr-<number>` (overwritten per push) | Preview of an in-review change |
 
-The compose stack picks the tag via the `IMAGE_TAG` env var (default
-`latest`). See *Trying a PR build* and *Rolling back* below.
+Pick the channel via the `IMAGE_TAG` env var (default `latest`).
+The right default for a home server is `latest` — it follows tagged
+releases, never moves under your feet unless a new release is cut. See
+*Updating*, *Trying a PR build* and *Rolling back* below.
 
 ## First-time server setup
 
@@ -96,15 +100,33 @@ backend needs an OAuth client to drive the consent flow:
 The callback path is already proxied by the existing `/api/` block in
 `deploy/nginx/default.conf`, so no extra reverse-proxy config is needed.
 
-## Updating after a push to `main`
+## Updating to the latest release
 
-Until Watchtower is wired up (separate commit), updates are a manual pull:
+Default deploy follows `latest`, which moves only when a new SemVer
+release is cut (see [CHANGELOG.md](../CHANGELOG.md) for what each
+release contains). Updates are a manual pull:
 
 ```bash
 cd /opt/familynido
 docker compose -f docker-compose.prod.yml pull
 docker compose -f docker-compose.prod.yml up -d
 ```
+
+To pin to an exact version instead of following `latest`, set
+`IMAGE_TAG=0.1.0` (or any minor channel like `0.1`) in `.env`.
+
+### Tracking `main` between releases
+
+If you want to deploy unreleased work from the main branch — typically
+because a PR you care about just merged and you don't want to wait for
+the next release — switch the channel:
+
+```bash
+IMAGE_TAG=main docker compose -f docker-compose.prod.yml pull
+IMAGE_TAG=main docker compose -f docker-compose.prod.yml up -d
+```
+
+Snap back to released versions by re-running without `IMAGE_TAG`.
 
 ## Trying a PR build before merging
 
@@ -136,17 +158,25 @@ to snap back to `latest`.
 
 ## Rolling back
 
-Each push to `main` tags the images with `sha-<shortsha>` (immutable).
-To roll back without reverting the branch:
+For released versions, the cleanest rollback is to pin to the previous
+SemVer tag (immutable, won't move):
 
 ```bash
 cd /opt/familynido
+IMAGE_TAG=0.0.9 docker compose -f docker-compose.prod.yml pull
+IMAGE_TAG=0.0.9 docker compose -f docker-compose.prod.yml up -d
+```
+
+For an unreleased commit, pin to its short SHA — those tags are
+immutable too:
+
+```bash
 IMAGE_TAG=sha-a57d52e docker compose -f docker-compose.prod.yml pull
 IMAGE_TAG=sha-a57d52e docker compose -f docker-compose.prod.yml up -d
 ```
 
-When you're ready to come back to the head of `main`, drop `IMAGE_TAG`
-and re-run the pull + up.
+When you're ready to come back to the regular release stream, drop
+`IMAGE_TAG` and re-run the pull + up.
 
 ## Database migrations
 

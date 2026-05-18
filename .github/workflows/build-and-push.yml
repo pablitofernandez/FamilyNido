@@ -55,12 +55,16 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAMESPACE }}/${{ matrix.image.name }}
           tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
+            # Main-branch builds publish `:main` (the bleeding edge). The
+            # `:latest` tag is owned by the release workflow now — it
+            # follows the newest SemVer release so home servers that pull
+            # `:latest` get a stable, tagged version.
+            type=raw,value=main,enable={{is_default_branch}}
             type=sha,format=short
             # PR builds → tag `pr-<number>` so reviewers can pull and run
             # them on their own server with IMAGE_TAG=pr-N (see deploy/README.md).
-            # GitHub does NOT auto-prune these; clean up manually from the
-            # GHCR package UI once the PR is merged or abandoned.
+            # GitHub does NOT auto-prune these; the pr-image-cleanup workflow
+            # handles deletion when the PR closes.
             type=ref,event=pr
 
       - name: Build and push ${{ matrix.image.name }}
