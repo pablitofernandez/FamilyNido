@@ -9,6 +9,8 @@ changes; patch releases (`0.x.Y`) stay backwards compatible.
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-05-18
+
 ### Added
 
 - **Time format and temperature unit are now per-user preferences**, joining
@@ -19,10 +21,12 @@ changes; patch releases (`0.x.Y`) stay backwards compatible.
   °F, es-ES → 24H + °C) — so existing users keep what they have without
   any action. Backed by two new endpoints (`PUT /api/auth/me/time-format`,
   `PUT /api/auth/me/temperature-unit`) and surfaced in `/api/auth/me`.
-- Hour formatting across the dashboard, calendar, account sync status,
-  member detail, tablet clock and the weather widget (including sunrise
-  /sunset times) now honours both the locale's native hour cycle and the
-  explicit override above. (#12)
+- Every hour-of-day display in the app now honours both the locale's hour
+  cycle and the explicit override above: dashboard widgets, calendar
+  events, tablet clock + events + tasks + recent messages, the wall
+  (message and comment timestamps), tasks list, school timetables,
+  member detail, member agenda, weather sunrise/sunset, account API-key
+  "last used", calendar sync status. (#12)
 
 ### Fixed
 
@@ -54,5 +58,6 @@ See [README.md](./README.md) for the full module overview and
 [deploy/README.md](./deploy/README.md) for how to pin to this version on
 the home server.
 
-[Unreleased]: https://github.com/pablitofernandez/FamilyNido/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/pablitofernandez/FamilyNido/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/pablitofernandez/FamilyNido/releases/tag/v0.1.1
 [0.1.0]: https://github.com/pablitofernandez/FamilyNido/releases/tag/v0.1.0
