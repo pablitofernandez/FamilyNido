@@ -9,6 +9,16 @@ changes; patch releases (`0.x.Y`) stay backwards compatible.
 
 ## [Unreleased]
 
+### Added
+
+- US-style display formats follow the active i18n bundle: the `en-US`
+  bundle now shows 12-hour times ("9:42 PM") and Fahrenheit temperatures,
+  while `es-ES` continues to use 24-hour and Celsius. Affects every
+  hour-of-day label across the dashboard, calendar, account sync status,
+  member detail, tablet clock, and the weather widget (including sunrise
+  /sunset times). Bundle-driven by design — no new family setting; users
+  who want US formats serve the `/en/` bundle. (#12)
+
 ### Fixed
 
 - All-day Google Calendar events no longer display one day early for families

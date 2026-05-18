@@ -50,17 +50,17 @@
           </div>
 
           <div class="flex flex-col items-center text-center gap-3">
-            @if (weather(); as w) {
+            @if (displayWeather(); as w) {
               <span class="text-9xl leading-none">{{ w.weatherIcon }}</span>
               <p class="font-serif text-7xl font-semibold tabular-nums">
-                {{ w.currentTemperature | number: '1.0-0' }}°
+                {{ w.currentTemperature | number: '1.0-0' }}°{{ temperatureUnit }}
               </p>
               <p class="text-2xl text-[color:var(--color-ink-2)]">{{ w.weatherLabel }}</p>
               <p class="text-lg text-[color:var(--color-ink-3)]">
                 @if (w.locationLabel) { {{ w.locationLabel }} · }
-                <ng-container i18n="@@tablet.weather.min">Mín</ng-container> {{ w.minTemperature | number: '1.0-0' }}°
+                <ng-container i18n="@@tablet.weather.min">Mín</ng-container> {{ w.minTemperature | number: '1.0-0' }}°{{ temperatureUnit }}
                 ·
-                <ng-container i18n="@@tablet.weather.max">Máx</ng-container> {{ w.maxTemperature | number: '1.0-0' }}°
+                <ng-container i18n="@@tablet.weather.max">Máx</ng-container> {{ w.maxTemperature | number: '1.0-0' }}°{{ temperatureUnit }}
                 @if (w.precipitationProbability !== null) {
                   · 💧 {{ w.precipitationProbability }}%
                 }

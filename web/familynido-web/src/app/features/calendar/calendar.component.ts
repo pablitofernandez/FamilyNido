@@ -226,8 +226,10 @@ export class CalendarComponent implements OnInit {
     }
     const start = new Date(event.startAt);
     const end = new Date(event.endAt);
+    // `hour: 'numeric'` honours the locale's native hour cycle (en-US → 12H,
+    // es-ES → 24H) without forcing `hourCycle` per locale. Issue #12.
     const fmt = (d: Date) =>
-      d.toLocaleTimeString(this.locale, { hour: '2-digit', minute: '2-digit' });
+      d.toLocaleTimeString(this.locale, { hour: 'numeric', minute: '2-digit' });
     return `${fmt(start)}–${fmt(end)}`;
   }
 

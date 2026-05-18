@@ -11,6 +11,7 @@ import { SchoolService } from '../../core/api/school.service';
 import { WallService } from '../../core/api/wall.service';
 import { WeatherService } from '../../core/api/weather.service';
 import { AuthService } from '../../core/auth/auth.service';
+import { projectWeather, reformatHourMinute, temperatureUnit } from '../../core/locale/format-prefs';
 import { CalendarEvent } from '../../core/models/calendar';
 import { FamilyMember } from '../../core/models/family-member';
 import { DayTasks, HouseholdTask, TaskOccurrence } from '../../core/models/household-task';
@@ -81,15 +82,22 @@ export class TabletComponent implements OnInit, OnDestroy {
   protected readonly currentPage = computed(() => this.pages[this.pageIndex()].id);
 
   protected readonly now = signal(new Date());
-  protected readonly clockTime = computed(() => {
-    const d = this.now();
-    return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
-  });
   private readonly locale = inject(LOCALE_ID);
+
+  // The big clock at the top of the tablet view goes through the locale-aware
+  // formatter so US tablets show "9:42 PM" instead of "21:42". Issue #12.
+  private readonly clockFormatter = new Intl.DateTimeFormat(this.locale, {
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+  protected readonly clockTime = computed(() => this.clockFormatter.format(this.now()));
 
   protected readonly dateLabel = computed(() =>
     this.now().toLocaleDateString(this.locale, { weekday: 'long', day: 'numeric', month: 'long' }),
   );
+
+  /** Same locale-aware formatter, reused to massage sunrise/sunset HH:mm strings. */
+  protected readonly temperatureUnit = temperatureUnit(this.locale);
 
   protected readonly familyName = computed(() => this.auth.me()?.familyName ?? 'FamilyNido');
 
@@ -97,6 +105,16 @@ export class TabletComponent implements OnInit, OnDestroy {
   protected readonly loading = signal(true);
   protected readonly members = signal<FamilyMember[]>([]);
   protected readonly weather = signal<WeatherToday | null>(null);
+  /** Weather payload projected into the user's preferred unit (issue #12). */
+  protected readonly displayWeather = computed<WeatherToday | null>(() => {
+    const w = this.weather();
+    if (!w) return null;
+    return projectWeather(
+      w,
+      this.temperatureUnit,
+      (hhmm) => reformatHourMinute(hhmm, this.clockFormatter),
+    );
+  });
   protected readonly today = signal<DayTasks | null>(null);
   protected readonly events = signal<CalendarEvent[]>([]);
   protected readonly pinned = signal<WallMessage[]>([]);

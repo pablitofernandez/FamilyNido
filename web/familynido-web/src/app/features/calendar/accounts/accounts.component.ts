@@ -136,7 +136,8 @@ export class AccountsComponent implements OnInit {
     const when = d.toLocaleString(this.locale, {
       day: 'numeric',
       month: 'short',
-      hour: '2-digit',
+      // `numeric` lets the locale pick 12H vs 24H itself (issue #12).
+      hour: 'numeric',
       minute: '2-digit',
     });
     return $localize`:@@calendar.accounts.last-sync:Última sync · ${when}:WHEN:`;

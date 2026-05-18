@@ -24,6 +24,7 @@ import { MealPlanSlotEntry } from '../../core/models/meal';
 import { ResolvedExtracurricular, ResolvedSchoolDay, SchoolHoliday, TransportMode } from '../../core/models/school';
 import { WeatherToday } from '../../core/models/weather';
 import { WallMessage } from '../../core/models/wall';
+import { projectWeather, reformatHourMinute, temperatureUnit } from '../../core/locale/format-prefs';
 import { refreshOnFocus } from '../../core/realtime/refresh-on-focus';
 import { AvatarComponent } from '../../shared/ui/avatar/avatar.component';
 import { IconComponent } from '../../shared/ui/icon/icon.component';
@@ -97,8 +98,11 @@ export class DashboardComponent implements OnInit {
     month: 'short',
   });
 
+  // `hour: 'numeric'` lets the locale's native hour cycle win — en-US shows
+  // "2:30 PM", es-ES shows "14:30" — without forcing `hourCycle` per locale.
+  // Switching from '2-digit' was issue #12: US users were getting "02:30 PM".
   private readonly timeFormatter = new Intl.DateTimeFormat(this.locale, {
-    hour: '2-digit',
+    hour: 'numeric',
     minute: '2-digit',
   });
 
@@ -130,6 +134,24 @@ export class DashboardComponent implements OnInit {
   protected readonly tomorrowLunch = signal<MealPlanSlotEntry | null>(null);
   protected readonly tomorrowDinner = signal<MealPlanSlotEntry | null>(null);
   protected readonly weather = signal<WeatherToday | null>(null);
+  /** `C` or `F` suffix to render alongside temperatures (issue #12). */
+  protected readonly temperatureUnit = temperatureUnit(this.locale);
+  /**
+   * Weather payload projected into the user's preferred unit. The backend
+   * always sends Celsius (Open-Meteo's default); we convert here so the
+   * widget can render Fahrenheit for en-US without changing the contract.
+   * Sunrise / sunset arrive as plain "HH:mm" 24H strings — reparsed through
+   * the locale-aware timeFormatter so US users see "6:32 AM" not "06:32".
+   */
+  protected readonly displayWeather = computed<WeatherToday | null>(() => {
+    const w = this.weather();
+    if (!w) return null;
+    return projectWeather(
+      w,
+      this.temperatureUnit,
+      (hhmm) => reformatHourMinute(hhmm, this.timeFormatter),
+    );
+  });
   protected readonly todaySchoolDays = signal<ResolvedSchoolDay[]>([]);
   protected readonly todayExtras = signal<ResolvedExtracurricular[]>([]);
   protected readonly todayHoliday = signal<SchoolHoliday | null>(null);

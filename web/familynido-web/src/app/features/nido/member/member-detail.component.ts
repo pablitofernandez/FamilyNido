@@ -369,7 +369,8 @@ export class MemberDetailComponent implements OnInit {
   protected eventTime(ev: CalendarEvent): string {
     if (ev.isAllDay) return $localize`:@@member-detail.event.all-day:todo el día`;
     const d = new Date(ev.startAt);
-    return d.toLocaleTimeString(this.locale, { hour: '2-digit', minute: '2-digit' });
+    // `numeric` defers to the locale's hour cycle (issue #12).
+    return d.toLocaleTimeString(this.locale, { hour: 'numeric', minute: '2-digit' });
   }
 
   protected recurrenceLabel(task: HouseholdTask): string {
