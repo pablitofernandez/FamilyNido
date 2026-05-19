@@ -1,0 +1,137 @@
+<section class="min-h-screen paper flex items-center justify-center px-6 py-12">
+  <div class="w-full max-w-md">
+    <div class="text-center mb-8">
+      <div class="text-5xl mb-4" aria-hidden="true">🪺</div>
+      <h1 class="font-serif text-3xl lg:text-4xl font-medium tracking-tight">
+        <ng-container i18n="@@setup.title">Crea tu nido</ng-container>
+      </h1>
+      <p i18n="@@setup.subtitle" class="text-[color:var(--color-ink-3)] mt-2 font-serif">
+        Primera vez en este servidor: configura la familia y tu cuenta de administrador.
+      </p>
+    </div>
+
+    <form (submit)="$event.preventDefault(); submit()" class="flex flex-col gap-3">
+      <fieldset class="contents">
+        <legend i18n="@@setup.family.legend" class="text-xs uppercase tracking-wider text-[color:var(--color-ink-3)] font-bold mb-1">
+          Familia
+        </legend>
+
+        <label for="setup-family-name" i18n="@@setup.family.name-label" class="block text-xs uppercase tracking-wide text-[color:var(--color-ink-3)] mt-2 mb-1">
+          Nombre de la familia
+        </label>
+        <input
+          id="setup-family-name"
+          type="text"
+          class="w-full px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white -mt-2"
+          autocomplete="organization"
+          [value]="familyName()"
+          (input)="read(familyNameSetter)($event)"
+          placeholder="Familia García"
+          maxlength="120"
+          required
+        />
+
+        <label for="setup-family-tz" i18n="@@setup.family.tz-label" class="block text-xs uppercase tracking-wide text-[color:var(--color-ink-3)] mt-2 mb-1">
+          Zona horaria (IANA)
+        </label>
+        <input
+          id="setup-family-tz"
+          type="text"
+          class="w-full px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white -mt-2"
+          autocapitalize="off"
+          spellcheck="false"
+          [value]="timeZone()"
+          (input)="read(timeZoneSetter)($event)"
+          placeholder="Europe/Madrid"
+          maxlength="64"
+          required
+        />
+        <p i18n="@@setup.family.tz-hint" class="text-xs text-[color:var(--color-ink-3)] -mt-1">
+          Por defecto la del navegador. Acepta nombres IANA (ej. <code>America/New_York</code>).
+        </p>
+      </fieldset>
+
+      <fieldset class="contents mt-4">
+        <legend i18n="@@setup.admin.legend" class="text-xs uppercase tracking-wider text-[color:var(--color-ink-3)] font-bold mb-1 mt-3">
+          Tu cuenta (administrador)
+        </legend>
+
+        <label for="setup-admin-name" i18n="@@setup.admin.name-label" class="block text-xs uppercase tracking-wide text-[color:var(--color-ink-3)] mt-2 mb-1">
+          Tu nombre
+        </label>
+        <input
+          id="setup-admin-name"
+          type="text"
+          class="w-full px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white -mt-2"
+          autocomplete="name"
+          [value]="adminDisplayName()"
+          (input)="read(adminDisplayNameSetter)($event)"
+          maxlength="120"
+          required
+        />
+
+        <label for="setup-admin-email" i18n="@@setup.admin.email-label" class="block text-xs uppercase tracking-wide text-[color:var(--color-ink-3)] mt-2 mb-1">
+          Email
+        </label>
+        <input
+          id="setup-admin-email"
+          type="email"
+          class="w-full px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white -mt-2"
+          autocomplete="email"
+          autocapitalize="off"
+          spellcheck="false"
+          [value]="adminEmail()"
+          (input)="read(adminEmailSetter)($event)"
+          required
+        />
+
+        <label for="setup-admin-password" i18n="@@setup.admin.password-label" class="block text-xs uppercase tracking-wide text-[color:var(--color-ink-3)] mt-2 mb-1">
+          Contraseña
+        </label>
+        <input
+          id="setup-admin-password"
+          type="password"
+          class="w-full px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white -mt-2"
+          autocomplete="new-password"
+          [value]="password()"
+          (input)="read(passwordSetter)($event)"
+          minlength="8"
+          required
+        />
+        <p i18n="@@setup.admin.password-hint" class="text-xs text-[color:var(--color-ink-3)] -mt-1">
+          Mínimo 8 caracteres, al menos una letra y un número.
+        </p>
+
+        <label for="setup-admin-password-confirm" i18n="@@setup.admin.password-confirm-label" class="block text-xs uppercase tracking-wide text-[color:var(--color-ink-3)] mt-2 mb-1">
+          Repite la contraseña
+        </label>
+        <input
+          id="setup-admin-password-confirm"
+          type="password"
+          class="w-full px-3 py-2 rounded-lg border border-[color:var(--color-line)] bg-white -mt-2"
+          autocomplete="new-password"
+          [value]="passwordConfirm()"
+          (input)="read(passwordConfirmSetter)($event)"
+          minlength="8"
+          required
+        />
+      </fieldset>
+
+      @if (error()) {
+        <p class="text-sm text-[color:var(--color-error)] mt-1">{{ error() }}</p>
+      }
+
+      <button
+        type="submit"
+        [disabled]="submitting()"
+        class="mt-4 px-6 py-3 rounded-full bg-[color:var(--color-terra)] text-white font-bold tracking-wide cursor-pointer border-0 disabled:opacity-50"
+      >
+        @if (submitting()) {
+          <ng-container i18n="@@setup.submitting">Creando…</ng-container>
+        } @else {
+          <ng-container i18n="@@setup.submit">Crear instancia</ng-container>
+        }
+      </button>
+    </form>
+  </div>
+</section>

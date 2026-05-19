@@ -16,6 +16,7 @@ using FamilyNido.Api.Features.Notifications;
 using FamilyNido.Api.Features.PublicApi;
 using FamilyNido.Api.Features.School;
 using FamilyNido.Api.Features.Scores;
+using FamilyNido.Api.Features.Setup;
 using FamilyNido.Api.Features.Wall;
 using FamilyNido.Api.Features.Weather;
 using FamilyNido.Api.Bootstrap;
@@ -274,6 +275,7 @@ app.UseAuthorization();
 
 // ── Endpoints ──────────────────────────────────────────────────────────────
 app.MapAuthEndpoints();
+app.MapSetupEndpoints();
 app.MapFamilyMemberEndpoints();
 app.MapHouseholdTaskEndpoints();
 app.MapWallEndpoints();

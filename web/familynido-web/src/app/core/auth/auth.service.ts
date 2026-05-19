@@ -17,7 +17,7 @@ export class AuthService {
   private readonly http = inject(HttpClient);
 
   private readonly _me = signal<Me | null>(null);
-  private readonly _status = signal<'idle' | 'loading' | 'authenticated' | 'anonymous' | 'not-linked'>('idle');
+  private readonly _status = signal<'idle' | 'loading' | 'authenticated' | 'anonymous' | 'not-linked' | 'setup-required'>('idle');
 
   /** Currently authenticated user profile (null when not logged in). */
   readonly me = this._me.asReadonly();
@@ -33,7 +33,10 @@ export class AuthService {
 
   /**
    * Fetch the current user's profile. Called at bootstrap; safe to call again.
-   * Maps 401 to `anonymous` and 403/`auth.not_linked` to `not-linked`.
+   * Maps 401 to `anonymous`, 403/`auth.not_linked` to `not-linked`, and —
+   * when anonymous — probes `/api/setup/status` to detect a brand-new
+   * instance that hasn't been initialised yet, flipping the status to
+   * `setup-required` so the guard can route to /setup instead of /login.
    */
   async loadInitialSession(): Promise<void> {
     this._status.set('loading');
@@ -44,8 +47,44 @@ export class AuthService {
     } catch (error: unknown) {
       this._me.set(null);
       const status = (error as { status?: number }).status;
-      this._status.set(status === 403 ? 'not-linked' : 'anonymous');
+      if (status === 403) {
+        this._status.set('not-linked');
+        return;
+      }
+      // 401 / network error → anonymous, unless the instance hasn't been
+      // bootstrapped yet (issue #20). Setup probe is best-effort: if it
+      // fails for any reason, fall back to plain anonymous.
+      try {
+        const setup = await firstValueFrom(
+          this.http.get<{ initialized: boolean }>('/api/setup/status'),
+        );
+        if (!setup.initialized) {
+          this._status.set('setup-required');
+          return;
+        }
+      } catch {
+        // Swallow — server unreachable / 5xx → behave like anonymous.
+      }
+      this._status.set('anonymous');
     }
+  }
+
+  /**
+   * One-shot bootstrap call hit by the /setup wizard. Creates the family,
+   * the admin user and the local credential; then auto-logs the admin in
+   * with those same credentials so they land straight in the app without
+   * a second password prompt. Reloads the `me` signal on success.
+   */
+  async initializeAdmin(payload: {
+    family: { name: string; timeZone: string };
+    admin: { email: string; displayName: string; password: string };
+  }): Promise<void> {
+    await firstValueFrom(this.http.post<void>('/api/setup/initial-admin', payload));
+    await firstValueFrom(this.http.post('/api/auth/local/login', {
+      email: payload.admin.email,
+      password: payload.admin.password,
+    }));
+    await this.loadInitialSession();
   }
 
   /**

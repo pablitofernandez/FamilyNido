@@ -9,6 +9,19 @@ changes; patch releases (`0.x.Y`) stay backwards compatible.
 
 ## [Unreleased]
 
+### Added
+
+- **First-run setup wizard at `/setup`** for fresh self-hosted deployments.
+  When the SPA detects zero users on the instance it routes the visitor to
+  a one-page form that collects the family name, timezone, admin name,
+  email and password — creates the four rows that a working instance
+  needs (Family + admin User + linked FamilyMember + local credential) in
+  a single transaction, then auto-logs the admin in so they land on the
+  dashboard without a second password prompt. Anonymous, one-shot,
+  refuses with 409 the moment any user already exists. Removes the
+  previous catch-22 where bootstrapping required either an OIDC provider
+  configured upfront or a manual SQL insert. (#20)
+
 ## [0.1.1] - 2026-05-18
 
 ### Added
