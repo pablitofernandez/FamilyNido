@@ -9,6 +9,8 @@ changes; patch releases (`0.x.Y`) stay backwards compatible.
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-05-19
+
 ### Added
 
 - **First-run setup wizard at `/setup`** for fresh self-hosted deployments.
@@ -71,6 +73,7 @@ See [README.md](./README.md) for the full module overview and
 [deploy/README.md](./deploy/README.md) for how to pin to this version on
 the home server.
 
-[Unreleased]: https://github.com/pablitofernandez/FamilyNido/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/pablitofernandez/FamilyNido/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/pablitofernandez/FamilyNido/releases/tag/v0.1.2
 [0.1.1]: https://github.com/pablitofernandez/FamilyNido/releases/tag/v0.1.1
 [0.1.0]: https://github.com/pablitofernandez/FamilyNido/releases/tag/v0.1.0
